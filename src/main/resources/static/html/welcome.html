@@ -1,0 +1,28 @@
+<!DOCTYPE html >
+<html>
+<head id="i18n_">
+    <title>欢迎您的到来！</title>
+    <script type="text/javascript" src="../jquery/jquery-3.3.1.min.js"></script>
+</head>
+<body class="">
+<h1>纸上得来终觉浅，绝知此事要躬行</h1>
+<h2>君子不争也，争必君子也</h2>
+<img src="/image/gif/123.gif" style="width:60px;height:auto">
+<!--<script type="text/javascript" src="/static/jquery/jquery-3.3.1.min.js"></script>-->
+<script type="text/javascript">
+    $(function () {
+        test();
+    });
+    function test() {
+       $.ajax({
+           type:'post',
+           url:'/test/count',
+           success:function (jdata) {
+               console.log(jdata)
+           }
+       })
+    }
+</script>
+
+</body>
+</html>
