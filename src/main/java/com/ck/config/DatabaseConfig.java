@@ -1,7 +1,6 @@
 package com.ck.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.github.pagehelper.Constant;
 import com.github.pagehelper.PageHelper;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -9,7 +8,6 @@ import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -17,7 +15,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -57,7 +54,7 @@ public class DatabaseConfig {
     /*public ServletRegistrationBean druidServlet(){
         return  new ServletRegistrationBean(new )
     }*/
-    @Bean(name = configConstants.PRIMARY_DATA_SOURCE,destroyMethod = "close")
+    @Bean(name = ConfigConstants.PRIMARY_DATA_SOURCE,destroyMethod = "close")
     @Primary
     public javax.sql.DataSource getBasicDataSource() {
         DruidDataSource dataSource = new DruidDataSource();
@@ -71,21 +68,21 @@ public class DatabaseConfig {
         dataSource.setValidationQuery(this.validationQuery);
         return dataSource;
     }
-    @Bean(name = configConstants.PRIMARY_JDBC_TEMPLATE)
+    @Bean(name = ConfigConstants.PRIMARY_JDBC_TEMPLATE)
     public JdbcTemplate getJdbcTemplate() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         jdbcTemplate.setDataSource(getBasicDataSource());
         return jdbcTemplate;
     }
 
-    @Bean(name = configConstants.PRIMARY_TRANSACTION_MANAGER)
+    @Bean(name = ConfigConstants.PRIMARY_TRANSACTION_MANAGER)
     public DataSourceTransactionManager getDataSourceTransactionManager() {
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
         transactionManager.setDataSource(getBasicDataSource());
         return transactionManager;
     }
 
-    @Bean(name = configConstants.PRIMARY_SESSION_FACTORY)
+    @Bean(name = ConfigConstants.PRIMARY_SESSION_FACTORY)
     public SqlSessionFactory getSqlSessionFactoryBean() throws Exception {
         List<Interceptor> list = new ArrayList<Interceptor>();
         //todo 分页判定需要否？
