@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * @author ron
- *         2016/5/18.
+ * 2016/5/18.
  */
 @Component
 public class SpringContextHolder implements ApplicationContextAware {
@@ -37,12 +37,13 @@ public class SpringContextHolder implements ApplicationContextAware {
         return applicationContext.getBeansOfType(aClass);
 
     }
-    public static  Map<String, Object>  getBeansWithAnnotation(Class<? extends Annotation> anno) {
+
+    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> anno) {
         check();
-        return  applicationContext.getBeansWithAnnotation(anno);
+        return applicationContext.getBeansWithAnnotation(anno);
     }
 
-    private static void check() throws IllegalStateException{
+    private static void check() throws IllegalStateException {
         if (applicationContext == null) {
             throw new IllegalStateException("applicationContext is not injected.");
         }

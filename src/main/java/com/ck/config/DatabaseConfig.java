@@ -1,6 +1,7 @@
 package com.ck.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
+//import com.ck.config.plugins.SqlPluginsConfig;
 import com.github.pagehelper.PageHelper;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -15,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -49,6 +51,9 @@ public class DatabaseConfig {
     //最大等待时间:当没有可用连接时,连接池等待连接被归还的最大时间(以毫秒计数),超过时间则抛出异常,如果设置为-1表示无限等待
     @Value("${maxWait:1000}")
     int maxWait;
+
+  /*  @Resource
+    private SqlPluginsConfig sqlPluginConfig;*/
 
     //todo servlet配置
     /*public ServletRegistrationBean druidServlet(){
@@ -86,7 +91,7 @@ public class DatabaseConfig {
     public SqlSessionFactory getSqlSessionFactoryBean() throws Exception {
         List<Interceptor> list = new ArrayList<Interceptor>();
         //todo 分页判定需要否？
-      /*  if(sqlPluginConfig.isPageHelperPlugin()){
+        /*if(sqlPluginConfig.isPageHelperPlugin()){
             list.add(pageHelper());
         }*/
         list.add(pageHelper());

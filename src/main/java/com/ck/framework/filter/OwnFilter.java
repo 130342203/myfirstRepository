@@ -38,12 +38,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class OwnFilter implements Filter,InitializingBean {
-    //Logger logger = LoggerFactory.getLogger(OwnFilter.class);
+public class OwnFilter implements Filter, InitializingBean {
+    Logger logger = LoggerFactory.getLogger(OwnFilter.class);
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-    private final long DUP_TIME =2;
+    private final long DUP_TIME = 2;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -51,8 +51,7 @@ public class OwnFilter implements Filter,InitializingBean {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException
-    {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         try {
             HttpServletRequest request = (HttpServletRequest) servletRequest;
             HttpServletResponse response = (HttpServletResponse) servletResponse;
@@ -69,44 +68,48 @@ public class OwnFilter implements Filter,InitializingBean {
             request.setAttribute(AogContextConstants.REQUEST_CONTEXT_NAME, context);
             String uri = (String) context.get(AogContextConstants.KEY_URI_PARAM);
             String sessionKey = context.getSessionKey();
-/*todo
-            LoginUser user = null;
-*/
+            //todo
+            //LoginUser user = null;
+
+
             boolean needAuth = true;
             String ua = (String) context.get(AogContextConstants.KEY_AGENT_PARAM);
-           /*todo 微信登录认证
-            boolean ismm = BrowserUtils.isMicroMessenger(ua) && weiXinConfig.getPublicAuthUrl() != null;
+            //todo 微信登录认证
+            //boolean ismm = BrowserUtils.isMicroMessenger(ua) && weiXinConfig.getPublicAuthUrl() != null;
 
-            //除忽略列表以外，所有接口请求均必须授权，其他WEB请求不需要拦截
+           /* //除忽略列表以外，所有接口请求均必须授权，其他WEB请求不需要拦截
             if (ignList.contains(uri) || uri == null
-                    || uri.indexOf(".shtml")>0  //view 下的页面 不需要授权
+                    || uri.indexOf(".shtml") > 0  //view 下的页面 不需要授权
                     || uri.contains("wechat/")
                     || uri.contains("qiuqiuapi/")
-                    ||uri.contains("api/v2/order/")) {
+                    || uri.contains("api/v2/order/")) {
                 needAuth = false;
             }
             if (ismm && !ignList.contains(uri)) {
                 needAuth = true;
             }*/
-            if((uri.indexOf(".shtml") > 0 && uri.indexOf("/template/") > -1) || uri.contains("app.shtml") ){
+
+            if ((uri.indexOf(".shtml") > 0 && uri.indexOf("/template/") > -1) || uri.contains("app.shtml")) {
                 needAuth = true;
             }
 
-           /* if (ismm && uri.contains("noAvailable.shtml")) {
+            /*if (ismm && uri.contains("noAvailable.shtml")) {
                 needAuth = false;
             }*/
+
 
             /*if (StringUtils.isNotBlank(sessionKey)) {
                 user = userService.getUserLoginUser(sessionKey);
                 context.put(AogContextConstants.KEY_USER, user);
-                if(!ismm && user != null){
+                if (!ismm && user != null) {
                     boolean isPageAuth = checkPageAuth(uri, user);
-                    if(!isPageAuth){
+                    if (!isPageAuth) {
                         response.sendRedirect("/error/p/restrict_error.shtml");
                         return;
                     }
                 }
             }*/
+
 
             //接口重复点击治理
             List<String> outSideUri = new ArrayList<>();
@@ -114,39 +117,40 @@ public class OwnFilter implements Filter,InitializingBean {
             outSideUri.add("/api/v1/planrelation/listForCombobox");
             outSideUri.add("/api/v1/dataDomainEnum/list");
 
+                logger.debug(JSON.toJSONString(context.getRequestParamMap()));
 
-            if( uri.indexOf("/api/v1/") > -1 && !outSideUri.contains(uri)){
-                //logger.debug(JSON.toJSONString(context.getRequestParamMap()));
+            if (uri.indexOf("/api/v1/") > -1 && !outSideUri.contains(uri)) {
+                logger.debug(JSON.toJSONString(context.getRequestParamMap()));
                 String rmd5 = "rqk:" + MD5Util.md5Hex(uri + JSON.toJSONString(context.getRequestParamMap()));
-                /* logger.debug("rqk:" + rmd5);*/
+                //logger.debug("rqk:" + rmd5);
+
                 //logger.debug("dk:" + stringRedisTemplate.getExpire(rmd5));
 
-                if(stringRedisTemplate.getExpire(rmd5) >0){
+                if (stringRedisTemplate.getExpire(rmd5) > 0) {
                     Result result = Result.buildSuccess();
                     result.setCode(ErrorCommonData.ERR_USER_REPEAT_CLICK);
                     result.setMsg(ErrorDict.asString(ErrorCommonData.ERR_USER_REPEAT_CLICK));
                     ResponseUtils.write(result, response);
                     return;
-                }else{
+                } else {
                     ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
                     ops.set(rmd5, "", DUP_TIME, TimeUnit.SECONDS);
                 }
             }
 
-              /*  if ( user == null) {
-                    String moniUser = request.getParameter("moniUser");
-                    user = new LoginUser();
-                    user.setSessionKey("xxx");
-                    if (StringUtils.isNotBlank(moniUser)) {
-                        user.setUserId(Long.parseLong(moniUser));
-                    } else {
-                        user.setUserId(1083l);
-                    }
-                    userService.refreshUserCacheAndCookie(user);
+            /*if (user == null) {
+                String moniUser = request.getParameter("moniUser");
+                user = new LoginUser();
+                user.setSessionKey("xxx");
+                if (StringUtils.isNotBlank(moniUser)) {
+                    user.setUserId(Long.parseLong(moniUser));
+                } else {
+                    user.setUserId(1083l);
+                }
+                userService.refreshUserCacheAndCookie(user);
 
-                }*/
-
-            /*if (needAuth) {
+            }*/
+          /*  if (needAuth) {
                 if (user == null) {
                     toAuth(request, response, ismm);
                     return;
@@ -154,11 +158,13 @@ public class OwnFilter implements Filter,InitializingBean {
                     userService.refreshUserCacheAndCookie(user);
                     context.put(AogContextConstants.KEY_USER, user);
                 }
-            }*/
-            /*if(!ismm && !uri.contains("restrict_error.shtml") && !checkIpRestrict()){
+            }
+
+            if (!ismm && !uri.contains("restrict_error.shtml") && !checkIpRestrict()) {
                 response.sendRedirect("/error/p/restrict_error.shtml");
                 return;
-            }*/
+            }
+*/
             filterChain.doFilter(servletRequest, servletResponse);
 
         } catch (Exception e) {
@@ -221,12 +227,14 @@ public class OwnFilter implements Filter,InitializingBean {
         context.put(AogContextConstants.KEY_REQUEST_PARAM_IP, getAddressIP(request));
 
     }
+
     private static String convertUri(String uri) {
         if (uri.indexOf("//") > 0) {
             return convertUri(uri.replace("//", "/"));
         }
         return uri;
     }
+
     private String getDevice(HttpServletRequest request) {
         String val = getVal(request, ParamConstants.KEY_DEVICE_PARAM);
         if (StringUtils.isNotBlank(val)) {
@@ -242,14 +250,17 @@ public class OwnFilter implements Filter,InitializingBean {
         }
         return val;
     }
+
     private String getSessionKey(HttpServletRequest request) {
         String val = getVal(request, ParamConstants.KEY_SESSIONKEY_PARAM);
         return val;
     }
+
     private String getUdid(HttpServletRequest request) {
         String val = getVal(request, ParamConstants.KEY_UDID_PARAM);
         return val;
     }
+
     private String getVersion(HttpServletRequest request) {
         String val = getVal(request, ParamConstants.KEY_VERSION_PARAM);
         if (StringUtils.isBlank(val)) {
@@ -257,10 +268,12 @@ public class OwnFilter implements Filter,InitializingBean {
         }
         return val;
     }
+
     private String getUserAgent(HttpServletRequest request) {
         String val = getVal(request, ParamConstants.KEY_USER_AGENT);
         return val;
     }
+
     private String getVal(HttpServletRequest request, String key) {
         String val = request.getHeader(key);
         if (StringUtils.isNotBlank(val)) {
@@ -273,6 +286,7 @@ public class OwnFilter implements Filter,InitializingBean {
         val = request.getParameter(key);
         return val;
     }
+
     public static String getAddressIP(HttpServletRequest request) {
         String ipAddress = null;
         ipAddress = request.getHeader("x-forwarded-for");

@@ -13,10 +13,9 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
-/**
- * @author ron
- *         2016/5/20.
- */
+
+
+
 public class ResponseUtils {
 
     //private static final Logger logger = LoggerFactory.getLogger(ResponseUtils.class);

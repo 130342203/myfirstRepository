@@ -1,6 +1,8 @@
 package com.ck.config;
 
+//import com.ck.framework.filter.OwnFilter;
 import com.ck.framework.interceptor.OwnInterceptor;
+import org.apache.catalina.ssi.SSIFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -41,5 +43,12 @@ public class WebConfig extends WebMvcConfigurationSupport{
         viewResolver.setSuffix(".html");
         return viewResolver;
     }
-
+   /* @Bean
+    public OwnFilter ownFilter(){
+        return new OwnFilter();
+    }*/
+    /*@Bean
+    public SSIFilter ssiFilter(){
+        return new SSIFilter();
+    }*/
 }

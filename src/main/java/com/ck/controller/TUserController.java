@@ -1,5 +1,6 @@
 package com.ck.controller;
 
+import com.ck.dao.entity.tuser;
 import com.ck.dao.mapper.TUserMapper;
 import com.ck.framework.ContextUtil;
 import com.ck.framework.context.AppContext;
@@ -20,6 +21,7 @@ public class TUserController {
     @ResponseBody
     public int test(){
         AppContext context = ContextUtil.getAppContext();
+        tuser tuser = tUserMapper.selectOneTest();
         return tUserMapper.selectCountTest();
     }
 

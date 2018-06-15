@@ -2,10 +2,8 @@ package com.ck.framework;
 
 import com.ck.framework.context.AppContext;
 
-/**
- * @author ron
- *         2016/5/18.
- */
+
+
 public class ContextUtil {
     private final static ThreadLocal<AppContext> contextLocal = new ThreadLocal<>();
 

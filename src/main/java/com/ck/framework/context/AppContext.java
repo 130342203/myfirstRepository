@@ -139,9 +139,10 @@ public class AppContext extends LinkedHashMap {
         return (String) get(AogContextConstants.KEY_SESSIONKEY_PARAM);
     }
     //todo 登录用户信息
-    /*public LoginUser getLoginUser(){
+/*public LoginUser getLoginUser(){
         return (LoginUser) get(AogContextConstants.KEY_USER);
     }*/
+
     public HttpServletRequest getHttpServletRequest(){
         return (HttpServletRequest)get(AogContextConstants.KEY_REQUEST);
     }

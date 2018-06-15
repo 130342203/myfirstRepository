@@ -1,3 +1,4 @@
+/*
 package com.ck.framework.utils.pdf;
 
 import com.itextpdf.text.Document;
@@ -26,9 +27,11 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.Map;
 
+*/
 /**
  * Created by WeiYuan on 2017/5/9.
- */
+ *//*
+
 @Component
 public class PDFUtils {
 
@@ -44,8 +47,10 @@ public class PDFUtils {
         writer.createXmpMetadata();
         document.open();
 
-        /*ICC_Profile icc = ICC_Profile.getInstance(new FileInputStream("d:\\sRGB Color Space Profile.icm"));
-        writer.setOutputIntents("Custom", "", "http://www.color.org", "sRGB IEC61966-2.1", icc);*/
+        */
+/*ICC_Profile icc = ICC_Profile.getInstance(new FileInputStream("d:\\sRGB Color Space Profile.icm"));
+        writer.setOutputIntents("Custom", "", "http://www.color.org", "sRGB IEC61966-2.1", icc);*//*
+
 
         XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider();
         fontProvider.register("simsun.ttc");
@@ -53,9 +58,11 @@ public class PDFUtils {
         CSSResolver cssResolver = new StyleAttrCSSResolver();
         //CssFile cssFile = XMLWorkerHelper.getCSS(new FileInputStream("E:\\git-workspace\\amro-em\\resources\\style.css"));
         cssResolver.addCss(XMLWorkerHelper.getInstance().getDefaultCSS());
-        /*CssFilesImpl cssFiles = new CssFilesImpl();
+        */
+/*CssFilesImpl cssFiles = new CssFilesImpl();
         cssFiles.add(this.getDefaultCSS());
-        StyleAttrCSSResolver cssResolver = new StyleAttrCSSResolver(cssFiles);*/
+        StyleAttrCSSResolver cssResolver = new StyleAttrCSSResolver(cssFiles);*//*
+
 
         CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
         HtmlPipelineContext htmlContext = new HtmlPipelineContext(cssAppliers);
@@ -105,3 +112,4 @@ public class PDFUtils {
     }
 
 }
+*/
