@@ -12,3 +12,9 @@ spring:
   validationQuery: "select 1"
   mvc:
     static-path-pattern: /static/**
+
+page-helper-config:
+    pageHelperPlugin: true
+
+load-path:
+

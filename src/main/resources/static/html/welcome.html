@@ -3,17 +3,32 @@
 <head id="i18n_">
     <title>欢迎您的到来！</title>
     <script type="text/javascript" src="../jquery/jquery-3.3.1.min.js"></script>
+    <!--<link rel="/shortcut icon" href="favicon.ico"  >-->
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+
+    <style>
+        div{
+            position: relative;
+            display: block;
+        }
+        div img{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+        }
+    </style>
 </head>
 <body class="">
-<h1>纸上得来终觉浅，绝知此事要躬行</h1>
-<h2>君子不争也，争必君子也</h2>
-<br/>
-<br/>
-
 <a id="count"></a>
 <br/><br/>
 
-<img src="/image/gif/123.gif" style="width:60px;height:auto">
+<h1 style="text-align: center">纸上得来终觉浅，绝知此事要躬行</h1>
+<h2 style="text-align: center">君子不争也，争必君子也</h2>
+<div>
+    <img src="/image/gif/123.gif" style="width:60px;height:auto;display:block;text-align: center;vertical-align: middle">
+    <img src="favicon.ico">
+</div>
 <!--<script type="text/javascript" src="/static/jquery/jquery-3.3.1.min.js"></script>-->
 <script type="text/javascript">
     $(function () {
@@ -23,6 +38,7 @@
        $.ajax({
            type:'post',
            url:'/test/count',
+           data:{test:1},
            success:function (jdata) {
                console.log(jdata)
                 $("#count").innerText=jdata;

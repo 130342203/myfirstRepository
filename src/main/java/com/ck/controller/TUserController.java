@@ -1,6 +1,9 @@
 package com.ck.controller;
 
+import com.ck.dao.entity.tuser;
 import com.ck.dao.mapper.TUserMapper;
+import com.ck.framework.ContextUtil;
+import com.ck.framework.context.AppContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +20,12 @@ public class TUserController {
     @RequestMapping(value = "test/count")
     @ResponseBody
     public int test(){
+        AppContext context = ContextUtil.getAppContext();
+        tuser tuser = tUserMapper.selectOneTest();
         return tUserMapper.selectCountTest();
     }
 
- /*   @RequestMapping(value = "/")
+    /*@RequestMapping(value = "/")
     @ResponseBody
     public String login(){
         return "redirect:/welcome.html";
