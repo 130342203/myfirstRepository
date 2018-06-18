@@ -3,9 +3,9 @@ server:
 
 spring:
   driverClassName: "com.mysql.jdbc.Driver"
-  localdb: "jdbc:mysql://127.0.0.1:3307/test"
+  localdb: "jdbc:mysql://127.0.0.1:3306/world"
   userName: "root"
-  password: "chen12345"
+  password: "chen_245193"
   initialSize: 5
   maxIdle: 10
   maxActive: 50

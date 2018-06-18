@@ -13,7 +13,7 @@ public class WebConfig extends WebMvcConfigurationSupport{
 
     @Override
     public void addViewControllers(ViewControllerRegistry controllerRegistry){
-        controllerRegistry.addViewController("/").setViewName("forward:/welcome");
+        controllerRegistry.addViewController("/").setViewName("forward:/welcome.html");
         controllerRegistry.setOrder(Ordered.HIGHEST_PRECEDENCE);
         super.addViewControllers(controllerRegistry);
     }
