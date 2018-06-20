@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -102,6 +103,9 @@ public class DatabaseConfig {
         SqlSessionFactoryBean ssf = new SqlSessionFactoryBean();
         ssf.setDataSource(getBasicDataSource());
         ssf.setPlugins(plugins);
+        org.springframework.core.io.Resource[] resources = null;
+        /*resources =
+        ssf.setMapperLocations(resource);*/
         SqlSessionFactory sf = ssf.getObject();
         sf.getConfiguration().setMapUnderscoreToCamelCase(true);
         sf.getConfiguration().setJdbcTypeForNull(JdbcType.NULL);

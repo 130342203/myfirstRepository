@@ -4,6 +4,9 @@ import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tk.mybatis.mapper.common.Mapper;
+
+import java.util.Properties;
 
 /**
  * Created by Administrator on 2018/6/7.
@@ -16,9 +19,10 @@ public class MybatisScannerConfig {
     public MapperScannerConfigurer mapperScannerConfigurer(){
         MapperScannerConfigurer     mapperScannerConfigurer = new MapperScannerConfigurer();
         mapperScannerConfigurer.setSqlSessionFactoryBeanName(ConfigConstants.PRIMARY_SESSION_FACTORY);
-        mapperScannerConfigurer.setBasePackage(ConfigConstants.SCAN_PACKAGE_PATH+".**.mapper");
+        mapperScannerConfigurer.setBasePackage(ConfigConstants.SCAN_PACKAGE_PATH+".**.dao.mapper");
         //Properties properties = new Properties();
-       // properties.setProperty("mappers", Mapper.class.getName());
+        //properties.setProperty("mappers", Mapper.class.getName());
+
           return  mapperScannerConfigurer;
     }
 }

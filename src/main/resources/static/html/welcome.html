@@ -24,8 +24,9 @@
 <h2 style="text-align: center">君子不争也，争必君子也</h2>
 <div>
     <img src="/image/gif/123.gif" style="width:60px;height:auto;display:block;text-align: center;vertical-align: middle">
-    <img src="favicon.ico">
+    <img src="favicon.ico" onclick="openHammer()">
 </div>
+
 <!--<script type="text/javascript" src="/static/jquery/jquery-3.3.1.min.js"></script>-->
 <script type="text/javascript">
     $(function () {
@@ -40,6 +41,9 @@
                console.log(jdata)
            }
        })
+    }
+    function openHammer() {
+        window.open("./hammer/index.html")
     }
 </script>
 

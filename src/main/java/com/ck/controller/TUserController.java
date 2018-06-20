@@ -9,6 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Administrator on 2018/6/11.
  */
@@ -22,6 +25,9 @@ public class TUserController {
     public int test(){
         AppContext context = ContextUtil.getAppContext();
         tuser tuser = tUserMapper.selectOneTest();
+        Map map = new HashMap();
+        map.put("userId","1");
+        tuser  tuser1 = tUserMapper.selectXmlTest(map);
         return tUserMapper.selectCountTest();
     }
 
