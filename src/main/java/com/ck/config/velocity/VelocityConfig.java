@@ -1,5 +1,5 @@
 /*
-package com.ck.config.velocity;
+package com.com.config.velocity;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.context.annotation.Bean;

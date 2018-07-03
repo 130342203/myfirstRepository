@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style type="text/css">
+        a{text-decoration: none; color: #eee; display: block;}
+        .button{width: 200px; height: 50px; border-radius: 20px; text-align:center;line-height: 50px;}
+        .callout_button{background:#FF5B5B;margin:0 auto; }
+        .callout_button:hover{background: red;}
+        .close_button{background:#363636;margin:0 auto;}
+        .close_button:hover{background: black;}
+        .mask{width: 100%;height: 100%;background:#000;position: absolute;top: 0px;left:0px;opacity: 0.4;z-index: 8000; display: none;-moz-user-select: none; -webkit-user-select: none;}
+        .dialog{width: 380px;background:#fff; position: absolute;z-index: 9000;padding-bottom: 10px; display: none;-moz-user-select: none; -webkit-user-select: none;}
+        .dialog_head{width: 100%;height:50px;background:#4B4B4B;text-align: center;line-height: 50px;color: #eee; cursor: move;}
+        .dialog_content{width: 100%;height:300px;}
+    </style>
+    <meta charset="UTF-8">
+    <title>弹窗demo</title>
+    <script type="text/javascript" src="../jquery/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<div id="callout" class="button callout_button"><a href="#">弹出对话框</a></div>
+<div id="mask" class="mask"></div>
+<div class="dialog" id="dialog">
+    <div class="dialog_head" id="move_part">可拖拽部分</div>
+    <div class="dialog_content"></div>
+    <div class="button close_button" id="close"><a href="#">点我关闭对话框</a>
+    </div>
+</div>
+<script type="text/javascript">
+    function g(id){return document.getElementById(id)};
+
+    //点击弹出对话框
+    g('callout').onclick = function(){
+        g('dialog').style.display = 'block';
+        g('mask').style.display = 'block';
+        autoCenter(g('dialog'));
+    };
+    //点击关闭对话框
+    g('close').onclick = function(){
+        g('dialog').style.display = 'none';
+        g('mask').style.display = 'none';
+    };
+
+    //禁止选中对话框内容
+    if(document.attachEvent) {//ie的事件监听，拖拽div时禁止选中内容，firefox与chrome已在css中设置过-moz-user-select: none; -webkit-user-select: none;
+        g('dialog').attachEvent('onselectstart', function() {
+            return false;
+        });
+    }
+
+    //点击弹出对话框中代码中的autoCenter()函数，让对话框保持自动居中
+    function autoCenter(el){
+        //获取可见窗口大小
+        var bodyW = document.documentElement.clientWidth;
+        var bodyH = document.documentElement.clientHeight;
+        //获取对话框宽、高
+        var elW = el.offsetWidth;
+        var elH = el.offsetHeight;
+
+        el.style.left = (bodyW - elW)/2 + 'px';
+        el.style.top = (bodyH - elH)/2 + 'px';
+    };
+
+    //窗口大小改变时，对话框始终居中
+    window.onresize = function(){
+        autoCenter(g('dialog'));
+    };
+    /*
+    * 最核心的部分来了，对话框拖动的实现，这个效果的实现要分为三个步骤：
+
+1.鼠标点击时，设置对话框可拖动，记录鼠标的初始位置；
+
+2.鼠标拖动时，根据鼠标新位置更新对话框位置（有两种算法）；
+
+3.鼠标离开时移出对话框可拖动属性；
+    * */
+    //声明需要用到的变量
+    var mx = 0,my = 0;      //鼠标x、y轴坐标（相对于left，top）
+    var dx = 0,dy = 0;      //对话框坐标（同上）
+    var isDraging = false;      //不可拖动
+
+    //第一步：鼠标按下时
+    g('move_part').addEventListener('mousedown',function(e){
+        var e = e || window.event;
+        mx = e.pageX;      //点击时鼠标X坐标
+        my = e.pageY;      //点击时鼠标Y坐标
+        dx = g('dialog').offsetLeft;
+        dy = g('dialog').offsetTop;
+        isDraging = true;      //标记对话框可拖动
+    });
+    //第二步：鼠标移动时
+    document.onmousemove = function(e){
+        var e = e || window.event;
+        var x = e.pageX;      //移动时鼠标X坐标
+        var y = e.pageY;      //移动时鼠标Y坐标
+        if(isDraging){        //判断对话框能否拖动
+            var moveX = dx + x - mx;      //移动后对话框新的left值
+            var moveY = dy + y - my;      //移动后对话框新的top值
+            g('dialog').style.left = moveX +'px';       //重新设置对话框的left
+            g('dialog').style.top =  moveY +'px';     //重新设置对话框的top
+        };
+    };
+    /*
+    * 前面提过更新对话框位置有两种算法，这里用的是第一种方法：
+       先算出鼠标移动的坐标偏移量，用对话框的位置（对话框top，left值）加上这个偏移量就是对话框新的位置；
+这种方法是参考了另一篇博客，原文地址http://www.jb51.net/article/67663.htm，慕课网的教学视频中采用的是另一种算法：
+       先算出鼠标按下时的坐标和对话框位置（对话框top，left值）的距离，再用鼠标移动的新坐标减去得到的距离更新对话框位置；即
+     moveX = mx – (x – dx);
+      moveY = my – (y – dy);
+无论哪种办法都可以实现对话框的拖动。
+    * */
+    //第三步： 鼠标离开
+    g('move_part').addEventListener('mouseup',function(){
+        isDraging = false;
+    });
+
+    /*
+    *
+这一步比较简单，重新设置对话框不可拖动。
+另一个比较重要的是限制对话框的拖动范围，代码如下（这段代码应插入到第二步的if判断中）。
+    * */
+    //设置拖动范围
+    var pageW = document.documentElement.clientWidth;
+    var pageH = document.documentElement.clientHeight;
+    var dialogW = g('dialog').offsetWidth;
+    var dialogH = g('dialog').offsetHeight;
+    var maxX = pageW - dialogW;       //X轴可拖动最大值
+    var maxY = pageH - dialogH;       //Y轴可拖动最大值
+    var moveX = Math.min(Math.max(0,moveX),maxX);     //X轴可拖动范围
+    var moveY = Math.min(Math.max(0,moveY),maxY);     //Y轴可拖动范围
+
+    g('dialog').style.left = moveX +'px';       //重新设置对话框的left
+    g('dialog').style.top =  moveY +'px';        //重新设置对话框的top
+/*
+* 限制对话框在可视窗口内拖动，原理就是设置合理的对话框的left、top值范围，其中
+     left值的范围是：【0，pageW – dialogW】
+     top值的范围是：【0，pageH – dialogH】
+需要注意的是给这两个值设定范围的Math.max(),Math.min()方法。
+* */
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 /*
-package com.ck.framework.utils;
+package com.com.framework.utils;
 
-import com.ck.framework.SpringContextHolder;
+import com.com.framework.SpringContextHolder;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 

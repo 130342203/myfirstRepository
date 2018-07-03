@@ -1,11 +1,10 @@
 <!DOCTYPE html >
 <html>
 <head id="i18n_">
+    <meta charset="UTF-8">
     <title>欢迎您的到来！</title>
-    <script type="text/javascript" src="../jquery/jquery-3.3.1.min.js"></script>
-    <!--<link rel="/shortcut icon" href="favicon.ico"  >-->
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-
+    <script type="text/javascript" src="../jquery/jquery-3.3.1.min.js"></script>
     <style>
         div{
             position: relative;
@@ -19,17 +18,26 @@
         }
     </style>
 </head>
-<body class="">
-<h1 style="text-align: center">纸上得来终觉浅，绝知此事要躬行</h1>
-<h2 style="text-align: center">君子不争也，争必君子也</h2>
-<div>
+<body>
+<!--<h1 style="text-align: center">纸上得来终觉浅，绝知此事要躬行</h1>
+<h2 style="text-align: center">君子不争也，争必君子也</h2>-->
+<span id="" style="color: #2aabd2"></span>
+<br/>
+<a style="padding-left: 10px">数量1：<span id="count1" style="color: blue"></span></a>
+<a style="padding-left: 10px">数量2：<span id="count2" style="color: blue"></span></a>
+<a style="padding-left: 10px">数量3：<span id="count3" style="color: blue"></span></a>
+
+<br/>
+<div style="height: 60px">
     <img src="/image/gif/123.gif" style="width:60px;height:auto;display:block;text-align: center;vertical-align: middle">
     <img src="favicon.ico" onclick="openHammer()">
 </div>
 
+
 <!--<script type="text/javascript" src="/static/jquery/jquery-3.3.1.min.js"></script>-->
 <script type="text/javascript">
     $(function () {
+        test1();
         test();
     });
     function test() {
@@ -38,13 +46,35 @@
            url:'/test/count',
            data:{test:1},
            success:function (jdata) {
-               console.log(jdata)
            }
        })
     }
     function openHammer() {
         window.open("./hammer/index.html")
     }
+    function count() {
+        var arr = [];
+        for(var i=1;i<=3;i++){
+            arr.push(f1(i))
+        }
+        return arr
+    }
+    function f1(index) {
+        return index*index
+    }
+    function test1() {
+        var results = count();
+        console.log(results)
+        var f1 = results[0];
+        var f2 = results[1];
+        var f3 = results[2];
+
+        $("#count1").html(f1)
+        $("#count2").html(f2)
+        $("#count3").html(f3)
+
+    }
+
 </script>
 
 </body>

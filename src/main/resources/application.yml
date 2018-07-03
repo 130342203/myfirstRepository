@@ -2,7 +2,7 @@ server:
   port: 33555
 
 spring:
-  driverClassName: "com.mysql.jdbc.Driver"
+  driverClassName:  "com.mysql.jdbc.Driver"
   localdb: "jdbc:mysql://127.0.0.1:3307/test"
   userName: "root"
   password: "chen12345"
@@ -10,9 +10,14 @@ spring:
   maxIdle: 10
   maxActive: 50
   validationQuery: "select 1"
-  mvc:
-    static-path-pattern: /static/**
-
+  destdriverClassName: "com.mysql.jdbc.Driver"
+  destDb: "jdbc:mysql://127.0.0.1:3307/test2"
+  destuserName: "root"
+  destpassword: "chen12345"
+  destinitialSize: 5
+  destmaxIdle: 10
+  destmaxActive: 50
+  destvalidationQuery: "select 1"
 page-helper-config:
     pageHelperPlugin: true
 

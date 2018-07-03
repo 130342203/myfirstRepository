@@ -1,5 +1,5 @@
 /*
-package com.ck.config.plugins;
+package com.com.config.plugins;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -13,8 +13,14 @@ public interface ConfigConstants {
     String PRIMARY_DATA_SOURCE = "primaryDataSource";
     String PRIMARY_SESSION_FACTORY = "primarySessionFactory";
     String PRIMARY_JDBC_TEMPLATE = "primaryJdbcTemplate";
+    String SCAN_PACKAGE_PATH = "com.ck.**";
 
-    String SCAN_PACKAGE_PATH = "com.ck";
+    String DEST_DATA_SOURCE = "destDataSource";
+    String DEST_JDBC_TEMPLATE = "destJdbcTemplate";
+    String DEST_SESSION_FACTORY = "destSessionFactory";
+    String SCAN_PACKAGE_PATH_DEST = "com.ck";
+    String DEST_TRANSACTION_MANAGER = "destTransactionManager";
+
 
     /**
      * device

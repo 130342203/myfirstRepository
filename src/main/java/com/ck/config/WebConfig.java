@@ -1,6 +1,6 @@
 package com.ck.config;
 
-//import com.ck.framework.filter.OwnFilter;
+//import com.com.framework.filter.OwnFilter;
 import com.ck.framework.interceptor.OwnInterceptor;
 import org.apache.catalina.ssi.SSIFilter;
 import org.springframework.context.annotation.Bean;

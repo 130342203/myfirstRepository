@@ -1,5 +1,5 @@
 /*
-package com.ck.framework.utils.pdf;
+package com.com.framework.utils.pdf;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;

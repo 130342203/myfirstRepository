@@ -1,5 +1,5 @@
 /*
-package com.ck.config;
+package com.com.config;
 
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

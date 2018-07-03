@@ -2,6 +2,7 @@ package com.ck.controller;
 
 import com.ck.dao.entity.tuser;
 import com.ck.dao.mapper.TUserMapper;
+import com.ck.destDao.mapper.destTuserMapper;
 import com.ck.framework.ContextUtil;
 import com.ck.framework.context.AppContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import java.util.Map;
 public class TUserController {
     @Autowired
     private TUserMapper tUserMapper;
+    @Autowired
+    private destTuserMapper destTuserMapper;
 
     @RequestMapping(value = "test/count")
     @ResponseBody
@@ -28,6 +31,8 @@ public class TUserController {
         Map map = new HashMap();
         map.put("userId","1");
         tuser  tuser1 = tUserMapper.selectXmlTest(map);
+        tuser1.setPassword("123");
+        int a = destTuserMapper.selectTest();
         return tUserMapper.selectCountTest();
     }
 
