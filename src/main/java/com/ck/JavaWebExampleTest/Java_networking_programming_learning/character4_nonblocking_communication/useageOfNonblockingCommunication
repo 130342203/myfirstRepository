@@ -1,0 +1,102 @@
+socket/serverSocket---非阻塞通信
+1、造成阻塞的几种原因：
+    a、线程执行了sleep()方法
+    b、线程需要执行同步代码块，但无法获取到锁，只好进入阻塞状态，知道获取了同步锁才能继续执行
+    c、线程执行了wait()方法，进入了阻塞状态，只有其他线程执行了该对象的notify()或notifyAll()，才可能将其唤醒
+    d、线程执行I/O操作或者远程通信时，会因为等待相关的资源而进入阻塞状态
+    e、请求与服务器连接时，即socket执行带参数的构造方法时
+    f、线程从socket的输入流读入数据时，如果没有足够的数据会进入阻塞状态，直到读到了足够的数据，或者读到了输入流的末尾，或者出现了异常，才从read()
+    中返回或者异常中断
+    g、线程向socket的输出流写一批数据时，可能会进入阻塞状态。
+    h、调用socket的setSoLinger()方法设置了关闭socket的延迟时间，此时执行close()方法时，可能会进入阻塞状态，直到底层socket发送完所有剩余数据，
+    或者超出了设置的延迟时间，才从close()方法返回。
+    --在服务器线程中可能有以下情况会造成阻塞：
+    i、线程执行serverSocket.accept()方法，等待客户的连接，直到接收到了客户的连接，才从accept()方法返回
+    j、线程从socket的输入流读入数据时，若没有读取到足够的数据，可能会先入阻塞
+    k、线程向socket的输出流写一批数据时，可能会陷入阻塞状态，等到输出了所有的数据或者陷入异常，才从输出流的write()方法返回或者中断异常
+    --总结：无论服务器还是客户端，通过socket的输入流和输出流来读写数据时，都可能进入阻塞状态，这种可能出现阻塞的输入输出称为阻塞I/O，反之，若不发生
+    阻塞则称为非阻塞I/O
+2、非阻塞通信--NIO的使用
+    2.1、java nio的主要类：
+        serverSocketChannel（一大事件：接收连接就绪）、socketChannel（三大事件：连接就绪、读就绪、写就绪）、
+    2.2、缓冲区buffer的分类运用：
+        （1）、三大属性：容量、极限、位置，以及修改三属性的三个方法：
+        a、clear()把极限设置为容量，在把位置设为0；
+        b、flip()把极限设置为位置，再把位置设为0；
+        c、rewind()不改变极限，把位置设为0； 另外，remainning()方法返回缓冲区剩余的容量，取值等于“极限-位置（极限减位置）”
+        （2）、获取实例的两个方法：
+        a、allocate(int capacity)：返回一个ByteBuffer对象，参数capacity指定缓冲区的容量
+        b、directAllocate(int capacity)：返回一个ByteBuffer对象，参数capacity指定缓冲区的容量
+        --除了byteBuffer之外，其他类型都有自己的缓冲区类，包括CharBuffer、DoubleBuffer、FloatBuffer、IntBuffer、LongBuffer、ShortBuffer以及比较特殊的MappedByteBuffer。
+          所有的缓冲区类都提供了的读写缓冲区的方法：
+          a、get():相对读，从缓冲区当前位置读取下一个单元的数据，读完后位置加1；
+          b、get(int index):绝对读，从参数index指定的位置读取一个单元的数据；
+          c、put():相对写，向缓冲区的当前位置写入一个单元的数据，写完后把位置加1；
+          d、put(int index):绝对写，向参数指定的位置写入一个单元的数据
+    2.3、字符编码Charset：
+        （1）编码与解码的方法：
+            ByteBuffer encode(String str)：对参数str进行编码，将得到的字节放在一个ByteBuffer的对象中
+            ByteBuffer encode(CharBuffer cb)：对参数cb指定的缓冲区中的字符进行编码，将得到的字节序列存放在一个CharBuffer对象中，然后返回
+            CharBuffer decode(ByteBuffer bb)：把参数bb指定的ByteBuffer中的字节序列进行解码，将得到的字符序列放在一个CharBuffer对象中返回
+        （2）编码器与解码器（这里以案例说明）：
+            例如：Charset cs = Charset.forName("GBK")//获取一个编码集的实例，也可以使用Charset.defaultCharset()获取
+                CharsetEncoder encoder = cs.newEncoder()
+                ByteBuffer bb = encoder.encode(cb)//这里的cb一个CharBuffer对象
+    2.4、通道Channel：
+        （1）两个方法：
+            open()：关闭通道
+            isOpen()：判断通道是否打开
+        （2）、Channel()接口的两个子接口：
+            ReadableByteChannel():声明了read(ByteBuffer dst),将指定的数据读到ByteBuffer缓冲区中
+            WritableByteChannel():声明了write(ByteBuffer src)，将ByteBuffer中的数据写到数据源、数据汇中
+            --ScatteringByteChannel()接口扩展了ReadableByteChannel接口，允许分散的读取数据（这里的分散指的是一次读取操作可以填充多个缓冲区）
+            --GatheringByteBuffer()：是WritableByteChannel的拓展，允许集中地写数据到数据汇（这里的集中指的是一写操作吧多个缓冲区的数据写到数据汇）
+            分散的读取和集中地读写进一步的提高了读取和写入的速度
+        （3）、FileChannel()类是Channel()接口类的实现类：
+            该类实现了ByteChannel()、ScatteringByteChannel、GatheringByteBuffer接口，支持读操作、写操作、分散读操作和集中写操作，
+            FileChannel类没有提供公共的构造方法，因此客户不能用new语句来构造它的实例。不过Inputstream、FileOutputstream和RandomAccessFile类
+            提供了getChannel方法，该方法返回相应的FileChannel对象
+        （4）、SelectableChannel类：
+            SlelectableChannel类既支持阻塞I/o也支持非阻塞I/O，才非阻塞下，读写操作不会阻塞，并且SelectableChannel可以向selector注册读就绪个写就绪。
+            主要方法：
+            A、configureBlocking(boolean block)当block为true时表示把SelectableChannel设为阻塞模式，反之为非阻塞模式。默认情况下，设置为阻塞模式。
+            B、isBlocking方法判断selectableChannel是否处于阻塞模式，返回true表示处于阻塞模式，反之非阻塞
+            C、register(Selector sel,int ops)方法向selector注册事件，返回一个selectionKey
+            D、register(Seletor sel,int ops,Object attachment)向selector注册事件，返回一个selectionKey，其中attachment是一个关联的附件
+        （5）、ServerSocketChannel类：
+            主要方法：
+            A、open()返回一个ServerSocketChannel对象，这个对象没有与任何端口绑定，并处于阻塞模式
+            B、accept()类似于ServerSocket的accept()方法，用于接收客户的连接，返回一个socketChannel对象，如果ServerSocketChannel处于非阻塞模式，当没有客户端连接时会立即返回null，
+            若处于阻塞模式，没有连接时会一直阻塞下去直到有客户端连接或者出现IOEexception。其中socketChannel可用configureBlocking方法修改阻塞模式
+            C、vlidOps方法返回ServerSocketChannel返回一个ServerSocketChannel所能产生的事件，该方法总是返回SelectionKey.OP_ACCEPT
+            D、socket返回与ServerSocketChannel关联的serverSocket对象，每个ServerSocketChannel都与一个ServerSocket对象关联
+         （6）、SocketChannel类：
+            主要方法：
+            A、open()方法创建SocketChannel对象
+            B、open(SocketAddress remote)方法在阻塞与非阻塞模式下的行为有所不同，
+            C、validOps方法返回SocketChannel所能产生的事件，该方法总是返回SelectionKey.OP_CONNECT|SelectionKey.OP_READ|SelectionKey.OP_WRITE
+            D、socket方法返回一个与SocketChannel相关联的socket对象
+            E、isConnected方法判断底层socket是否处于连接状态
+            F、isConnectionPending方法判断是否正在进行远程连接
+            G、connect(SocketAddress remote)使底层socket建立远程连接，当SocketChannel处于非阻塞模式时，如果立即连接成功则放回true，否则返回false，
+            程序过会儿必须调用finishConect方法来完成连接；当SocketChannel处于阻塞模式，如果立即连接成功则返回true，否则将进入阻塞状态，直至连接成功，
+            或者出现I/O异常
+            H、finishConnect方法试图完成连接远程服务器的操作，非阻塞下，连接从connect开始到finishConnect结束，若finishConnect顺利完成连接，或者在调用此方法前
+            已经建立，则该方法立即返回true，若连接未完成，则返回false。如果连接操作中遇到异常而失败，则抛出相应的I/O异常。在阻塞模式下，若操作未完成，则进入阻塞状态，直至完成或者发生异常
+            I、read(ByteBuffer dst)方法从channel中读取若干字节，把他们存放到指定的ByteBuffer中。其中ByteBuffer的位置p，剩余容量为r，r等于dst.remaining方法的返回值。
+            假设read方法读取了n个字节，0<= n <= r,方法执行之后，参数dst引用的ByteBuffer的位置变为p+n，极限保持不变。在阻塞模式下，read方法会争取读到r个字节，若输入流中不足r个字节则进入阻塞，
+            直到读取了r个字节或者读到了输入流末尾，或者出现了I/O异常；在非阻塞模式下，read方法奉行能读多少读多少，有可能不足r个字节，有可能为0，总是立即返回，而不会等到读取了r个字节再返回。
+            其中读取到-1则表示读到了末尾。
+            J、write(ByteBuffer src)方法将参数src中的字节写到Channel中，
+
+
+
+
+
+
+
+
+
+
+
+

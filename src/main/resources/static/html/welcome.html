@@ -26,11 +26,19 @@
 <h1 style="text-align: center">纸上得来终觉浅，绝知此事要躬行</h1>
 <h2 style="text-align: center">君子不争也，争必君子也</h2>
 <div>
+
     <img src="/image/gif/123.gif" style="width:60px;height:auto;display:block;text-align: center;vertical-align: middle">
     <img src="favicon.ico" onclick="openHammer()">
 </div>
 
-
+<div id="ld" style="position:absolute; left:-1px; top:1px; width:100%; height:100%; background-color:#FFFFFF; z-index:1000;">
+    <div id="center" style="position:absolute;">
+        <table border="0">
+            <tr><td><span id="disp">页面加载中,请等待...</span></td></tr>
+            <tr><td><img src="/image/gif/123.gif"></td></tr>
+        </table>
+    </div>
+</div>
 <!--<script type="text/javascript" src="/static/jquery/jquery-3.3.1.min.js"></script>-->
 <script type="text/javascript">
     $(function () {
@@ -38,15 +46,19 @@
         test();
     });
     function test() {
-       $.ajax({
+      /* $.ajax({
            type:'post',
            url:'/test/count',
            data:{test:1},
            success:function (jdata) {
                console.log(jdata)
                 $("#count").innerText=jdata;
+<<<<<<< Updated upstream
+=======
+               $("#ld").hide();
+>>>>>>> Stashed changes
            }
-       })
+       })*/
     }
     function openHammer() {
         window.open("./hammer/index.html")

@@ -1,4 +1,4 @@
-package com.ck.JavaWebExampleTest.javaLeague.daily_acm;
+package com.ck.JavaWebExampleTest.javaLeague_weixinPublic.daily_acm;
 
 import java.io.*;
 

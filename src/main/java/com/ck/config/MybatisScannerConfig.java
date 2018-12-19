@@ -19,7 +19,7 @@ public class MybatisScannerConfig {
     public MapperScannerConfigurer mapperScannerConfigurer(){
         MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
         mapperScannerConfigurer.setSqlSessionFactoryBeanName(ConfigConstants.PRIMARY_SESSION_FACTORY);
-        mapperScannerConfigurer.setBasePackage(ConfigConstants.SCAN_PACKAGE_PATH+".dao.mapper");
+        mapperScannerConfigurer.setBasePackage(ConfigConstants.SCAN_PACKAGE_PATH+".**.dao.mapper");
         Properties properties = new Properties();
         properties.setProperty("mappers", Mapper.class.getName());
         mapperScannerConfigurer.setProperties(properties);
@@ -29,7 +29,7 @@ public class MybatisScannerConfig {
     public MapperScannerConfigurer destMapperScannerConfigurer(){
         MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
         mapperScannerConfigurer.setSqlSessionFactoryBeanName(ConfigConstants.DEST_SESSION_FACTORY);
-        mapperScannerConfigurer.setBasePackage(ConfigConstants.SCAN_PACKAGE_PATH_DEST+".destDao.mapper");
+        mapperScannerConfigurer.setBasePackage(ConfigConstants.SCAN_PACKAGE_PATH_DEST+".**.destDao.mapper");
         Properties properties = new Properties();
         properties.setProperty("mappers", Mapper.class.getName());
         mapperScannerConfigurer.setProperties(properties);

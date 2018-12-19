@@ -1,4 +1,4 @@
-package com.ck.JavaWebExampleTest.javaLeague.JavaBasicSkills;
+package com.ck.JavaWebExampleTest.javaLeague_weixinPublic.JavaBasicSkills;
 /*java联盟之排序*/
 public class example1_sort {
 

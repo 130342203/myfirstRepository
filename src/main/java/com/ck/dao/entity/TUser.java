@@ -1,7 +1,9 @@
 package com.ck.dao.entity;
 
-public class tuser {
+import javax.persistence.Id;
 
+public class TUser {
+    @Id
     private Integer userId;
     private String userName;
     private String credits;

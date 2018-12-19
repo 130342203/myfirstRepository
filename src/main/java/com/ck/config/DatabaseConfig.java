@@ -80,6 +80,7 @@ public class DatabaseConfig {
     /*public ServletRegistrationBean druidServlet(){
         return  new ServletRegistrationBean(new )
     }*/
+    /*基础数据源*/
     @Bean(name = ConfigConstants.PRIMARY_DATA_SOURCE)
     public javax.sql.DataSource getBasicDataSource() {
         DruidDataSource dataSource = new DruidDataSource();
@@ -93,50 +94,20 @@ public class DatabaseConfig {
         dataSource.setValidationQuery(this.validationQuery);
         return dataSource;
     }
-
-    @Bean(name = ConfigConstants.DEST_DATA_SOURCE)
-    public javax.sql.DataSource getDestDataSource() {
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl(this.destDb);
-        dataSource.setUsername(this.destuserName);
-        dataSource.setPassword(this.destpassword);
-        dataSource.setInitialSize(this.destinitialSize);
-        dataSource.setMaxActive(this.destmaxActive);
-        dataSource.setMinIdle(this.destminIdle);
-        dataSource.setMaxWait(this.destmaxWait);
-        dataSource.setValidationQuery(this.destvalidationQuery);
-        return dataSource;
-    }
-
-
     @Bean(name = ConfigConstants.PRIMARY_JDBC_TEMPLATE)
     public JdbcTemplate getJdbcTemplate() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         jdbcTemplate.setDataSource(getBasicDataSource());
         return jdbcTemplate;
     }
-    @Bean(name = ConfigConstants.DEST_JDBC_TEMPLATE)
-    public JdbcTemplate getDestJdbcTemplate() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
-        jdbcTemplate.setDataSource(getDestDataSource());
-        return jdbcTemplate;
-    }
-
     @Bean(name = ConfigConstants.PRIMARY_TRANSACTION_MANAGER)
     public DataSourceTransactionManager getDataSourceTransactionManager() {
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
         transactionManager.setDataSource(getBasicDataSource());
         return transactionManager;
     }
-    @Bean(name = ConfigConstants.DEST_TRANSACTION_MANAGER)
-    public DataSourceTransactionManager getDestDataSourceTransactionManager() {
-        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
-        transactionManager.setDataSource(getBasicDataSource());
-        return transactionManager;
-    }
-
-    @Bean(name = ConfigConstants.PRIMARY_SESSION_FACTORY)
     @Primary
+    @Bean(name = ConfigConstants.PRIMARY_SESSION_FACTORY)
     public SqlSessionFactory getSqlSessionFactoryBean() throws Exception {
         List<Interceptor> list = new ArrayList<Interceptor>();
         //todo 分页判定需要否？
@@ -158,6 +129,33 @@ public class DatabaseConfig {
         sf.getConfiguration().setMapUnderscoreToCamelCase(true);
         sf.getConfiguration().setJdbcTypeForNull(JdbcType.NULL);
         return sf;
+    }
+
+    /*目标数据源*/
+    @Bean(name = ConfigConstants.DEST_DATA_SOURCE)
+    public javax.sql.DataSource getDestDataSource() {
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl(this.destDb);
+        dataSource.setUsername(this.destuserName);
+        dataSource.setPassword(this.destpassword);
+        dataSource.setInitialSize(this.destinitialSize);
+        dataSource.setMaxActive(this.destmaxActive);
+        dataSource.setMinIdle(this.destminIdle);
+        dataSource.setMaxWait(this.destmaxWait);
+        dataSource.setValidationQuery(this.destvalidationQuery);
+        return dataSource;
+    }
+    @Bean(name = ConfigConstants.DEST_JDBC_TEMPLATE)
+    public JdbcTemplate getDestJdbcTemplate() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        jdbcTemplate.setDataSource(getDestDataSource());
+        return jdbcTemplate;
+    }
+    @Bean(name = ConfigConstants.DEST_TRANSACTION_MANAGER)
+    public DataSourceTransactionManager getDestDataSourceTransactionManager() {
+        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+        transactionManager.setDataSource(getBasicDataSource());
+        return transactionManager;
     }
     @Bean(name = ConfigConstants.DEST_SESSION_FACTORY)
     public SqlSessionFactory getDestSqlSessionFactoryBean() throws Exception {

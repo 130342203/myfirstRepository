@@ -1,4 +1,4 @@
-package com.ck.JavaWebExampleTest.character1;
+package com.ck.JavaWebExampleTest.JavaWebTech_depth_analysis.character1;
 
 
 import org.apache.http.impl.client.CloseableHttpClient;
