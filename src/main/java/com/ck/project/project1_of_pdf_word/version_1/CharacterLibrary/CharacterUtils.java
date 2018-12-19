@@ -1,9 +1,9 @@
 package com.ck.project.project1_of_pdf_word.version_1.CharacterLibrary;
 
-import com.ck.project.project1_of_pdf_word.version_1.output.OutPutUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,10 +15,8 @@ public class CharacterUtils {
         String[] fontNames = graphicsEnvironment.getAvailableFontFamilyNames();
         Font[] fonts = graphicsEnvironment.getAllFonts();
         for (String name : fontNames) {
-
-            System.out.println(name);
+            System.out.print(name+"/");
         }
-        BufferedImage image = null;
         for (Font font :fonts){
             if (font.getName().equals("仿宋")){
                 writeFontOnImage("龙",256,256,font);
@@ -29,7 +27,6 @@ public class CharacterUtils {
     public static void writeFontOnImage(String str,int width,int height,Font font) throws IOException {
         BufferedImage image = new BufferedImage(width, height,BufferedImage.TYPE_INT_RGB);
         Font newfont = font.deriveFont(Font.BOLD,64f);
-        System.out.println(newfont.getName()+"-"+newfont.getStyle()+"-"+newfont.getSize());
         // 获取Graphics2D
         Graphics2D g2d = image.createGraphics();
         //g2d.drawImage(image,0,0,image.getWidth(),image.getHeight(),null);//将图片画到图片上
@@ -37,13 +34,19 @@ public class CharacterUtils {
         g2d.clearRect(0, 0, width, height);
         g2d.setColor(Color.red);
         //g2d.setPaint(Color.green);
-        g2d.setFont(new Font("宋体",Font.PLAIN,50));
-        g2d.setFont(newfont);
+        int fontSize = 128;
+        g2d.setFont(new Font("宋体",Font.BOLD,fontSize));
+        //g2d.setFont(newfont);
+        FontMetrics fm =g2d.getFontMetrics();
+        Rectangle2D rc = fm.getStringBounds(str,g2d);
+        System.out.println("宽度"+rc.getWidth());
+        System.out.println("高度"+rc.getHeight()+"leading:"+fm.getLeading()+"ascent:"+fm.getAscent()+"descent:"+fm.getDescent());
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         int x = image.getWidth() - 2 *getWatermarkLength(str,g2d);
         int y = image.getHeight() - 2 *getWatermarkLength(str,g2d);
-        x = image.getWidth()/2 - 25;
-        y = image.getHeight()/2 + 25;
+        x = (image.getWidth()/2) - ((int) rc.getWidth()/2);
+        y = (image.getHeight()/2) + ((int) rc.getHeight()/2);
+        System.out.println(x+"-"+y);
         g2d.drawString(str,x,y);
         g2d.drawLine(0,0,0,250);
         g2d.drawLine(255,0,255,255);
