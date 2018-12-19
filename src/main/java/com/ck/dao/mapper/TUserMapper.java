@@ -9,6 +9,7 @@ import java.util.Map;
 /**
  * Created by Administrator on 2018/6/11.
  */
+
 public interface TUserMapper extends Mapper<tuser> {
     @Select("select count(*) from t_user")
     int selectCountTest();
