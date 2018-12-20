@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,8 @@ public class PdfToWordController {
 
         }
         new CharacterUtils().getCharactersFromSystem();
+        BufferedImage  image = CharacterUtils.writeFontOnImage("龙",256,256,new Font("仿宋",Font.BOLD,50));
+        ImageIO.write(image,"jpg",new File("G:\\1.jpg"));
         return new Result().buildSuccess();
     }
 }
