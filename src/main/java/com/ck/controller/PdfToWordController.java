@@ -5,6 +5,7 @@ import com.ck.project.project1_of_pdf_word.conferences.image.ImageService;
 import com.ck.project.project1_of_pdf_word.conferences.image.bean.ImageContent;
 import com.ck.project.project1_of_pdf_word.conferences.pdf.PdfUtil;
 import com.ck.project.project1_of_pdf_word.version_1.CharacterLibrary.CharacterUtils;
+import com.ck.project.project1_of_pdf_word.version_1.ImageOcr.ImageUtils;
 import com.ck.project.project1_of_pdf_word.version_1.output.OutPutUtils;
 import com.ck.project.project1_of_pdf_word.version_1.pdfToImage.PdfToImages;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +37,9 @@ public class PdfToWordController {
 
         }
         new CharacterUtils().getCharactersFromSystem();
+        BufferedImage  image = CharacterUtils.writeFontOnImage("测试字",35,35,new Font("仿宋",Font.BOLD,50));
+        ImageIO.write(image,"jpg",new File("G:\\1.jpg"));
+        new ImageUtils().printPixelValue(image);
         return new Result().buildSuccess();
     }
 }
