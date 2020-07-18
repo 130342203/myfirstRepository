@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="layui-input-inline" id="imgAvatar" >
+        </div>
+        <input class="layui-btn layui-btn-sm" type="button"
+               onclick="javascript: showWinImgAvatarUpload();" data-i18n="[value]page:PAGE.VIEW_IC_PERSON_INFO.MODIFY_AVATAR" value="修改头像"></input>
+        <input class="layui-btn layui-btn-sm" type="button"
+               onclick="javascript: showWinPwdModify();" data-i18n="[value]page:PAGE.VIEW_IC_PERSON_INFO.MODIFY_PWD" value="密码修改"></input>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_PERSON_INFO.ACCOUNT_NUMBER">账号</label>
+                <div class="layui-input-inline">
+                    <div id="accountNumber" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_PERSON_INFO.USER_NAME">用户名称</label>
+                <div class="layui-input-inline">
+                    <div id="userName" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">人员单位/部门</label>
+                <div class="layui-input-inline">
+                    <div id="unitName" class="layui-input textmiddle" style="width: 420px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">需求/资质单位</label>
+                <div class="layui-input-inline">
+                    <div id="demandUnitName" class="layui-input textmiddle" style="width: 420px;"></div>
+                    <div id="authUnitName" class="layui-input textmiddle" style="width: 420px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_PERSON_INFO.ACCOUNT_ROLES">账号角色</label>
+                <div class="layui-input-inline" style="width: 320px;">
+                    <ul id="roleTree" class="mtree"></ul>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        var account = WinUtil.getLoginAccount();
+        $('#accountNumber').html(account.accountNumber);
+        $('#userName').html(account.relUserName);
+        $('#demandUnitName').html('需求单位：' + account.demandUnitName);
+        $('#authUnitName').html('资质单位：' + account.authUnitName);
+        $('#unitName').html(account.orgName + "/" + account.departName);
+
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_ROLES",
+            data: {accountId: account.accountId || '' },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var tdata_ = EasyUITool.WarpTreeData(result.data[result.reqCode], ["pkid", "pid"], function (tdata) {
+                    return {
+                        id: tdata.pkid,
+                        text: tdata.roleName,
+                        state: 'open'
+                    };
+                }/*, "0"*/);
+                if (!tdata_) {
+                    return;
+                }
+                EasyUI.initTree('#roleTree', {
+                    data: tdata_, lines: true,
+                    animate: true,
+                    formatter: function (node) {
+                        return node.text;
+                    }
+                }).css({padding: '5px'});
+            }
+        });
+
+        initUserAvatar();
+    });
+
+    function initUserAvatar() {
+        var account = WinUtil.getLoginAccount();
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_ATTACH_GET",
+            data: {sourceId: account.accountId, category: "USER_AVATAR" },
+            success: function (result) {
+                if(!FuncUtil.checkResult(result)){
+                    return;
+                }
+                var userAvatar = result.data.IC_ATTACH_GET[0]
+                var imgSrc = "/topjui/image/avatar.png";
+                if(userAvatar){
+                    PAGE_PARAM.USER_AVATAR_ATTACH_ID = userAvatar.pkid;
+                    imgSrc = Constant.API_V1_PLUGINS + 'IC_ATTACH_DOWN' + '?attachId='+userAvatar.pkid +"&_t=" + new Date().getTime();
+                }
+                $('#imgAvatar').html("<img src='"+imgSrc+"' class='user-image' onerror='this.src=\"/topjui/image/avatar.png\"' style='width: 50px; height: 50px;'/>");
+            }
+        });
+    }
+
+    function showWinImgAvatarUpload(){
+        var account = WinUtil.getLoginAccount();
+        WinUtil.showTopDialog({
+            title : $.tl('page:PAGE.VIEW_IC_PERSON_INFO.UPLOAD_AVATAR', "上传头像"),
+            width: 650, height : 480,
+            param: {
+                CATEGORY: 'USER_AVATAR',
+                SOURCE_ID: account.accountId,
+                ALLOW_TYPE: 'images', IS_COVER: true,
+                IS_MULTIPLE: false,
+                MAX_UPLOAD_SIZE_KB: 200,
+                ALLOW_DRAG: false,
+                SUCCESS_CALLBACK : function (result) {
+                    WinUtil.MsgInfo({ content: result.msg });
+                    initUserAvatar();
+                }
+            },
+            url: ICViews.IC_FILE_UPLOAD
+        });
+    }
+
+    function showWinPwdModify() {
+        top.modifyPwd();
+    }
+
+</script>
+</html>

@@ -1,0 +1,89 @@
+.txtbox{
+    border: 1px solid #D4D4D4;
+    background-color: #fff;
+    vertical-align: middle;
+    font-size: 12px;
+    padding: 4px;
+    white-space: normal;
+    vertical-align: top;
+    outline-style: none;
+    resize: none;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border-radius: 5px 5px 5px 5px;
+
+}
+
+/*.validatebox-readonly{
+    background-color: #EBEBE4;
+}*/
+.validatebox-onlyview{
+    background-color: #EBEBE4;
+}
+/*.tabs-container{
+	padding: 0 2px;
+}*/
+
+*{margin:0;padding:0;}
+select{outline:none;}
+ul{list-style:none;}
+a{text-decoration:none;}
+/*select{display: none;}*/
+.select_box{font-family: "微软雅黑"; font-size: 12px;color: #999999;width: 178px;line-height: 20px;margin: 50px auto;}
+.select_showbox{border: 1px solid #b0a296;height: 20px;padding-left: 5px;background: url(icon.png) no-repeat 156px 0;}
+.select_option{border: 1px solid #b0a296;border-top: none;display: none;}
+.select_option li{padding-left: 5px;}
+.select_option li.selected{background-color: #F3F3F3;color: #999;}
+.select_option li.hover{background: #7b6959; color: #fff;}
+
+
+.uploadBox {height:62px; cursor:pointer;}
+.uploadBox li { position:relative; float:left; display:block; width:60px; height:60px; border:1px dashed #ccc; overflow:hidden;}
+.uploadBox li input  , .uploadBox li img { position:absolute; top:0; width:60px; height:60px; cursor:pointer;}
+.uploadBox li input { opacity: 0; filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0); z-index: 1000;}
+
+.detail_view{
+    position:absolute;
+    display: none;
+    width: 300px;height:200px;
+    overflow-y: scroll;
+    border:1px solid #999;
+    background: #fff;
+    color:#666;
+    font-size: 12px;
+}
+
+
+.mytable {
+    padding: 0;
+    margin: 0; font-size: 12px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.mytable .ctr {
+    text-align: center;
+    height: 32px;
+    min-height: 32px;
+}
+
+.mytable th {
+    font-size: 9px;
+    color: #4f6b72;
+    border: 1px solid #CCCCCC; /*C1DAD7*/
+    letter-spacing: 2px;
+    text-align: left;
+    padding: 3px 3px 3px 6px;
+    background: #F8F8FF no-repeat;
+    height: 32px;
+    min-height: 32px;
+}
+
+.mytable td {
+    border: 1px solid #CCCCCC;
+    background: #FBFBFB;
+    font-size:11px;
+    padding: 3px 3px 3px 6px;
+    color: #4f6b72;
+    height: 28px;
+}

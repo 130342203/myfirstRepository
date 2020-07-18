@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2">
+                <tr>
+                    <th style="width: 80px;" align="right">角色名称：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="roleName" id="roleName" />
+                    </td>
+                    <th style="width: 80px;" align="right">描述：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="roleDesc" id="roleDesc" />
+                    </td>
+                    <td colspan="2">
+                        &nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>模糊</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="clearBtn" onclick="onClear_()"><span>精准</span></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            title: '角色列表',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            firstLoad: true,
+            pagination: false,
+            custom: {
+                code: API_IC_CODE.IC_ROLE_LIST,
+                alter: {
+                }
+            },
+            contextMenus:[
+                {id: "m-edit", text : ("编辑"), auth:"IC_ROLE_EDIT@角色管理#角色编辑",
+                    onclick: function(){
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : ("编辑"),
+                            width: 500, height : 360,
+                            param: {PKID: row.PKID },
+                            url: Constant.VIEWS_IC + "/role/ic_role_update.shtml"
+                        });
+                    }
+                },{id: "m-delete", text : ("删除"), auth:"IC_ROLE_DELETE@角色管理#角色删除",
+                    onclick: function(){
+                        $.messager.confirm(('确认窗口'),
+                            ('你确定要删除此项吗?'),function(r){
+                            if (r){
+                                var row = $('#dg').datagrid('getSelected');
+                                AjaxUtil.post({
+                                    url: Constant.API_V1_PLUGINS + "IC_ROLE_DEL",
+                                    data: {pkid: row.PKID },
+                                    success : function (result) {
+                                        if (!FuncUtil.checkResult(result)) {
+                                            return;
+                                        }
+                                        reloadDataGrid();
+                                        WinUtil.MsgInfo({ content: result.msg });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                },
+                { text :("设置菜单权限"), auth:"IC_ROLE_SETTING_MENU@角色管理#设置菜单权限",
+                    onclick: function(){
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : "[" + row.ROLE_NAME + "]" +("设置菜单权限"),
+                            width: 700, height : 450,
+                            param: row,
+                            url: Constant.VIEWS_IC + "/role/ic_role_setting_menu.shtml"
+                        });
+                    }
+                },
+                { text : ("设置系统权限"), auth:"",
+                    onclick: function(){
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showTopDialog({
+                            title : "[" + row.ROLE_NAME + "]" + ("设置系统权限"),
+                            width: 1020, height : 620,
+                            param: row,
+                            url: Constant.VIEWS_IC + "/role/ic_role_setting_system.shtml"
+                        });
+                    }
+                }
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {
+                    iconCls: 'icon-table_add', text:'新增', auth:"",
+                    handler: function () {
+                        WinUtil.showDialog({
+                            title :('角色-增加'),
+                            width: 450, height : 300,
+                            param: {},
+                            url: Constant.VIEWS_IC + "/role/ic_role_update.shtml"
+                        });
+                    }
+                }, '-',
+                {
+                    iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+</script>
+</html>

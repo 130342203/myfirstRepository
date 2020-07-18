@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="./personel.js"></script>
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2">
+                <tr>
+                    <th style="width: 80px;" align="right">姓名：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="realName" id="roleName" />
+                    </td>
+                    <th style="width: 80px;" align="right">证件号：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="idNo" id="idNo" />
+                    </td>
+                    <!--<th style="width: 80px;" align="right">登录账号：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="accountNumber" id="accountNumber" />
+                    </td>
+                    <th style="width: 80px;" align="right">手机号码：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="phone" id="phone" />
+                    </td>-->
+                    <td colspan="2">
+                        &nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>查询</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="clearBtn" onclick="GridUtil.onReset({target: '#dg'})"><span>重置</span></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    // 初始化列表
+    var $dg = $("#dg");
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            title: '维修人员审核',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            firstLoad: true,
+            queryParams: {status:'4'},
+            custom: {
+                code: 'BS_USER_AUDIT_LIST'
+            },
+            contextMenus:[
+               /* {text : '审核通过',
+                    onclick: function(){
+                        $.messager.confirm( '确认窗口','你确认审核通过该项么?',function(r){
+                                if (r){
+                                    var row = $('#dg').datagrid('getSelected');
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "PERSONNEL_AUDIT_STATUS" ,
+                                        data: {id: row.ID,pkid:row.PKID,status:'1'},
+                                        success : function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            reloadDataGrid();
+                                            WinUtil.MsgInfo({ content: result.msg });
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                },{text: "审核不通过",
+                    onclick: function(){
+                        $.messager.confirm( '确认窗口','你确认审核不通过该项么?',function(r){
+                                if (r){
+                                    var row = $('#dg').datagrid('getSelected');
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "PERSONNEL_AUDIT_STATUS" ,
+                                        data: {id: row.ID,pkid:row.PKID,status:'3' },
+                                        success : function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            reloadDataGrid();
+                                            WinUtil.MsgInfo({ content: result.msg });
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                },*/
+                {
+                    text: "审核",
+                    onclick: function () {
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showTopDialog({
+                            title:  "审核",
+                            width: '50%', height: '60%',
+                            param: {row:row},
+                            url: "/views/login/person_audit_pass.shtml"
+                        });
+                    }
+                },
+
+                {
+                    text: "查看",
+                    onclick: function () {
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showTopDialog({
+                            title:  "查看",
+                            width: '90%', height: '80%',
+                            param: {row:row,
+                                callBack: function (result) {
+
+                                    WinUtil.MsgInfo(result.msg);
+                                }
+                            },
+                            url: "/views/login/user_register_view.shtml"
+                        });
+                    }
+                },
+                {
+                    text: '审核轨迹', auth: "",
+                    onclick: function () {
+                        var row = $("#dg").datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title: '审核轨迹',
+                            width: '80%', height: '80%',
+                            url: Constant.VIEWS_COM + "/com_audit_log.shtml",
+                            param: {queryParams: {sourceType: 'BS_USER_AUDIT', sourceId: row.ID}}
+                        });
+                    }
+                }
+
+                /*{text: "删除",
+                    onclick: function(){
+                        $.messager.confirm( '确认窗口','你确认删除该项么?',function(r){
+                                if (r){
+                                    var row = $('#dg').datagrid('getSelected');
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "PERSONNEL_AUDIT_DELETE" ,
+                                        data: {id: row.ID,pkid:row.PKID },
+                                        success : function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            reloadDataGrid();
+                                            WinUtil.MsgInfo({ content: result.msg });
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                }*/
+            ],
+            toolbar: [
+                {
+                    iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+    function updISFDir(roleId) {
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + 'IC_ROLE_UPD_ISF_DIR',
+            data: {pkid: roleId },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                reloadDataGrid();
+            }
+        });
+    }
+</script>
+</html>

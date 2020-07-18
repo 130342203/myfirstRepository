@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <style>
+        .textCenter {
+            text-align: center
+        }
+    </style>
+</head>
+
+<body style="overflow-y:auto; overflow-x:auto;">
+<div id="app">
+    <div class="form-div-class form_eui">
+        <div class="textCenter">
+            <caption  style="font-size: 15px;">注册注意事项</caption>
+        </div>
+        <div class="layui-form-item">
+            <div id="contents"></div>
+           <!-- <ul  v-for="(item, index) in qualList">
+                <li><a style="color: red">*</a>{{index+1+'、'}}{{item.contents}}</li>
+            </ul>-->
+        </div>
+        <!--<form id="person" method="post" class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" onclick="havePass('Y')" class="easyui-linkbutton" id="saveButtonCom"
+                            style="margin-left: 120px;"
+                            data-options="iconCls:'icon-page_save',toggle:true"
+                            lay-submit>同 意
+                    </button>
+                    <button class="easyui-linkbutton" id="closeButton"
+                            data-options="iconCls:'icon-page_cancel',toggle:true"
+                            onclick="havePass('N')">不同意
+                    </button>
+                </div>
+            </div>
+        </form>-->
+    </div>
+</div>
+
+
+</body>
+<script>
+    var PAGE_PARAM = {};
+    /*var vm = new Vue({
+        el: '#app',
+        data: {
+            qualList: [
+                {
+                    demand: "学历信息必须真实"
+                },
+                {
+                    demand: "身份证照片必须是个人的真实清晰照片"
+                },
+                {
+                    demand: "专业必须是理工科专业人员，否则不能申请"
+                }
+            ]
+        }
+    });*/
+
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + 'BS_PROTOCOL_GET',
+            success : function (result) {
+                console.log(result);
+                //如需要查询后面改为ajax后台传值即可
+                //vm.$data.qualList = result.data.BS_PROTOCOL_GET
+                $("#contents").append(result.data.BS_PROTOCOL_GET[0].contents);
+            }
+        });
+    });
+
+    function havePass(a) {
+        if (a == "Y") {
+            PAGE_PARAM.callBack(true);
+        } else {
+            PAGE_PARAM.callBack(false);
+        }
+        WinUtil.closeCurrDialog();
+    }
+</script>
+</html>
+
+

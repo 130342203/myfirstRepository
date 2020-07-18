@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2">
+                <tr>
+                    <th style="width: 80px;" align="right">用户姓名：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="realName" id="realName" />
+                    </td>
+                    <th style="width: 80px;" align="right">用户账号：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="accountNumber" id="accountNumber" />
+                    </td>
+                    <td colspan="2">
+                        &nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>查询</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="clearBtn" onclick="GridUtil.onReset({target: '#dg'})"><span>重置</span></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        AjaxUtil.postReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {codes: DATA_DICT_CODES.IC_ACCOUNT_STATE },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                EasyUI.initCombobox('#state', {
+                    data: data[DATA_DICT_CODES.IC_ACCOUNT_STATE]
+                });
+            }
+        });
+
+        InitDataGrid();
+    });
+
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            title: '用户列表',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            firstLoad: true,
+            custom: {
+                code: API_IC_CODE.IC_ACCOUNT_LIST,
+                alter: {
+                    'ACCOUNT_NUMBER':{formatter:function(value,row,index){
+                        return row.PKID == '1' ? '<span class="fa fa-lock fa-fw"></span>' + value : value;
+                    }},
+                    'DEMAND_UNIT_NAME':{formatter:function(value,row,index){
+                        return value ? value : '<span style="color:red;">未配置需求单位</span>';
+                    }},
+                    'AUTH_UNIT_NAMES':{formatter:function(value,row,index){
+                        return value ? value : '<span style="color:red;">未配置资质单位</span>';
+                    }},
+                    'STATE':{formatter:function(value,row,index){
+                            return value=='L' ? "锁定" : "正常";
+                        }},
+                }
+            },
+            loadFilter : function(result){
+                return { total: result.data.IC_ACCOUNT_LIST.total, rows: result.data.IC_ACCOUNT_LIST.rows };
+            },
+            contextMenus:[
+                {
+                    text: "删除", auth: "FUNC:HTI_INTERNAL_AUDITH_DATA_CHILD_DELETE",
+                    onclick: function () {
+                        $.messager.confirm( '确认窗口','你确定要删除此项吗?', function (r) {
+                                if (r) {
+                                    var row = $('#dg').datagrid('getSelected');
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_DEL",
+                                        data: {accountId: row.PKID},
+                                        success: function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            $("#dg").datagrid('reload');
+                                            WinUtil.MsgInfo({content: result.msg});
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                },
+                { text : ( "编辑"), auth:"",
+                    onclick: function(){
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : ("编辑"),
+                            width: 800, height : 400,
+                            param: {row:row,_isEdit:true},
+                            url: Constant.VIEWS_IC + "/account/ic_account_add_update.shtml"
+                        })
+                    }
+                },
+                {id: "m-edit", text : ("设置角色"), auth:"",
+                    onclick: function(){
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : row.ACCOUNT_NUMBER + "-" + ("设置角色"),
+                            width: 750, height : 420,
+                            param: {ACCOUNT_ID: row.PKID},
+                            url: Constant.VIEWS_IC + "/account/ic_account_role_setting.shtml"
+                        });
+                    }
+                },
+                {text : ("修改密码"), auth:"",
+                    onclick: function(){
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : ("修改密码"),
+                            width: 560, height : 400,
+                            param: {ACCOUNT_ID: row.PKID, ACCOUNT_NUMBER: row.ACCOUNT_NUMBER, EMAIL: row.EMAIL },
+                            url: Constant.VIEWS_IC + "/account/ic_account_modify_pwd.shtml"
+                        });
+                    }
+                },
+                {text : '重置密码', auth:"",
+                    onclick: function(){
+                        $.messager.prompt($.tl('page:PAGE.COMM.CONFIRM_TITLE', '确认窗口'),
+                            '请输入重置密码！', function (r) {
+                                if (r) {
+                                    var row = $('#dg').datagrid('getSelected');
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_RESET_PWD",
+                                        data: {accountId: row.PKID, newPwd: r },
+                                        success: function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            $("#dg").datagrid('reload');
+                                            WinUtil.MsgInfo({content: result.msg});
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                }
+            ],
+            validAuthContextMenu: function(row, items){
+                if(row.PKID == '1'){
+                    items[("设置角色")].display = false;
+                    //items['删除'].display = false;
+                }
+                return items;
+            },
+            toolbar: [
+                {iconCls:'icon-table_add', text: '新增',
+                    handler: function () {
+                        WinUtil.showDialog({
+                            title : ("增加"),
+                            width: 800, height : 450,
+                            param: {},
+                            url: Constant.VIEWS_IC + "/account/ic_account_add_update.shtml"
+                        });
+                    }
+                },
+                {iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+</script>
+</html>

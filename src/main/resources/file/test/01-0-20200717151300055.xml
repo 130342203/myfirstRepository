@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<EDRDocument>
+    <Header>
+        <BusinessActivityIdentification>InfectiousDiseases</BusinessActivityIdentification>
+        <DocumentId>null-InfectiousDiseases-20200717151300055</DocumentId>
+        <License>eyJhbGciOiJIUzI1NiJ9.eyJ1bmFtZSI6Inlhbmdob25nbGVpNTM1OSIsInVpZCI6IjI5MTMzOSJ9.BYds3qYJUhFT-MEZKUXu-GVsDy0a1XeBtHJWPPKAQA4</License>
+        <OperateType>Add</OperateType>
+        <ReportOrgCode version="V1.0" value="郑州市疾病预防控制中心">410102035</ReportOrgCode>
+        <ReportZoneCode version="V1.0" value="河南省郑州市">41010000</ReportZoneCode>
+    </Header>
+    <Body>
+        <PersonInfo>
+            <AuditReportDate>2020-07-16</AuditReportDate>
+            <AuditReportOrgCode version="V1.0" value="成都市公共卫生临床医疗中心(成都市传染病医院、成都市结核病防治院)">510104008</AuditReportOrgCode>
+            <AuditReportZoneCode version="V1.0" value="成都市公共卫生临床医疗中心(成都市传染病医院、成都市结核病防治院)">510104008</AuditReportZoneCode>
+            <BirthDate>1983-12-20</BirthDate>
+            <Contacts></Contacts>
+            <ContactsTel></ContactsTel>
+            <CurrentAddrCode version="V1.0" value=""></CurrentAddrCode>
+            <CurrentAddrDetail></CurrentAddrDetail>
+            <EducationCode version="V1.0" value=""></EducationCode>
+            <GenderCode version="V1.0" value="男">1</GenderCode>
+            <IdCard>510811198312203675</IdCard>
+            <IdCardTypeCode version="V1.0" value="">居民身份证号</IdCardTypeCode>
+            <MainPatientIndex></MainPatientIndex>
+            <MaritalStatusCode version="V1.0" value=""></MaritalStatusCode>
+            <NationCode version="V1.0" value="汉族">1</NationCode>
+            <NationalityCode version="V1.0" value=""></NationalityCode>
+            <NultitudeTypeCode version="V1.0" value="农民">18</NultitudeTypeCode>
+            <PatientName>刘广元</PatientName>
+            <PermanentAddrCode version="V1.0" value=""></PermanentAddrCode>
+            <PermanentAddrDetai>四川省广元市昭化区射箭乡红花村13组13号</PermanentAddrDetai>
+            <PermanentAddrTypeCode version="V1.0" value="">51081124</PermanentAddrTypeCode>
+            <ReportDate>2020-07-16</ReportDate>
+            <ReportOrgCode version="V1.0" value=""></ReportOrgCode>
+            <ReportZoneCode version="V1.0" value=""></ReportZoneCode>
+            <UpdateReportDate></UpdateReportDate>
+            <UpdateReportOrgCode version="V1.0" value=""></UpdateReportOrgCode>
+            <UpdateReportZoneCode version="V1.0" value=""></UpdateReportZoneCode>
+            <Workunit>无</Workunit>
+        </PersonInfo>
+        <DiseaseInfo>
+            <AEFIDate></AEFIDate>
+            <AEFIHardeDiameter></AEFIHardeDiameter>
+            <AEFIIntialClassCode></AEFIIntialClassCode>
+            <AEFIIntialReportorgFromCode></AEFIIntialReportorgFromCode>
+            <AEFIMedDRACode></AEFIMedDRACode>
+            <AEFISeriousMarkCode></AEFISeriousMarkCode>
+            <AEFISwellDiameter></AEFISwellDiameter>
+            <AEFITemperature></AEFITemperature>
+            <AEFIThearProcess></AEFIThearProcess>
+            <AFPFinalDiagnosisCode></AFPFinalDiagnosisCode>
+            <AnatomicalSiteCode></AnatomicalSiteCode>
+            <AuditReportDate>2020-07-16</AuditReportDate>
+            <BsTransmissionCode></BsTransmissionCode>
+            <COPDDiagnoseEvidenceCode></COPDDiagnoseEvidenceCode>
+            <COPDDiagnoseEvidenceTypeCode></COPDDiagnoseEvidenceTypeCode>
+            <CaseTypeCode version="V1.0" value="">0</CaseTypeCode>
+            <CausalRelevanceDegreeCode></CausalRelevanceDegreeCode>
+            <ChildhoodTumorCode></ChildhoodTumorCode>
+            <ClassificationCode></ClassificationCode>
+            <ClinicalTNMStageMCode></ClinicalTNMStageMCode>
+            <ClinicalTNMStageNCode></ClinicalTNMStageNCode>
+            <ClinicalTNMStageTCode></ClinicalTNMStageTCode>
+            <ConductCode></ConductCode>
+            <ContactTypeCode></ContactTypeCode>
+            <DeadDate></DeadDate>
+            <DetectionOrgCode></DetectionOrgCode>
+            <DetectionPositiveDate></DetectionPositiveDate>
+            <DiagnoseOrgCode version="V1.0" value="成都市公共卫生临床医疗中心(成都市传染病医院、成都市结核病防治院)">510104008</DiagnoseOrgCode>
+            <DiagnoseTime>2020-07-16 15</DiagnoseTime>
+            <DiagnostiClassDate></DiagnostiClassDate>
+            <DiscoveryModeCode></DiscoveryModeCode>
+            <DiseaseCode version="V1.0" value="病原学阳性">A15.0</DiseaseCode>
+            <EmphysemaDiagnoseOrgCode></EmphysemaDiagnoseOrgCode>
+            <HospitalDiagnosisDescription></HospitalDiagnosisDescription>
+            <ID>199ca5c9-2bb1-496f-8f91-d61aa048879d</ID>
+            <InstitutionalLevelCode></InstitutionalLevelCode>
+            <MorphologicalCode></MorphologicalCode>
+            <MultiplePrimaryCode></MultiplePrimaryCode>
+            <NameReportingPhysician></NameReportingPhysician>
+            <NumberEpisodes></NumberEpisodes>
+            <OnsetDate></OnsetDate>
+            <PathologicalDiagnosisDescription></PathologicalDiagnosisDescription>
+            <PathologicalTNMStageMCode></PathologicalTNMStageMCode>
+            <PathologicalTNMStageNCode></PathologicalTNMStageNCode>
+            <PathologicalTNMStageTCode></PathologicalTNMStageTCode>
+            <PatientRegistrationNumber></PatientRegistrationNumber>
+            <PsychogenyDiseaseCode></PsychogenyDiseaseCode>
+            <PsychogenyFirstCureDate></PsychogenyFirstCureDate>
+            <PsychogenyInformedDate></PsychogenyInformedDate>
+            <PsychogenyInformedYn></PsychogenyInformedYn>
+            <PsychogenyPastHospital></PsychogenyPastHospital>
+            <PsychogenySendDiagnosisCode></PsychogenySendDiagnosisCode>
+            <ReportDate>2020-07-16</ReportDate>
+            <ReportORGTelPhone></ReportORGTelPhone>
+            <ReportOrgCode version="V1.0" value="成都市公共卫生临床医疗中心(成都市传染病医院、成都市结核病防治院)">510104008</ReportOrgCode>
+            <ReportZoneCode version="V1.0" value="锦江区">51010400</ReportZoneCode>
+            <ServerityCode></ServerityCode>
+            <SideCode></SideCode>
+            <UpdateReportDate></UpdateReportDate>
+            <UpdateReportOrgCode version="V1.0" value="成都市公共卫生临床医疗中心(成都市传染病医院、成都市结核病防治院)">510104008</UpdateReportOrgCode>
+            <UpdateReportZoneCode version="V1.0" value="成都市公共卫生临床医疗中心(成都市传染病医院、成都市结核病防治院)">510104008</UpdateReportZoneCode>
+            <VaccinationID></VaccinationID>
+        </DiseaseInfo>
+    </Body>
+</EDRDocument>
+

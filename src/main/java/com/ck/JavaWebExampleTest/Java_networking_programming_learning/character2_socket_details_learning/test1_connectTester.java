@@ -36,7 +36,9 @@ public class test1_connectTester {
             result = "failsure";
         }finally {
             try {
-                if (socket!=null)socket.close();
+                if (socket!=null){
+                    socket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

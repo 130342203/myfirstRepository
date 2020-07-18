@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <legend>搜索</legend>
+    <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">ServCode</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="servCode" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn layui-btn-sm" type="button" onclick="GridUtil.onSearch({target: '#dg'})">查 询</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            url: Constant.API_V1_PLUGINS + 'IC_SERV_LIST',
+            columns:[[
+                {field: "SERV_CODE", title: "SERV_CODE", width: 180},
+                {field: "CLASS_NAME", title: "所属类路径", width: 420 },
+                {field: "METHOD_NAME", title: "所属方法", width: 220 }
+            ]],
+            loadFilter : function(result){
+                return { total: result.data.IC_SERV_LIST.total, rows: result.data.IC_SERV_LIST.rows };
+            },
+            contextMenus:[],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {iconCls:'icon-reload', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+</script>
+</html>

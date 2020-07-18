@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .icon {
+            font-size: 17px;
+        }
+        .th_right{
+            text-align: right;
+        }
+    </style>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <title></title>
+</head>
+
+<body class="fixed-sidebar full-height-layout gray-bg" style="overflow:hidden; height: 100%;">
+<div>
+    <table style="width: 98%;margin-top: 50px;overflow: auto">
+        <tr>
+            <th style="width: 20%;" class="th_right">
+                撤销意见：
+            </th>
+            <td>
+                <textarea id="auditOpinion" name="auditOpinion" class="layui-textarea" style="width: 100%;height: 100px" placeholder="字数限制在200字以内" maxlength="200"></textarea>
+            </td>
+        </tr>
+<!--        <tr>-->
+<!--            <th class="th_right">-->
+<!--                附件：-->
+<!--            </th>-->
+<!--            <td>-->
+<!--                <input id="proveFile" name="proveFile"-->
+<!--                       data-options="buttonText:'选择文件', prompt:'请选择文件...'" style="height: 26px; width:100%">-->
+<!--            </td>-->
+<!--        </tr>-->
+    </table>
+    <div style="text-align: center;padding-top: 50px">
+        <button id="btn_submit" type="button" class="easyui-linkbutton" id="saveButton"
+                data-options="iconCls:'icon-table_save',toggle:true" onclick="Check('WX')">提交
+        </button>&nbsp;
+        &nbsp;
+        <button class="easyui-linkbutton" id="closeButton"  data-options="iconCls:'icon-page_cancel',toggle:true"
+                onclick="WinUtil.closeCurrDialog();">关 闭
+        </button>
+    </div>
+
+</div>
+</body>
+<script>
+    var PAGE_PARAM={};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        // EasyUI.initFilebox('#proveFile', {width: 250});
+    });
+
+    function Check() {
+        var formData = new FormData();
+        // var files = $('input[name=proveFile]').prop('files');
+        // if (files!=null && files.length == 1) {
+        //     formData.append("proveFile", files[0]);
+        // }
+        var url ="";
+        if (PAGE_PARAM.row==undefined){
+            formData.append("ids",PAGE_PARAM.ids);
+            url = "BACKOUT_MAINTAIN_EXPERIENCE_BATCH";
+        } else {
+            formData.append("id",PAGE_PARAM.row.ID);
+            url = "BACKOUT_MAINTAIN_EXPERIENCE";
+        }
+        formData.append("status","CX");
+        if ($('#auditOpinion').val()=="" || $('#auditOpinion').val()==undefined){
+            WinUtil.MsgError({content:"撤销意见必须填写！",time:2000});
+            return false;
+        }
+        formData.append("auditOpinion",$('#auditOpinion').val());
+        AjaxUtil.postFileReq({
+            url: Constant.API_V1_PLUGINS + url,
+            data: formData,
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                WinUtil.MsgInfo({content: result.msg});
+                PAGE_PARAM.OWindow.reloadDataGrid();
+                WinUtil.closeCurrDialog();
+
+            }
+        });
+    }
+
+
+</script>
+</html>
+
+

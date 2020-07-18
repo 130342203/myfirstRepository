@@ -1,0 +1,26 @@
+server:
+  port: 33555
+
+spring:
+  driverClassName:  "com.mysql.jdbc.Driver"
+#  localdb: "jdbc:mysql://127.0.0.1:3306/test"
+  localdb: "jdbc:mysql://127.0.0.1:3306/world"
+  userName: "root"
+  password: "Chen_245193"
+  initialSize: 5
+  maxIdle: 10
+  maxActive: 50
+  validationQuery: "select 1"
+  destdriverClassName: "com.mysql.jdbc.Driver"
+  destDb: "jdbc:mysql://127.0.0.1:3307/test2"
+  destuserName: "root"
+  destpassword: "chen12345"
+  destinitialSize: 5
+  destmaxIdle: 10
+  destmaxActive: 50
+  destvalidationQuery: "select 1"
+page-helper-config:
+    pageHelperPlugin: true
+
+load-path:
+

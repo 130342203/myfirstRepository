@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<div class="form_eui">
+    <fieldset class="fieldset_eui">
+        <legend data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.SYSTEM_BASIC_CONFIG">系统基础配置</legend>
+        <form class="layui-form layui-form-pane" ty="SYSTEM" style="margin-top: 2px;">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.COMPANY_NAME">公司名称</label>
+                    <div class="layui-input-inline" style="width: 220px">
+                        <input type="text" name="COMPANY_NAME" autocomplete="off" datatype="s4-80"
+                               errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.SYSTEM_NAME">系统名称</label>
+                    <div class="layui-input-inline" style="width: 220px">
+                        <input type="text" name="APP_NAME" autocomplete="off" datatype="s4-80"
+                               errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            <div>
+                <img id="logoImg" src="#" width="205" height="42" style="border: 1px solid #eee;">
+            </div>
+            <br/>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.SYSTEM_LOGO">系统logo</label>
+                    <div class="layui-input-inline" style="width: 220px">
+                        <input id="file" name="file" accept="image/png"
+                               data-options="buttonText:'选择文件', prompt:'请选择文件...'" style="height: 26px; width:100%">
+                    </div>
+                    <input class="layui-btn layui-btn-sm" type="submit" value="确定"
+                           data-i18n="[value]page:PAGE.COMM.SUBMIT"></input>
+                </div>
+            </div>
+        </form>
+    </fieldset>
+    <fieldset class="fieldset_eui">
+        <legend data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.SYSTEM_EMAIL_CONFIG">系统邮箱配置</legend>
+        <form class="layui-form layui-form-pane" ty="EMAIL" style="margin-top: 2px;">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label input-lg140">SMTP Server</label>
+                    <div class="layui-input-inline input-lg220">
+                        <input type="text" name="SMTP_SERVER" autocomplete="off" datatype="s4-80"
+                               errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label input-lg140">SMTP Port</label>
+                    <div class="layui-input-inline input-lg220">
+                        <input type="text" name="SMTP_PORT" autocomplete="off" datatype="n" errormsg="必须数值！"
+                               class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label input-lg140" data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.EMAIL_ADDRESS">邮箱账户</label>
+                    <div class="layui-input-inline input-lg220">
+                        <input type="text" name="EMAIL_ADDRESS" autocomplete="off" datatype="*4-80"
+                               errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label input-lg140"
+                           data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.EMAIL_PWD">账户密码</label>
+                    <div class="layui-input-inline input-lg220">
+                        <input type="text" name="EMAIL_PWD" autocomplete="off" datatype="*4-80"
+                               errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                    </div>
+                </div>
+                <input class="layui-btn layui-btn-sm" type="submit" value="确定"
+                       data-i18n="[value]page:PAGE.COMM.SUBMIT"></input>
+            </div>
+        </form>
+        <br/>
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label"
+                           data-i18n="page:PAGE.VIEW_IC_APP_CONFIG.TEST_EMAIL_ADDRESS">测试邮箱</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="testEmailAddress" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <input class="layui-btn layui-btn-sm" type="button" onclick="javascript: sendTestEmail();"
+                       data-i18n="[value]page:PAGE.VIEW_IC_APP_CONFIG.SEND_TEST_EMAIL" value="发送测试邮件"></input>
+            </div>
+        </form>
+    </fieldset>
+
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        EasyUI.initFilebox('#file', { width: 200 });
+
+        initForm('SYSTEM');
+        initForm('EMAIL');
+
+        renderSysConfigs();
+    });
+
+    function renderSysConfigs() {
+        var setInputValFunction = function ($zone, configs) {
+            $("input", $zone).each(function () {
+                var inputName = $(this).attr('name');
+                if (configs[inputName]) {
+                    $(this).val(configs[inputName]);
+                }
+            });
+        };
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_SYS_CONFIG_GET_DATA",
+            data: {},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var systemConfigs = result.data.IC_SYS_CONFIG_GET_DATA || [];
+                var configs = {};
+                $.each(systemConfigs, function (i, e) {
+                    var config_ = configs[e.type] || {};
+                    config_[e.confKey] = e.confValue;
+                    configs[e.type] = config_;
+                });
+                WinUtil.setStorageItem("_SYSTEM_CONFIG_", configs || {});
+
+                var $systemConfig = $("form[ty=SYSTEM]");
+                setInputValFunction($systemConfig, configs['SYSTEM']);
+                var imgData = configs['SYSTEM'].APP_LOGO;
+                var logoSrc = imgData ? ("data:image/png;base64," + imgData) : "/topjui/image/logo.png";
+                $('#logoImg').attr('src', logoSrc);
+                top.reloadLogoImg(imgData);
+
+                var $emailConfig = $("form[ty=EMAIL]");
+                setInputValFunction($emailConfig, configs['EMAIL']);
+            }
+        });
+    }
+
+    function initForm(ty) {
+        if ('SYSTEM' == ty) {
+            FuncUtil.initValidform({
+                target: 'form[ty=' + ty + ']',
+                beforeSubmit: function (curform) {
+                    var files = $('input[name=file]').prop('files');
+                    var formData = new FormData();
+                    formData.append("type", ty);
+
+                    var data = curform.serializeObject();
+                    var configs = [];
+                    $.each(data, function (k, v) {
+                        configs.push({confKey: k, confValue: v, type: ty});
+                    });
+                    formData.append("configs", FuncUtil.encodelg_(JSON.stringify(configs)));
+                    if (files.length == 1) {
+                        formData.append("file", files[0]);
+                    }
+                    AjaxUtil.postFileReq({
+                        url: Constant.API_V1_PLUGINS + "IC_SYS_CONFIG_UPDATE",
+                        data: formData,
+                        success: function (result) {
+                            if (!FuncUtil.checkResult(result)) {
+                                return;
+                            }
+                            if (files.length == 1) {
+                                renderSysConfigs();
+                            }
+                            WinUtil.MsgInfo({content: result.msg});
+                        }
+                    });
+                    return false;
+                }
+            });
+        } else {
+            FuncUtil.initValidform({
+                target: 'form[ty=' + ty + ']',
+                beforeSubmit: function (curform) {
+                    var data = [];
+                    var formData = curform.serializeObject();
+                    $.each(formData, function (k, v) {
+                        data.push({confKey: k, confValue: v, type: ty});
+                    });
+                    doAjaxSettingConfig(ty, FuncUtil.encodelg_(JSON.stringify(data)));
+                    return false;
+                }
+            });
+        }
+    }
+
+    function doAjaxSettingConfig(type, configs) {
+        AjaxUtil.post({
+            url: Constant.API_V1_PLUGINS + "IC_SYS_CONFIG_UPDATE",
+            data: {type: type, configs: configs},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                WinUtil.MsgInfo({content: result.msg});
+            }
+        });
+    }
+
+    function initUserAvatar() {
+        var account = WinUtil.getLoginAccount();
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_ATTACH_GET",
+            data: {sourceId: account.accountId, category: "USER_AVATAR"},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var userAvatar = result.data.IC_GET_ATTACHMENT[0]
+                var imgSrc = "/topjui/image/avatar.png";
+                if (userAvatar) {
+                    PAGE_PARAM.USER_AVATAR_ATTACH_ID = userAvatar.pkid;
+                    imgSrc = Constant.API_V1_PLUGINS + 'IC_ATTACH_DOWN' + '?attachId=' + userAvatar.pkid;
+                }
+                $('#imgAvatar').html("<img src='" + imgSrc + "' class='user-image' style='width: 50px; height: 50px;'/>");
+            }
+        });
+    }
+
+    function showWinImgAvatarUpload() {
+        var account = WinUtil.getLoginAccount();
+        WinUtil.showTopDialog({
+            title: $.tl('page:PAGE.VIEW_IC_APP_CONFIG.UPLOAD_AVATAR', "上传头像"),
+            width: 650, height: 480,
+            param: {
+                CATEGORY: 'APP_LOGO',
+                SOURCE_ID: "APP",
+                ALLOW_TYPE: 'images',
+                IS_MULTIPLE: false,
+                MAX_UPLOAD_SIZE_KB: 200,
+                ALLOW_DRAG: false,
+                SUCCESS_CALLBACK: function (result) {
+                    initUserAvatar();
+                }
+            },
+            url: ICViews.IC_FILE_UPLOAD
+        });
+    }
+
+    function sendTestEmail() {
+        var testEmail = $('#testEmailAddress').val();
+        if (!($.trim(testEmail) != '' && /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/.test(testEmail))) {
+            WinUtil.MsgError({content: $.tl('page:PAGE.VIEW_IC_APP_CONFIG.EMAIL_ADDRESS_INCORRECT', "请正确填写邮箱地址!")});
+            return;
+        }
+        AjaxUtil.post({
+            url: Constant.API_V1_PLUGINS + "IC_SYS_CONFIG_SEND_MAIL_TEST",
+            data: {testEmail: testEmail},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                WinUtil.MsgInfo({content: result.msg});
+            }
+        });
+
+    }
+
+</script>
+</html>

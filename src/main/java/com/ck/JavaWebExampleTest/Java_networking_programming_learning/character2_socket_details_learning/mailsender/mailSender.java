@@ -24,16 +24,17 @@ public class mailSender {
             content =args[3];
         }else {
             System.out.println("运行程序时，请依次输入发送人邮箱，密码，收件人邮箱,邮件内容");
-           /* user = "1203796151@qq.com";
-            password="ck2451930";*/
-           System.exit(0);
+            user = "1203796151@qq.com";
+//            password="ck2451930";
+            password="nkwdwlkdijtwibgd";
+//           System.exit(0);
         }
-        message msg = new message(user,
+        /*message msg = new message(user,
                 toUser,
                 "testEmail",
-                content);
+                content);*/
+        message msg = new message("1203796151@qq.com","chenkun@bireturn.com","testEmail","邮件协议测试");
         new mailSender().sendEmail(msg,user,password);
-        //message msg = new message("1203796151@qq.com","chenkun@bireturn.com","testEmail","邮件协议测试");
     }
 
     private BufferedReader getReader(Socket socket) throws IOException {

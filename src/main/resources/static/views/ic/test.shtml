@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script type="text/javascript" src="/res/plugins/datagrid-view/datagrid-detailview.js"></script>
+    <style type="text/css">
+        .up{
+           padding:5px;
+        }
+    </style>
+</head>
+<body>
+    <p class="up"><input id="cc" name="dddd"/>&nbsp;&nbsp;&nbsp;<input type="button" value="getValue" class="layui-btn layui-btn-sm bilingual" onclick="getCrval()"></p>
+    <!--<h3>DataGrid - DetailView</h3>-->
+    <table id="tt"></table>
+    <div style="margin-top: 10px;">
+        <input type="text" name="page" id="page" class="layui-input input-lg200" style="display: inline-block;margin-left:5px;"/>
+        <input type="text" name="pageName" id="pageName"  class="layui-input input-lg200" style="display: inline-block"/>
+        <button onclick="csi18n();" class="layui-btn layui-btn-sm bilingual" type="button">解析18n</button>
+        <br>
+        <textarea id="pageTarget" style="width: 800px; height: 320px;margin:5px;"></textarea>
+    </div>
+    <br/>
+    <div style="margin-left:5px;margin-bottom:20px;">
+        <table>
+            <tr>
+                <td><div id="dl1" style="width:200px;height:200px;"></div></td>
+                <td>
+                    <button id="dl_add" class="easyui-linkbutton" style="width:50px;margin:5px;">>|</button><br />
+                    <button id="dl_add_all" class="easyui-linkbutton" style="width:50px;margin:5px;">>>|</button><br />
+                    <button id="dl_remove_all" class="easyui-linkbutton" style="width:50px;margin:5px;">|<<</button><br />
+                    <button id="dl_remove" class="easyui-linkbutton" style="width:50px;margin:5px;">|<</button>
+                </td>
+                <td><div id="dl2" style="height:200px;width:200px;"></div></td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script>
+    $(function () {
+        /*AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "TS_TEST01",
+            data: {pkid: PAGE_PARAM.row.PKID},
+            success: function (result) {
+
+            }
+        });*/
+        EasyUI.initCombotree('#cc', {
+            editable: true, width: 380, height: 26,
+            panelHeight:300,panelWidth:300,
+            url: Constant.API_V1_PLUGINS + "ORGAN_TRIPARTITE",
+            loadFilter : function(result){
+                var tdata_ = EasyUITool.WarpTreeData(result.data.ORGAN_TRIPARTITE, ["PKID", "PID"], function (tdata) {
+                    return {
+                        id: tdata.PKID,
+                        text: tdata.NAME,
+                        type: tdata.TYPE,
+                        checked: false,
+                        state: 'open'
+                    };
+                }, "0");
+                return tdata_;
+            }
+        });
+
+        datagrid_view();
+
+        var dt = [];
+        for(var i =0; i< 23; i++){
+            dt.push({text: 'a'+i, value: 'a' + i});
+        }
+
+        $('#dl1').datalist({
+            lines:false,
+            checkbox: true,
+            singleSelect:false,
+            data: dt
+        });
+        $('#dl2').datalist({
+            lines:false,
+            checkbox: true,
+            singleSelect:false
+        });
+
+        //移动按钮  
+        $("#dl_add").click(function () {
+            var rows = $("#dl1").datalist("getSelections");
+            $(rows).each(function(i){
+                var value = rows[i].value;
+                var text = rows[i].text;
+                var row = {
+                    value:value,
+                    text:text
+                };
+                $("#dl2").datalist("insertRow",{index:0,row:row});
+                var rowIndex = $("#dl1").datalist("getRowIndex", rows[i]);
+                $("#dl1").datalist("deleteRow",rowIndex);
+            });
+            $("#dl2").datalist("loadData", $("#dl2").datalist('getRows'));
+        });
+        //移动按钮  
+        $("#dl_add_all").click(function () {
+            var data = $("#dl1").datalist("getData");
+            var rows = data.rows;
+            var rowsLength = rows.length;
+            var indexArray = new Array();
+            for (var i = 0; i < rowsLength; i++){
+                var value = rows[i].value;
+                var text = rows[i].text;
+                var row = {
+                    value:value,
+                    text:text
+                };
+                $("#dl2").datalist("appendRow",row);
+            }
+            var rows = $("#dl1").datalist('getRows');
+            for(var i=rows.length-1;i>=0;i--){
+                $("#dl1").datalist("deleteRow",i);
+            }
+            $("#dl2").datalist("reload");
+        });
+        $("#dl_remove").click(function () {
+            var rows = $("#dl2").datalist("getSelections");
+            var rowArray = new Array();
+            $(rows).each(function(i){
+                var value = rows[i].value;
+                var text = rows[i].text;
+                var row = {
+                    value:value,
+                    text:text
+                }; 
+                $("#dl1").datalist("insertRow",{index:0,row:row});//作为第一条
+                var rowIndex = $("#dl2").datalist("getRowIndex", rows[i]);
+                $("#dl2").datalist("deleteRow",rowIndex);
+            });
+            //移动完后重新加载dl1,否则显示不正常  
+            $("#dl1").datalist("loadData",$("#dl1").datalist('getRows'));
+
+        });
+        $("#dl_remove_all").click(function () {
+            var data = $("#dl2").datalist("getData");
+            var rows = data.rows;
+            var rowsLength = rows.length;
+            var indexArray = new Array();
+            for (var i = 0; i < rowsLength; i++){
+                var value = rows[i].value;
+                var text = rows[i].text;
+                var row = {
+                    value:value,
+                    text:text
+                };
+                //添加  
+                $("#dl1").datalist("appendRow",row);
+            }
+            //删除  
+            var rows = $("#dl2").datalist('getRows');
+            for(var i=rows.length-1;i>=0;i--){
+                $("#dl2").datalist("deleteRow",i);
+            } 
+            $("#dl1").datalist("reload");
+        });
+    });
+
+    function getCrval() {
+       var node = $('#cc').combotree('tree').tree('getSelected');
+        var v = $('#cc').combotree('getValue');
+        var t = $('#cc').combotree('getText');
+        alert(v + "----" + t + "--" +node.type);
+    }
+
+    function datagrid_view() {
+        $('#tt').datagrid({
+            title:'DataGrid - DetailView',
+            width:'100%',
+            height:480,
+            remoteSort:false,
+            singleSelect:true,
+            nowrap:false,
+            fitColumns:true, method: 'get',
+            url:'/res/plugins/datagrid-view/datagrid_data.json',
+            columns:[[
+                {field:'itemid',title:'Item ID',width:80},
+                {field:'productid',title:'Product ID',width:100,sortable:true},
+                {field:'listprice',title:'List Price',width:80,align:'right',sortable:true},
+                {field:'unitcost',title:'Unit Cost',width:80,align:'right',sortable:true},
+                {field:'attr1',title:'Attribute',width:150,sortable:true},
+                {field:'status',title:'Status',width:60,align:'center'}
+            ]],
+            view: detailview,
+            detailFormatter: function(rowIndex, rowData){
+                //_detailDG属性用于绑定，注意同一个页面 多个datagrid，要更改属性名称用于区分
+                return '<table _detailDG id="dg_'+rowData.itemid+'"></table>';
+                /*return '<table><tr>' +
+                    '<td rowspan=2 style="border:0"><img src="images/' + rowData.itemid + '.png" style="height:50px;"></td>' +
+                    '<td style="border:0">' +
+                    '<p>Attribute: ' + rowData.attr1 + '</p>' +
+                    '<p>Status: ' + rowData.status + '</p>' +
+                    '</td>' +
+                    '</tr></table>';*/
+            },
+            onExpandRow: function (index, row) {
+                console.log(index);
+                console.log(row);
+                $('#dg_'+ row.itemid).datagrid('resize');
+            },
+            onLoadSuccess:function () {
+                $('table[_detailDG]').each(function () {console.log('9kkk')
+                    // $("#dg").MyDataGrid({
+                    //这里初始化后，height会计算为0，此问题使用onExpandRow时，resize重置大小
+                    $(this).datagrid({
+                        width:800,
+                        height:280,
+                        fitColumns:true, method: 'get',
+                        url:'/res/plugins/datagrid-view/datagrid_data.json',
+                        columns:[[
+                            {field:'productid',title:'Product ID',width:100,sortable:true},
+                            {field:'listprice',title:'List Price',width:80,align:'right',sortable:true},
+                            {field:'unitcost',title:'Unit Cost',width:80,align:'right',sortable:true},
+                        ]]
+                    });
+
+                });
+            }
+        });
+    }
+
+    function csi18n() {
+        if($.trim($('#page').val()) == '' || $.trim($('#pageName').val()) == ''){
+            alert('填写！');
+            return;
+        }
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "TS_I18N_GEN",
+            data: {page: $('#page').val(), pageName: $('#pageName').val() },
+            success: function (result) {
+                $('#pageTarget').val(result.data.TS_I18N_GEN);
+            }
+        });
+    }
+</script>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2">
+                <tr>
+                    <!--<th style="width: 80px;" align="right">菜单编码：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="menuCode" id="menuCode" />
+                    </td>-->
+                    <th style="width: 80px;" align="right">菜单名称：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="menuName" id="menuName" />
+                    </td>
+                    <td colspan="2">
+                        &nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>模糊</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="clearBtn" onclick="onClear_()"><span>精准</span></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    function InitDataGrid() {
+        $("#dg").MyTreeGrid({
+            title: '菜单列表',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            custom: {
+                code: API_IC_CODE.IC_MENU_MAINTAIN_LIST,
+                alter: {
+                    'STATE': {
+                        formatter: function (value, row, index) {
+                            var cl = value == '0' ? '启用' : '<span style="color: red;">未启用</span>';
+                            return cl;
+                        }
+                    }
+                }
+            },
+            idField: 'PKID',
+            treeField: 'MENU_NAME', firstLoad: true,
+            pagination: false,
+            loadFilter: function (result, parentId) {
+                return EasyUITool.WarpTreeData(result.data.IC_MENU_MAINTAIN_LIST, ['PKID', 'PID'], function (tdata) {
+                    return tdata;
+                }, '0');
+            },
+            contextMenus: [
+                {
+                    text: "编辑",
+                    onclick: function () {
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title: "菜单-编辑",
+                            width: 750, height: 370,
+                            param: {PKID: row.PKID},
+                            url: Constant.VIEWS_IC + "/menu/ic_menu_maintain_update.shtml"
+                        });
+                    }
+                },
+                {
+                    text: "删除",
+                    onclick: function () {
+                        $.messager.confirm('确认窗口',
+                            '你确定要删除此项吗?', function (r) {
+                                if (r) {
+                                    var row = $('#dg').datagrid('getSelected');
+                                    AjaxUtil.postReq({
+                                        url: Constant.API_V1_PLUGINS + "IC_MENU_DELETE",
+                                        data: {pkid: row.PKID},
+                                        success: function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            reloadDataGrid();
+                                            WinUtil.MsgInfo({content: result.msg});
+                                        }
+                                    });
+                                }
+                            });
+
+                    }
+                }
+            ],
+            validAuthContextMenu: function (row, items) {
+                return items;
+            },
+            toolbar: [
+                {
+                    iconCls: 'icon-table_add', text: '新增', auth: "FUNC:IC_MENU_ADD",
+                    handler: function () {
+                        WinUtil.showDialog({
+                            title: "菜单-增加",
+                            width: 750, height: 400,
+                            param: {},
+                            url: Constant.VIEWS_IC + "/menu/ic_menu_maintain_update.shtml"
+                        });
+                    }
+                }, '-',
+                {
+                    iconCls: 'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").treegrid('reload');
+    }
+</script>
+</html>

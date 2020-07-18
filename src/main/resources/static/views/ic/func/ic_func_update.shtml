@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<style type="text/css">
+    .textarea{
+        width: 360px; height: 90px;
+        overflow: scroll;
+    }
+</style>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">功能代码</label>
+                <div class="layui-input-inline">
+                    <input type="hidden" id="ordFuncCode" name="ordFuncCode" value="" />
+                    <input type="text" name="funcCode" autocomplete="off" datatype="s4-80" errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">功能名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="funcName" autocomplete="off" datatype="*1-180" errormsg="最多180个字符！" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">返回值类型</label>
+            <div class="layui-input-block">
+                <select id="returnType" name="returnType" datatype="easyui_combo" errormsg="请选择！">
+                    <option value="">请选择</option>
+                    <option value="json" selected>JSON</option>
+                    <option value="xml">XML</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">所属组名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="groupName" datatype="*1-180" errormsg="最多180个字符！" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否返回值</label>
+            <div class="layui-input-pane">
+                <input type="checkbox" name="isfResult" lay-skin="primary" checked value="Y">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">锁定功能：</label>
+                <div class="layui-input-inline">
+                    <div style="width: 400px;">
+                        <div id="lock_ul" class="textarea layui-input" style="float: left;"></div>
+                        <div style="float: left;">
+                        <input onclick="showWinFuncSelect();" type="button" value="选择"></input>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <input class="layui-btn layui-btn-sm" type="submit" value="提 交"></input>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    var EXTRA_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.FUNC_CODE ? true : false;
+        $('#ordFuncCode').val(PAGE_PARAM.FUNC_CODE);
+        EXTRA_PARAM.LOCK_FUNC_CODES = []
+
+        EasyUI.initCombobox('#returnType', {});
+
+        if(PAGE_PARAM.IS_EDIT){
+            AjaxUtil.postReq({
+                url: Constant.API_V1_PLUGINS + "IC_FUNC_GET",
+                data: {funcCode: PAGE_PARAM.FUNC_CODE },
+                success: function (result) {
+                    if(!FuncUtil.checkResult(result)){
+                        return;
+                    }
+                    var func = result.data.IC_FUNC_GET.function;
+                    FuncUtil.parseForm(func);
+                    var lockConfigs = result.data.IC_FUNC_GET.lockConfigs;
+                    var con = "", codes = [];
+                    $.each(lockConfigs, function(i, e){
+                        codes.push(e.LOCK_CODE);
+                        con += e.LOCK_CODE + "/" + e.LOCK_FCNAME + '<br/>';
+                    });
+                    $('#lock_ul').html(con);
+                    EXTRA_PARAM.LOCK_FUNC_CODES = codes;
+                }
+            });
+        }
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.lockCodes = FuncUtil.encodelg_(JSON.stringify(EXTRA_PARAM.LOCK_FUNC_CODES));
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + (PAGE_PARAM.IS_EDIT ?  "IC_FUNC_UPDATE" : "IC_FUNC_ADD"),
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadLeftDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+    
+    function showWinFuncSelect() {
+        WinUtil.showTopDialog({
+            title : "功能选择",
+            width: 750, height : 370,
+            param: {
+                FUNC_CODE: "IC_SELECT_FUNC_LIST",
+                MULTI_SELECT: true, DEFAULT_VALUE: EXTRA_PARAM.LOCK_FUNC_CODES,
+                SELECTED_CALL : function (selectData) {
+                    var con = "", codes = [];
+                    $.each(selectData, function(i, e){
+                        codes.push(e.FUNC_CODE);
+                        con += e.FUNC_CODE + "/" + e.FUNC_NAME + '<br/>';
+                    });
+                    $('#lock_ul').html(con);
+                    EXTRA_PARAM.LOCK_FUNC_CODES = codes;
+                }
+            },
+            url: ICViews.IC_SELECT_LIST
+        });
+    }
+
+
+</script>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<div class="form_eui">
+    <div id="tabs" class="easyui-tabs">
+        <div title="ԭ�����޸�" data-i18n="[title]page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.ORD_PWD_TITLE" style="padding:2px;">
+            <form id="mform1" class="layui-form layui-form-pane" style="margin-top: 2px;" >
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.ACCOUNT_NUMBER">�û��˺�</label>
+                        <div class="layui-input-inline">
+                            <div id="account" class="layui-input textmiddle"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.ORD_PWD">ԭ����</label>
+                        <div class="layui-input-inline">
+                            <input type="password" id="ordPwd" name="ordPwd" autocomplete="off" datatype="*" errormsg="����4���ַ�,���80���ַ���" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.NEW_PWD">������</label>
+                        <div class="layui-input-inline">
+                            <!--datatype="s4-80"-->
+                            <input type="password" id="newPwd" name="newPwd" autocomplete="off" datatype="pwdreg" errormsg="����6λ����������1����д��ĸ,1��Сд��ĸ,1������,1�������ַ���" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.CONFIRM_PWD">ȷ������</label>
+                        <div class="layui-input-inline">
+                            <!--datatype="s4-80,chkpwd2"-->
+                            <input type="password" id="newPwd2" name="newPwd2" autocomplete="off" datatype="pwdreg,chkpwd2" errormsg="����6λ����������1����д��ĸ,1��Сд��ĸ,1������,1�������ַ���" class="layui-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label-blank"></label>
+                    <div class="layui-input-block">
+                        <input class="layui-btn layui-btn-sm" type="submit" value="�� ��" data-i18n="[value]page:PAGE.COMM.SUBMIT"></input>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!--<div title="����ԭ����" data-i18n="[title]page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.FORGET_PWD_TITLE" style="padding:2px;">
+            <form id="mform2" class="layui-form layui-form-pane" style="margin-top: 2px;" >
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.ACCOUNT_NUMBER">�û��˺�</label>
+                        <div class="layui-input-inline">
+                            <div id="account2" class="layui-input textmiddle"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.ACCOUNT_EMAIL">�û�����</label>
+                        <div class="layui-input-inline" style="width: 380px">
+                            <div id="email" class="layui-input input-lg textmiddle"></div>
+                            <span style="color: #666;" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_MODIFY_PWD.EMAIL_MODIFY_TIP">* ϵͳ�������޸��������ӵ��������䣬����պ���ʾ������</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label-blank"></label>
+                    <div class="layui-input-block">
+                        <input class="layui-btn layui-btn-sm" type="submit" value="�� ��" data-i18n="[value]page:PAGE.COMM.SUBMIT"></input>
+                    </div>
+                </div>
+            </form>
+        </div>-->
+    </div>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        $('#account,#account2').html(PAGE_PARAM.ACCOUNT_NUMBER);
+        $('#email').html(PAGE_PARAM.EMAIL);
+
+        //$('#tabs').tabs('disableTab', 1);
+        InitValidform();
+        //InitValidform2();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '#mform1',
+            datatype:{
+                pwdreg : /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*?]).*$/,
+                chkpwd2:function (gets) {
+                    if($('#newPwd').val() != gets){
+                        return $.tl('page:PAGE.VIEW_IC_ACCOUNT_EMAIL_MODIFY_PWD.RESET_PWD_ATYPISM',"�������벻һ��!");
+                    }
+                    return true;
+                }
+            },
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.accountId = PAGE_PARAM.ACCOUNT_ID;
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_ORG_MODIFY_PWD",
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function InitValidform2() {
+        FuncUtil.initValidform({
+            target: '#mform2',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.accountId = PAGE_PARAM.ACCOUNT_ID;
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_EMAIL_MODIFY_PWD",
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+</script>
+</html>

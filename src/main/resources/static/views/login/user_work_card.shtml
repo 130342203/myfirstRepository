@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link href="/js/plugins/codemirror/lib/codemirror.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/lib/codemirror.js"></script>
+    <link href="/js/plugins/codemirror/theme/erlang-dark.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/mode/sql/sql.js"></script>
+    <script src="/js/plugins/codemirror/mode/xml/xml.js"></script>
+    <link rel="stylesheet" href="/js/plugins/codemirror/addon/hint/show-hint.css" />
+    <script src="/js/plugins/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/js/plugins/codemirror/addon/hint/sql-hint.js"></script>
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <script src="/js/plugins/my_upload_view.js"></script>
+    <script src="/js/plugins/my_easyui_multistage_combox.js"></script>
+    <script src="/js/canvas2image.js"></script>
+    <script src="/js/html2canvas.js"></script>
+    <script src="/js/jquery.qrcode.min.js"></script>
+
+
+</head>
+<style type="text/css">
+    /** {*/
+        /*margin: 0;*/
+        /*padding: 0;*/
+        /*font-size: 14px;*/
+    /*}*/
+
+
+    .left {
+        float: left;
+    }
+    .right {
+        float: right;
+        /*padding:0px 20px;*/
+    }
+    .picture1{
+        background:#F5F5DC;
+        padding:20px 20px;
+        border:1px solid #000
+        /*ackground:url(图片路径) no-repeat 4px 5px*/
+    }
+    .picture2{
+        background:#F5F5DC;
+        padding:20px 20px;
+        border:1px solid #000
+        /*ackground:url(图片路径) no-repeat 4px 5px*/
+    }
+    .mytable {
+        padding: 0;
+        margin: 0; font-size: 12px;
+        /*border-collapse: collapse;*/
+        width: 100%;
+    }
+    .logo img {
+        width: 120px;
+        margin-left: 50px;
+        float:left;
+    }
+    table{
+        border:1px;
+        border-collapse:separate;
+        border-spacing:10px 18px;
+    }
+
+    input {
+        outline:none;
+        background:transparent;
+        border:none;
+        outline:medium;
+    }
+    *:focus {
+        outline: none;
+        background-color: transparent;
+    }
+    ::selection{background:transparent; }
+    ::-moz-selection{background:transparent; }
+
+    /*table {*/
+        /*border:1px;*/
+        /*border-spacing:10px;*/
+    /*}*/
+
+    /*table td, table th {*/
+        /*border: 1px;*/
+    /*}*/
+
+    /*table thead th {*/
+        /*background-color: #CCE8EB;*/
+        /*width: 100px;*/
+    /*}*/
+
+
+
+
+</style>
+<body>
+<div  style="padding:10px 10px;">
+    <a id="tttt"></a>
+    <div id="codes">
+        <div class="picture1">
+            <form style='height: 200PX;' >
+
+                <div class="clear">
+                    <div class="left">
+                        <div class="logo"><img src="/img/caacLogo.png" > </div>
+                        <table>
+                            <tr>
+                                <td> 执照编号: </td><td><input id="duty" name="duty"></td>
+                            </tr>
+                            <tr>
+                                <td> 姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名: </td><td><input  id="realName" name="realName"></td>
+                            </tr>
+                            <tr>
+                                <td> 性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别: </td><td><input  name="sex" id="sex"></td>
+                            </tr>
+                            <tr>
+                                <td> 所属单位: </td><td><input  id="companyName" name="companyName">
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="right">
+                        <tr>
+                            <div class="person" id="headPhotoPicture"> </div>
+                        </tr>
+                        &nbsp;
+                        <tr>
+                            <div id="qrcode"></div>
+                        </tr>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+        &nbsp;
+        <div class="picture2">
+            <form  style='height: 200PX;' >
+                <div>背面信息待定</div>
+            </form>
+        </div>
+
+
+
+    </div>
+</div>
+<!-- 存放截图 -->
+<img id="screenShotImg">
+<div class="btn">点击生成&下载</div>
+</body>
+<script>
+    var editor;
+    var PAGE_PARAM = {};
+
+    var UIV_uploadPhoto;
+
+    $(function () {
+        //图片生成保存
+        document.querySelector('.btn').onclick = function(){
+            html2canvas(document.querySelector("#codes")).then(function (canvas) {
+                var base64Url = canvas.toDataURL('image/png');
+                var triggerDownload = $("#tttt").attr("href", base64Url).attr("download", "工牌.png");
+                triggerDownload[0].click();
+
+            });
+        }
+        jQuery('#qrcode').qrcode({width: 80,height: 80,text: "http://www.baidu.com"});
+
+
+        PAGE_PARAM = WinUtil.getDialogParam();
+
+        getBsuser(PAGE_PARAM.row.ID);
+    });
+
+    function submitForm(){
+        // 测试图片信息
+        if(UIV_uploadPhoto){
+            var file = UIV_uploadPhoto.getFile();
+            console.log(file);
+        }
+    }
+
+    function getBsuser(ID){
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "BS_USER_SELECT_BY_ID",
+            data: {id: ID},
+            success: function (result) {
+                var data = result.data[result.reqCode][0];
+                FuncUtil.parseForm(ToolUtil.toCamelCase(data), null, 'sex');
+                console.log(data);
+                if(data.SEX=='1'){
+                    $('input[name="sex"]').val("男");
+                }else{
+                    $('input[name="sex"]').val("女");
+                }
+
+                var a = data.ADDRESS_PROVINCE? data.ADDRESS_PROVINCE:'';
+                var b = data.ADDRESS_CITY?data.ADDRESS_CITY:'';
+                var c = data.ADDRESS_AREA?data.ADDRESS_AREA:'';
+                $("body").MyEasyUIMultistageCombox({
+                    url: Constant.API_V1_PLUGINS + "IC_SYS_AREA_SELECT",
+                    level : [
+                        {__id: 'addressProvince', __def_value: a}, //国家
+                        {__id: 'addressCity', __def_value: b }, //城市
+                        {__id: 'addressArea', __def_value: c } //乡镇
+                    ]
+                });
+                var file_1 = data.headPhotoPicture ;
+                var file_2 = data.educationCredentialPicture;
+                var file_3 = data.idCardFrontPicture ;
+                var file_4 = data.idCardReversePicture ;
+                var file_5 = data.idCardHoldPicture ;
+                if(file_1!=undefined){
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture', imgWidth: 80, imgHeight: 100,defImgSrc:Constant.IC_ATTACH_DOWN_CODES+file_1
+                    });
+                }else{
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture', imgWidth: 80, imgHeight: 80
+                    });
+                }
+            }
+        });
+    }
+
+
+</script>
+</html>

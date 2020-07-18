@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+    <fieldset class="fieldset_eui">
+        <form id="ffSearch" method="post">
+            <div id="searchBar">
+                <table cellspacing="0" cellpadding="2">
+                    <tr>
+                        <th style="width: 80px;" align="right">字典编码：</th>
+                        <td style="width:110px">
+                            <input class="easyui-textbox" name="dictCode" id="dictCode" />
+                        </td>
+                        <th style="width: 80px;" align="right">字典名称：</th>
+                        <td style="width:110px">
+                            <input class="easyui-textbox" name="dictName" id="dictName" />
+                        </td>
+                        <td colspan="2">
+                            &nbsp;&nbsp;
+                            <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>模糊</span></a>&nbsp;&nbsp;
+                            <a href="javascript:void(0)" class="clearBtn" onclick="onClear_()"><span>精准</span></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    var $dg = $("#dg");
+    function InitDataGrid() {
+        $dg.MyDataGrid({
+            title: '数据字典列表',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            queryParams : {}, firstLoad: true,
+            custom: {
+                code : API_IC_CODE.IC_DATA_DICT_LIST,
+                alter: {}
+            },
+            loadFilter : function(result){
+                var data = result.data[result.reqCode];
+                return { total: data.total, rows: data.rows };
+            },
+            contextMenus:[
+                {id: "m-edit", text :"编辑", auth:"",
+                    onclick: function(){
+                        var row = $dg.datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : "编辑",
+                            width: 850, height : 480,
+                            param: row,
+                            url: Constant.VIEWS_IC + "/datadict/ic_datadict_update.shtml"
+                        });
+                    }
+                },
+                {text : "删除", auth:"",
+                    onclick: function(){
+                        $.messager.confirm(('确认窗口'),
+                            ('你确定要删除此项吗？'), function(r){
+                                if (r){
+                                    var row = $dg.datagrid('getSelected');
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "IC_DATA_DICT_DEL",
+                                        data: row,
+                                        success : function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            $dg.datagrid('reload');
+                                            WinUtil.MsgInfo({ content: result.msg });
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                }
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {text : "增加", iconCls:'icon-table_add', auth:"",
+                    handler: function(){
+                        WinUtil.showDialog({
+                            title : "新增-数据字典",
+                            width: 850, height : 480,
+                            param: {},
+                            url: Constant.VIEWS_IC + "/datadict/ic_datadict_update.shtml"
+                        });
+                    }
+                }, '-',
+                {
+                    iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        $dg.datagrid('reload');
+                    }
+                },'-',
+                {
+                    iconCls:'icon-page_cancel', text: '清除缓存',
+                    handler:function(){
+                        AjaxUtil.post({
+                            url: Constant.API_V1_PLUGINS + "IC_DATA_DICT_CLEAR_CACHE",
+                            data: {},
+                            success : function (result) {
+                                if (!FuncUtil.checkResult(result)) {
+                                    return;
+                                }
+                                WinUtil.MsgInfo({ content: result.msg });
+                            }
+                        });
+                    }
+                },'-',
+                {
+                    iconCls:'icon-page_excel',text:'导出',
+                    handler:function(){
+                        GridUtil.dgExportExcel($dg, "数据字典列表");
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $dg.datagrid('reload');
+    }
+
+</script>
+</html>

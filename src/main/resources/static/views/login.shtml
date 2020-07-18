@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 浏览器标签图片 -->
+    <link rel="shortcut icon" href="/views/favicon.ico"/>
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="/css/bootstrap.min14ed.css?v=3.3.6" rel="stylesheet">
+    <link href="/css/font-awesome.min93e3.css" rel="stylesheet">
+    <link href="/css/animate.min.css" rel="stylesheet">
+    <link href="/css/style.min862f.css?v=4.1.0" rel="stylesheet">
+    <link rel="stylesheet" href="/css/plugins/easyui/themes/icon.css">
+    <link rel="stylesheet" href="/css/plugins/easyui/themes/color.css">
+    <link rel="stylesheet" href="/css/newMain.css">
+    <link rel="stylesheet" href="/font-awesome-4.7.0/css/font-awesome.min.css">
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <!-- jQuery相关引用 -->
+    <script type="text/javascript" src="/js/jquery-1.12.0.min.js"></script>
+    <script type="text/javascript" src="/js/plugins/easyui/jquery.easyui.min.js"></script>
+
+    <title></title>
+    <style>
+        body {
+            background: url("../img/aogLoginBack.png") no-repeat center center;
+            background-size: cover;
+        }
+
+        .write {
+            font-family: "微软雅黑";
+            color: #fff;
+            position: relative;
+            letter-spacing: 14px;
+            font-size: 36px;
+            text-align: center;
+        }
+
+        .box {
+            width: 360px;
+            height: 240px;
+            position: absolute;
+            top: 30%;
+            right: 15%;
+            padding-top: 0;
+        }
+
+        #mform {
+            background: #fff;
+            border-radius: 5px;
+            margin-top: 0;
+            height: 180px;
+        }
+
+        .p {
+            width: 260px;
+            text-align: left;
+            margin-left: 0;
+            line-height: 20px;
+            color: #006dcc;
+            margin-top: 10px;
+            cursor: pointer;
+
+        }
+
+        .p1 {
+            width: 260px;
+            text-align: left;
+            margin-left: 0;
+            line-height: 20px;
+            color: red;
+            margin-top: 10px;
+            cursor: pointer;
+
+        }
+
+        .form-control {
+            width: 260px;
+            margin: 0 auto;
+        }
+
+        #btnSubmit {
+            width: 260px;
+            margin: 0 auto;
+            padding: 5px 0;
+            background: #006dcc;
+        }
+
+        #registerSubmit {
+            width: 260px;
+            margin: 0 auto;
+            padding: 5px 0;
+            background: #0088ff;
+        }
+    </style>
+</head>
+
+<body>
+<div class="middle-box text-center loginscreen  animated fadeInDown box">
+    <div>
+        <h3 class="write">维修人员信息平台</h3>
+    </div>
+    <div id="mform" class="m-t">
+        <!--<div style="margin-top:10px;margin-bottom: 5px">
+            <input type="hidden" id="flg" name="flg">
+            <span id="wx" class="p" onclick="chooseTab('a')"
+                  style="background-color:#d0d0d0;margin-top:5px;font-size:18px ">维修人员登录</span> |
+            <span id="gl" class="p" onclick="chooseTab('b')"
+                  style="background-color:#d0d0d0;margin-top:5px;font-size:18px ">管理人员登陆</span>
+        </div>-->
+        <div class="form-group">
+            <input type="radio" value="1" checked="checked" name="userType" />维修人员
+            <input   type="radio" value="2" name="userType" style="margin-left: 20px" />管理人员
+        </div>
+        <div class="form-group">
+            <input type="username" id="accountNumber" name="accountNumber" class="form-control" placeholder="用户名"
+                   required="" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <input type="password" id="password" name="password" class="form-control" placeholder="密码" required="">
+        </div>
+        <div style="color: red;">
+            <span id="errMsg"></span>
+        </div>
+        <div style="margin-top: 10px">
+            <button type="submit" id="btnSubmit" class="btn btn-primary block m-b">登 录</button>
+        </div>
+        <div style="margin-top: 10px">
+            <button type="button" id="registerSubmit" onclick="registerSubmit()" class="btn btn-primary block m-b">注 册
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
+<script src="/js/drag.js" type="text/javascript" charset="utf-8"></script>
+<script src="/js/plugins/i18next/i18next.min.js" charset="utf-8"></script>
+<script src="/js/plugins/cookie/jquery.cookie.js" charset="utf-8"></script>
+<script type="text/javascript" src="/js/base64.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $('#password').keyup(function (event) {
+            if (event.keyCode == "13") {
+                $("#btnSubmit").trigger("click");
+                return false;
+            }
+        });
+        $('#accountNumber').keyup(function (event) {
+            if (event.keyCode == "13") {
+                $("#btnSubmit").trigger("click");
+                return false;
+            }
+        });
+        $('.form-control').focus(function () {
+            hideErrMsg();
+        });
+        $("#btnSubmit").on("click", function () {
+            submitForm();
+        });
+    });
+
+    function registerSubmit() {
+        WinUtil.showDialog({
+            title: "注册",
+            width: 1300, height: 800,
+
+            url: Constant.VIEWS + "/login/user_register.shtml"
+        });
+    }
+
+
+
+    function register() {
+        WinUtil.showDialog({
+            title: "注册",
+            width: 1000, height: 500,
+
+            url: Constant.VIEWS + "/register.shtml"
+        });
+    }
+
+    function submitForm() {
+        var pass = $(".ipt").val();
+        var password = $(".ipt1").val();
+        var reg = /^[a-zA-Z0-9]{5,30}$/
+        var result = reg.test(pass);
+        //var regpassword = /^[a-zA-Z0-9!@#$%^&*?]{6,}$/
+        var regpassword = /^.{6,}$/
+        var resultpassword = regpassword.test(password);
+        if (result == false) {
+            showErrMsg("用户名需字母+数字，5-30位组成！");
+            return false;
+        }
+        if (false && resultpassword == false) { //todo
+            showErrMsg("密码需6位以上组成！");
+            return false;
+        }
+        if (navigator.appName == "Microsoft Internet Explorer" &&
+            (navigator.appVersion.split(";")[1].replace(/[ ]/g, "") == "MSIE6.0" ||
+                navigator.appVersion.split(";")[1].replace(/[ ]/g, "") == "MSIE7.0" ||
+                navigator.appVersion.split(";")[1].replace(/[ ]/g, "") == "MSIE8.0")
+        ) {
+            alert("您的浏览器版本过低，请使用360安全浏览器的极速模式或IE10.0以上版本的浏览器");
+        } else {
+            var debug = true;
+            if (debug) {
+                submit("1");
+            } else {
+                WinUtil.showTopDialog({
+                    title: '验证码',
+                    width: 345, height: 290,
+                    url: "/views/show-verify-image.shtml",
+                    param: {
+                        callBack: function (vCode) {
+                            submit(vCode);
+                        }
+                    }
+                });
+            }
+            return;
+        }
+    }
+
+    function submit(vCode) {
+        var formData = {
+            username: $('#accountNumber').val(),
+            password: $('#password').val(),
+            userType: $("input[name='userType']:checked").val(),
+        };
+        formData.vCode = vCode;
+        // formData.cok = $('#cok').is(":checked") ? 'Y' : 'N';
+        AjaxUtil.post({
+            url: Constant.API_V1_PLUGINS + "IC_LOGIN", mask: false,
+            data: {mlg: FuncUtil.encodelg_(JSON.stringify(formData))},
+            success: function (jdata) {
+                if (jdata.code == ResultCode.SUCCESS_CODE) {
+                    var a=$("input[name='userType']:checked").val();
+                    if(a=="1"){//维修人员界面
+                        FuncUtil.doPost(Constant.API_V1_PLUGINS + "IC_REDIRECT_TO_PAGE", {path: "/views/home_maintain.shtml?_v=" + new Date().getTime()});
+                    }else{//管理人员界面
+                        FuncUtil.doPost(Constant.API_V1_PLUGINS + "IC_REDIRECT_TO_PAGE", {path: "/views/home.shtml?_v=" + new Date().getTime()});
+                    }
+                    //MaskUtil.mask($.tl('page:PAGE.COMM.LOGINTING','登录中...'));
+                } else {
+                    console.log(jdata)
+                    showErrMsg(jdata.msg);
+                }
+            }
+        });
+    }
+
+
+    function showErrMsg(msg) {
+        $('#errMsg').parent().show();
+        $('#errMsg').text(msg);
+    }
+
+    function hideErrMsg() {
+        $('#errMsg').parent().hide();
+        $('#errMsg').text('');
+    }
+</script>

@@ -1,34 +1,43 @@
 <configuration>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <!--<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <MaxFileSize>10MB</MaxFileSize>
+        </rollingPolicy>-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>~/log/test606.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
             <!-- keep 30 days' worth of history -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %X{GlobalTrackId} - %msg%n</pattern>
         </encoder>
-    </appender>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    </appender>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %X{GlobalTrackId} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="com.bireturn.aog" level="DEBUG"/>
-    <logger name="com.mybatis" level="DEBUG"/>
-    <logger name="com.mybatis.spring" level="INFO"/>
-    <logger name="org.springframework" level="INFO"/>
-    <logger name="tk.mybatis.mapper" level="INFO"/>
-    <logger name="org.apache" level="INFO"/>
-    <logger name="httpclient.wire" level="INFO"/>
-
+<!--    <logger name="com.mybatis" level="DEBUG"/>-->
+<!--    <logger name="com.mybatis.spring" level="DEBUG"/>-->
+<!--    <logger name="org.springframework" level="DEBUG"/>-->
+<!--    <logger name="tk.mybatis.mapper" level="DEBUG"/>-->
+<!--    <logger name="org.apache" level="DEBUG"/>-->
+<!--    <logger name="httpclient.wire" level="DEBUG"/>-->
+<!--    <logger name="com.ck.dao" level="DEBUG" />-->
+<!--    <logger name="com.ck" level="DEBUG" />-->
 
     <root level="DEBUG">
-        <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="stdout"/>
+<!--        <appender-ref ref="FILE"/>-->
+        <appender-ref ref="rollingFile"/>
     </root>
 
 </configuration>

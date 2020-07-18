@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <legend data-i18n="page:PAGE.COMM.SEARCH">搜索</legend>
+    <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_LIST.LOG_TYPE">日志类型</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="logType" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_LIST.REQUEST_FUNC">请求功能</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="funcCode" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_LIST.RECORD_TIME">记录时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="timestampStart" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm' })"
+                           autocomplete="off" class="layui-input input-lg150 float_left mdate" >
+                    <p class="float_left" style="height:24px;line-height: 24px;">&nbsp;-&nbsp;</p>
+                    <input type="text" name="timestampEnd" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm' })"
+                           autocomplete="off" class="layui-input input-lg150 float_left mdate" >
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn layui-btn-sm" type="button" onclick="GridUtil.onSearch({target: '#dg'})" data-i18n="page:PAGE.COMM.QUERY">查 询</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            identity: 'dg', firstLoad: true,
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            custom: {
+                code : API_IC_CODE.IC_LOG_LIST,
+                alter: {
+                    'timestamp':{formatter:function(value,row,index){
+                        return '<a href="javascript:void(0);" style="text-decoration: underline;" onclick="showLogDetail(\''+index+'\')">'+value+'</a>';
+                    }},
+                    'funcCode':{formatter:function(value,row,index){
+                        return (row.funcName||'-') + "/" + (row.funcCode||'-');
+                    }},
+                    'accountId':{formatter:function(value,row,index){
+                        return (row.accountNumber||'-') + "/" + (row.accountUserName||'-') + "/" + (row.accountId||'-');
+                    }},
+                    'consumeTime':{formatter:function(value,row,index){
+                        if(row.sign == 'AMRO_SYSTEM'){
+                            return value;
+                        }
+                        return value ? value + " ms" : '';
+                    }},
+                    'userAgent':{formatter:function(value,row,index){
+                        return row.remoteUserAgent;
+                    }},
+                    'clientInfo':{formatter:function(value,row,index){
+                        var clientInfo = row.remoteIp + "|" + row.remotePort;
+                        return clientInfo;
+                    }},
+                    'serverInfo':{formatter:function(value,row,index){
+                        var serverInfo = row.serverIp + "|" + row.serverPort
+                        return serverInfo;
+                    }}
+                }
+            },
+            loadFilter : function(result){
+                return { total: result.data.IC_LOG_LIST.total, rows: result.data.IC_LOG_LIST.rows };
+            },
+            rowStyler: function (index, row) {
+                if("ERROR" == row.logType){
+                    return 'color:red;';
+                }
+            },
+            contextMenus:[],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {iconCls:'icon-reload', text: $.tl('page:PAGE.COMM.REFRESH','刷新'),
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+    function showLogDetail(index) {
+        var row = $('#dg').datagrid('getRows')[index];
+        WinUtil.showDialog({
+            title : $.tl('page:PAGE.VIEW_IC_LOG_LIST.LOG_VIEW','日志-查看'),
+            width: 750, height : 480,
+            param: row,
+            url: Constant.VIEWS_IC + "/log/ic_log_detail.shtml"
+        });
+    }
+</script>
+</html>

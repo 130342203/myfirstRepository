@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<style type="text/css">
+    #locks li{
+        float: left; margin-left: 8px;
+    }
+    #dgzone{
+        width: 100%;
+        position: absolute;
+        top: 60px;
+        bottom: 0px;
+        left: 0px;
+    }
+    #fset_lock{
+        height: 60px;
+    }
+</style>
+<body>
+<fieldset class="fieldset_eui">
+    <legend data-i18n="page:PAGE.COMM.SEARCH">搜索</legend>
+    <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_FUNC_LIST.FUNC_CODE">功能编码</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="funcCode" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_FUNC_LIST.FUNC_NAME">功能名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="funcName" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_FUNC_LIST.FUNC_GPNAME">功能组名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="gpName" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn layui-btn-sm" type="button" onclick="GridUtil.onSearch({target: '#left_dg', dgtype: 'treegrid'})" data-i18n="page:PAGE.COMM.QUERY">查 询</button>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <button class="layui-btn layui-btn-sm" type="button" onclick="onRefreshDict_('IC_SRES_REFRESH')">刷新Sres资源</button>
+                <button class="layui-btn layui-btn-sm" type="button" onclick="onRefreshDict_('IC_ERRMSG_REFRESH')">刷新ErrMsg</button>
+                <button class="layui-btn layui-btn-sm" type="button" onclick="showWinServList()">查看服务列表</button>
+
+                <button class="layui-btn layui-btn-sm" type="button" onclick="onReloadPagePerm()">重新加载页面权限</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<div class="easyui-layout" data-options="fit:true">
+    <div id="left_dg_reg" class="mlayout" data-options="region:'west', title:'',split:true,border:false,width:'48%',iconCls:'fa fa-sitemap',headerCls:'border_right',bodyCls:'border_right'">
+        <table id="left_dg"></table>
+    </div>
+    <div id="right_dg_reg" data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,bodyCls:'border_left'">
+        <fieldset id="fset_lock" class="fieldset_eui">
+            <legend data-i18n="page:PAGE.VIEW_IC_FUNC_LIST.LOCK_TIP">执行该功能时将锁定以下功能：</legend>
+            <ul id="locks">
+            </ul>
+        </fieldset>
+        <div id="dgzone" class="mlayout">
+            <table id="right_dg"></table>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    $(function () {
+        InitLeftDataGrid();
+        InitRightDataGrid();
+    });
+
+    function InitLeftDataGrid() {
+        $("#left_dg").MyTreeGrid({
+            identity: 'left_dg',
+            offset: $('fieldset').outerHeight(),
+//            url: Constant.API_V1_PLUGINS + 'IC_FUNC_LIST',
+            custom: {
+                code : API_IC_CODE.IC_FUNC_LIST,
+                alter: {}
+            },
+            /*columns:[[
+                {field: "FUNC_CODE", title: "功能代码", width: 200 },
+                {field: "FUNC_NAME", title: "功能名称", width: 150 },
+                {field: "RETURN_TYPE", title: "返回值类型", width: 90 },
+                {field: "ISF_RESULT", title: "返回值", width: 60 },
+                {field: "PRIORITY", title: "优先级", width: 60 }
+            ]],*/
+            idField: 'FUNC_CODE',
+            treeField: 'FUNC_CODE',
+            loadFilter : function(result){
+                var data = result.data.IC_FUNC_LIST.rows;
+                var map = {};
+                $.each(data, function (i, e) {
+                    if(!map[e.GROUP_NAME || '-']) {
+                        map[e.GROUP_NAME || '-'] = {
+                            FUNC_CODE: e.GROUP_NAME,
+                            GROUP_NAME: "**"
+                        };
+                    }
+                });
+                $.each(map, function (k, v) {
+                    data.push(v);
+                });
+                var rows = EasyUITool.WarpTreeData(data, ['FUNC_CODE', 'GROUP_NAME'], function (tdata) {
+                    return tdata;
+                }, "**");
+                return { total: result.data.IC_FUNC_LIST.total, rows: rows };
+            },
+            contextMenus:[
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            onClickRow:function(row){ //function(index,row){
+                if(!row){
+                    return;
+                }
+                $('#right_dg').datagrid('load',{
+                    funcCode : row.GROUP_NAME == "**" ? "---" :row.FUNC_CODE
+                });
+                AjaxUtil.postSyncReq({
+                    url: Constant.API_V1_PLUGINS + "IC_FUNC_LOCK_CONFIG_LIST",
+                    data: {}, mask: false,
+                    success : function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        var lockConfigs = result.data.IC_FUNC_LOCK_CONFIG_LIST;
+                        var lis = '';
+                        $.each(lockConfigs, function (i, e) {
+                            lis += '<li>' + e + '</li>';
+                        });
+                        $('#locks').html(lis);
+                    }
+                });
+            },
+            toolbar: [
+                {iconCls:'icon-reload', text: '刷新',
+                    handler: function () {
+                        reloadLeftDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadLeftDataGrid() {
+        $("#left_dg").treegrid('reload');
+    }
+
+    function InitRightDataGrid(){
+        $("#right_dg").MyDataGrid({
+            identity: 'right_dg', pagination: false,
+            url: Constant.API_V1_PLUGINS + 'IC_FUNC_SERV_LIST',
+            queryParams:{ funcCode: '---' },
+            columns:[[
+                {field: "TRANS-0", title: "事务", width: 80, formatter: function(value,row,index){
+                    var res = [];
+                    if(true == row.TRANS_BEGIN){
+                        res.push("<span class='fa fa-sign-in fa-fw'></span>");
+                    }
+                    if(true == row.TRANS_END){
+                        res.push("<span class='fa fa-sign-out fa-fw'></span>");
+                    }
+                    return res.join(",")
+                } },
+                {field: "SORT", title: "顺序", width: 50 },
+                {field: "SERV_CODE", title: "服务代码", width: 130 },
+                {field: "SQL_CODE", title: "SQL_CODE", width: 130 },
+                {field: "SQL_MODE", title: "SQL_MODE", width: 130 }
+            ]],
+            loadFilter : function(result){
+                return { total: result.data.IC_FUNC_SERV_LIST.length, rows: result.data.IC_FUNC_SERV_LIST };
+            },
+            contextMenus:[
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {iconCls:'icon-reload', text: '刷新',
+                    handler: function () {
+                        reloadRightDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadRightDataGrid() {
+        $("#right_dg").datagrid('reload');
+    }
+
+    function onRefreshDict_(code) {
+        AjaxUtil.post({
+            url: Constant.API_V1_PLUGINS + code,
+            data: {},
+            success : function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                WinUtil.MsgInfo({ content: result.msg });
+            }
+        });
+    }
+
+
+
+    function showWinServList() {
+        WinUtil.showDialog({
+            title : "服务列表",
+            width: 950, height : 460,
+            param: { },
+            url: Constant.VIEWS_IC + "/func/ic_serv_list.shtml"
+        });
+    }
+
+    function onReloadPagePerm() {
+        AjaxUtil.post({
+            url: Constant.API_V1_PLUGINS + "IC_RELOAD_PAGE_PERM",
+            data: {},
+            success : function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                WinUtil.MsgInfo({ content: result.msg });
+            }
+        });
+    }
+</script>
+</html>

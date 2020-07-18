@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Title</title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="/js/canvas2image.js"></script>
+    <script src="/js/html2canvas.js"></script>
+    <script src="/js/qrcode.min.js"></script>
+
+    <style type="text/css">
+
+        .btn {
+
+            width: 6rem;
+
+            height: 2rem;
+
+            line-height: 2rem;
+
+            text-align: center;
+
+            color: #fff;
+
+            background: red;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+　<!--截取区域（通过Id控制） -->
+
+<div id="codes">
+
+    <a id="tttt"></a>
+
+    <img id="picture" src="/img/caacLogo.png">
+
+    <div id="code" class="img"></div>
+
+</div>
+
+
+
+<!-- 存放截图 -->
+
+<img id="screenShotImg">
+
+<div class="btn">点击截图</div>
+
+<script>
+
+    new QRCode(document.getElementById('code'), '');
+
+    // 设置参数方式
+
+    var qrcode = new QRCode('qrcode', {
+
+        text: 'http://xxx.com?shareuid=25',
+
+        width: 90,
+
+        height: 90,
+
+        colorDark : '#000000',
+
+        colorLight : '#ffffff',
+
+        correctLevel : QRCode.CorrectLevel.H
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        document.querySelector('.btn').onclick = function(){
+
+            html2canvas(document.querySelector("#codes")).then(function (canvas) {
+                var base64Url = canvas.toDataURL('image/png');
+                var triggerDownload = $("#tttt").attr("href", base64Url).attr("download", "order-1111111111.png");
+
+                triggerDownload[0].click();
+
+            });
+
+        }
+
+    });
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link href="/js/plugins/codemirror/lib/codemirror.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/lib/codemirror.js"></script>
+    <link href="/js/plugins/codemirror/theme/erlang-dark.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/mode/sql/sql.js"></script>
+    <script src="/js/plugins/codemirror/mode/xml/xml.js"></script>
+    <link rel="stylesheet" href="/js/plugins/codemirror/addon/hint/show-hint.css" />
+    <script src="/js/plugins/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/js/plugins/codemirror/addon/hint/sql-hint.js"></script>
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<div class="form_eui">
+<form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+    <table class="form_table">
+        <tr>
+            <td class="bilingual form_th">字典编码</td>
+            <td>
+                <input type="text" name="code" autocomplete="off" datatype="s4-80" errormsg="至少4个字符,最多80个字符！" class="easyui-textbox">
+            </td>
+
+            <td class="bilingual form_th">字典名称</td>
+            <td>
+                <input type="text" name="name" autocomplete="off" datatype="s2-80" errormsg="至少2个字符,最多120个字符！" class="easyui-textbox">
+            </td>
+
+            <td class="bilingual form_th">字典类型</td>
+            <td>
+                <select id="type" name="type" datatype="easyui_combo" errormsg="请选择！" style="width:150px;">
+                    <option value="ENUM" selected>ENUM</option>
+                    <option value="SQL">SQL</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <div id="type_sql" class="layui-form-item" style="height: 300px;margin-top:3px;">
+        <textarea id="script_code"></textarea>
+    </div>
+    <div id="type_enum" class="layui-form-item">
+        <table id="dg"></table>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label-blank"></label>
+        <div class="layui-input-block">
+            <button style="margin-left:260px;" class="layui-btn layui-btn-sm" lay-submit lay-filter="demo1">提 交</button>
+        </div>
+    </div>
+</form>
+</div>
+</body>
+<script>
+    var editor;
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.CODE ? true : false;
+        if(PAGE_PARAM.IS_EDIT){
+            FuncUtil.setReadOnly('input[name=code]').removeAttr("datatype");
+            if(PAGE_PARAM.TYPE=="ENUM"){
+                $('#type_sql').hide();
+                $('#type_enum').show();
+            }else{
+                $('#type_sql').show();
+                $('#type_enum').hide();
+            }
+        }else{
+            $('#type_sql').hide();
+            $('#type_enum').show();
+        }
+        InitDataGrid();
+        InitCodeMirror();
+        EasyUI.initCombobox('#type', {
+            onSelect: function (record) {
+                if(record.value == 'ENUM'){
+                    $('#type_sql').hide();
+                    $('#type_enum').show();
+                }else if(record.value == 'SQL'){
+                    $('#type_enum').hide();
+                    $('#type_sql').show();
+                }
+            },
+            value: PAGE_PARAM.TYPE
+        });
+        FuncUtil.parseForm(ToolUtil.toCamelCase(PAGE_PARAM));
+        InitValidform();
+
+    });
+
+    function InitCodeMirror() {
+        editor = CodeMirror.fromTextArea($("#script_code")[0], {
+            mode: "text/x-sql",　//默认脚本编码
+            lineWrapping: true, //是否强制换行
+            theme: 'erlang-dark',
+            indentWithTabs: true,
+            smartIndent: true,
+            lineNumbers: true,
+            matchBrackets : true,
+            autofocus: true,
+            extraKeys: {"Ctrl-.": "autocomplete"}
+        });
+        editor.setValue(PAGE_PARAM.VALUE || '');
+    }
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                var type = $('#type').combobox('getValue');
+                if(type == 'ENUM'){
+                    if(!PAGE_PARAM.IS_EDIT) {
+                        GridEdit.DataGrid.endAndClearDGEdit($dg);
+                        data.enums = FuncUtil.encodeCustom(JSON.stringify($dg.datagrid('getRows')));
+                    }
+                }else{
+                    data.value = editor.getValue();
+                }
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_DATA_DICT_ADD_EDIT",
+                    data: $.extend(data, {__lemark: PAGE_PARAM.IS_EDIT ? "edit" : "add"}),
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    var $dg = $("#dg");
+    function InitDataGrid() {
+        $dg.MyDataGrid({
+            identity: 'dg',
+            width: $(window).width()-8,
+            height: 300,
+            queryParams : {dictCode: PAGE_PARAM.IS_EDIT ? PAGE_PARAM.CODE : "-" },
+            enableLineEdit: true, firstLoad: true, pagination: false,
+            url: Constant.API_V1_PLUGINS + 'IC_DATA_DICT_GET_ENUMS',
+            columns: [[
+                {field: "text", title: "名称", width: 160, editor: {type: 'text'}},
+                {field: "value", title: "数据值", width: 160, editor: {type: 'text'}},
+                {field: "sort", title: "排序", width: 100, editor: {type: 'text'}}
+            ]],
+            loadFilter : function(result){
+                var data = result.data[result.reqCode];
+                return { total: data.total, rows: data };
+            },
+            contextMenus:[
+                {id: "m-delete", text : "删除", auth:"",
+                    onclick: function(){
+                        if(!PAGE_PARAM.IS_EDIT){
+                            $dg.datagrid('deleteRow', $dg.datagrid('getRowIndex', $dg.datagrid('getSelected')));
+                            return;
+                        }
+                        $.messager.confirm('确认窗口','你确定要删除此项吗?', function(r){
+                                if (r){
+                                    var row = $dg.datagrid('getSelected');
+                                    if(!row || !row.pkid){
+                                        return;
+                                    }
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "IC_DATA_DICT_ENUM_DEL",
+                                        data: row,
+                                        success : function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            $dg.datagrid('reload');
+                                            WinUtil.MsgInfo({ content: result.msg });
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                }
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        if(PAGE_PARAM.IS_EDIT){ //
+                            $dg.datagrid('reload');
+                        }
+                    }
+                },'-',
+                {
+                    iconCls: 'icon-table_add', auth: "", text: "新增行",
+                    handler: function () {
+                        GridEdit.DataGrid.insertDGEditRow($dg, {});
+                    }
+                },'-',
+                {
+                    iconCls: 'icon-table_save', auth: "", text: '保存行',
+                    handler: function () {
+                        var dt = GridEdit.DataGrid.getEditChangeData($dg);
+                        if (!dt || dt.length == 0) {
+                            return;
+                        }
+                        if(!PAGE_PARAM.IS_EDIT){
+                            GridEdit.DataGrid.endAndClearDGEdit($dg);
+                        }else{
+                            AjaxUtil.postReq({
+                                url: Constant.API_V1_PLUGINS + "IC_DATA_DICT_ENUM_BATCH_EDIT",
+                                data: {
+                                    dictCode: PAGE_PARAM.CODE,
+                                    editData: FuncUtil.encodelg_(JSON.stringify(dt))
+                                },
+                                success: function (result) {
+                                    if (!FuncUtil.checkResult(result)) {
+                                        return;
+                                    }
+                                    GridEdit.DataGrid.endAndClearDGEdit($dg);
+                                    WinUtil.MsgInfo({content: result.msg});
+                                    $dg.datagrid('reload');
+                                }
+                            });
+                        }
+                    }
+                },'-',
+                {
+                    iconCls: 'icon-cancel', auth: "", text:  '取消行',
+                    handler: function () {
+                        GridEdit.DataGrid.cancelAndClearDGEdit($dg);
+                    }
+                }
+            ]
+        });
+    }
+
+
+</script>
+</html>

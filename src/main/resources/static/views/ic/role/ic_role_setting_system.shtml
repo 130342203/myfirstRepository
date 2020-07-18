@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <!-- 避免IE使用兼容模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<div class="form_eui">
+<form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+    <div class="layui-form-item">
+        <div class="layui-inline">
+
+            <div class="">
+                角色名称: <div id="roleName" style="height: 25px" class="easyui-textbox"></div>
+                <button class="layui-btn layui-btn-sm" style="height: 25px" type="submit"  data-i18n="">提 交</button>
+            </div>
+        </div>
+    </div>
+    <!--<div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ROLE_SETTING_MENU.DESC">描述</label>
+            <div class="layui-input-inline">
+                <div id="roleDesc" class="layui-input textmiddle textarea"></div>
+            </div>
+        </div>
+    </div>-->
+    <!--<div class="layui-form-item">
+        <label class="layui-form-label-blank"></label>
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-sm" type="submit"  data-i18n="page:PAGE.COMM.SUBMIT">提 交</button>
+        </div>
+    </div>-->
+    <div id="fluid" class="layui-form-item">
+        <div style="padding: 2px">
+            <div id="tabs">
+                <div title="功能权限" style="padding:2px;">
+                    <div id="func_auth_area" style="margin-top: 0px;">
+
+                        <fieldset class="fieldset_eui">
+                            <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+                                <table class="form_table">
+
+
+                                        <div>
+                                            功能名称: <input type="text" name="searchName" autocomplete="off" style="height: 25px" class="easyui-textbox">
+                                            <button class="layui-btn layui-btn-sm"  style="margin:2px;height: 25px" type="button"
+                                                    onclick="GridUtil.onSearch({target: '#funcDg'})" data-i18n="">查询
+                                            </button>
+                                        </div>
+
+
+                                </table>
+                            </form>
+                        </fieldset>
+
+                        <table id="funcDg"></table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+
+</body>
+<!--#include virtual="/views/include/include_loading.shtml"-->
+<script type="text/javascript">
+    var PAGE_PARAM = {};
+    var relFuncCodes = [];
+    var relPermKeys = [];
+    var relGroupPermIds = [];
+
+    var relFuncCodes2 = [];
+    var relPermKeys2 = [];
+    var relGroupPermIds2 = [];
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.PKID ? true : false;
+
+        $('#mlayout').layout({ height: 460 });
+
+        //initPageAuthTG();
+
+        $('#tabs').tabs({
+            width: $('#tabs').parent().width() - 10,
+            height: 480
+        });
+
+        var menuCodes = [];
+        if(PAGE_PARAM.IS_EDIT){
+            AjaxUtil.postSyncReq({
+                url: Constant.API_V1_PLUGINS + "IC_ROLE_GET",
+                data: {roleId: PAGE_PARAM.PKID },
+                success: function (result) {
+                    var role = result.data.IC_ROLE_GET.role;
+                    var permAllot = result.data.IC_ROLE_GET.permAllot;
+                    if(permAllot){
+                        if(permAllot.notAllowFuncs){
+                            eval('relFuncCodes = ' + FuncUtil.decodeCustom(permAllot.notAllowFuncs));
+                        }
+                        if(permAllot.notAllowPerms) {
+                            eval('relPermKeys = ' + FuncUtil.decodeCustom(permAllot.notAllowPerms));
+                        }
+                        if(permAllot.notAllowGroupPermIds){
+                            eval('relGroupPermIds = ' + FuncUtil.decodeCustom(permAllot.notAllowGroupPermIds));
+                        }
+                        if(permAllot.allowFuncs){
+                            eval('relFuncCodes2 = ' + FuncUtil.decodeCustom(permAllot.allowFuncs));
+                        }
+                        if(permAllot.allowPerms) {
+                            eval('relPermKeys2 = ' + FuncUtil.decodeCustom(permAllot.allowPerms));
+                        }
+                        if(permAllot.allowGroupPermIds){
+                            eval('relGroupPermIds2 = ' + FuncUtil.decodeCustom(permAllot.allowGroupPermIds));
+                        }
+                    }
+                    $('#roleName').textbox('setValue',role.roleName);
+                    $('#roleDesc').textbox('setValue',role.roleDesc);
+                }
+            });
+        }
+
+        InitFCArea();
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.roleId = PAGE_PARAM.PKID;
+                data.relGroupPermIds = FuncUtil.encodeCustom(JSON.stringify(relGroupPermIds));
+                data.relGroupPermIds2 = FuncUtil.encodeCustom(JSON.stringify(relGroupPermIds2));
+                //data.relFuncCodes = FuncUtil.encodeCustom(JSON.stringify(relFuncCodes));
+                //data.relPermKeys = FuncUtil.encodeCustom(JSON.stringify(relPermKeys));
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_ROLE_PERM_ALLOT",
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function InitFCArea() {
+        $("#funcDg").MyTreeGrid({
+            identity: 'funcDg',
+            height: 380,
+            url: Constant.API_V1_PLUGINS + "IC_FUNC_LIST_ALL",
+            columns : [[
+                {field:'funcName',title: '功能名称', width: 680,   formatter:function(value,row,index){
+                    if(row.groupName != "*--*"){
+                        var checked_ = ($.inArray(row.pkid, relGroupPermIds) > -1) ? 'checked' : '';
+                        var checked2_ = ($.inArray(row.pkid, relGroupPermIds2) > -1) ? 'checked' : '';
+                        return  '&nbsp;'
+                            + '<input type="checkbox" ' + checked2_ + ' name="rel_perm_ids2" onclick="doChecked2(this)" value="'+row.pkid+'"/>&nbsp;允许'
+                            + '<input type="checkbox" ' + checked_ + ' name="rel_perm_ids" onclick="doChecked(this)" value="'+row.pkid+'"/>&nbsp;不允许'+'&nbsp;&nbsp;'+value;
+                    }
+                    return value;
+                }}
+            ]],
+            idField: 'pkid',
+            treeField: 'funcName', firstLoad: true,
+            pagination: true,
+            loadFilter: function (result, parentId) {
+                var rdata = result.data.IC_FUNC_LIST_ALL;
+                var list = rdata.rows;
+                var gmap = {};
+                $.each(list, function (k, item) {
+                    if(!item.groupName){
+                        return true;
+                    }
+                    gmap[item.groupName] = item.groupName;// + "组";
+                });
+                var glist = [];
+                $.each(gmap, function (k, it) {
+                    glist.push({
+                        funcCode: k,
+                        funcName: k,
+                        groupName: "*--*",
+                        permCode: "",
+                        pkid: k
+                    });
+                });
+                var dlist = glist.concat(list);
+                var mrows = EasyUITool.WarpTreeData(dlist, ['funcName', 'groupName'], function (tdata) {
+                    return tdata;
+                }, '*--*');
+                return {total:rdata.total, rows: mrows };
+            },
+            contextMenus: [],
+            validAuthContextMenu: function (row, items) {
+                return items;
+            },
+            onLoadSuccess: function () {
+                //$('#funcDg').treegrid('collapseAll')
+            }
+        });
+    }
+    
+    function goPage(mp) {
+        p = p + mp;
+        if(p < 1) {
+            p = 1;
+        }
+        if(p > t){
+            p = t;
+        }
+        MaskUtil.mask("加载中...");
+        var newary = getListByPage(PGD_List, p, c);
+        var dlist = PGD_DList.slice(0);
+        $.each(newary, function (ni,nit) {
+            dlist.push(nit);
+        });
+
+        $("#funcDg").treegrid('loadData', dlist);
+        MaskUtil.unmask();
+    }
+
+    function getListByPage(dlist, p, r) {
+        var start = (p-1) * r;
+        var end = start + r;
+
+        var newary = dlist.slice(start, end);
+        return newary;
+    }
+
+
+    function doChecked(thiz) {
+        var $thiz = $(thiz);
+        var isChecked = $thiz.is(":checked");
+        var name = $thiz.attr('name');
+        var value = $thiz.val();
+        if(name == 'rel_perm_keys'){
+            var index = $.inArray(value, relPermKeys);
+            if(index > -1){ //存在
+                if(!isChecked) {
+                    relPermKeys.splice(index, 1);
+                }
+            }else{
+                if(isChecked) {
+                    relPermKeys.push(value);
+                }
+            }
+        }else if(name == 'rel_func_codes'){
+            var index = $.inArray(value, relFuncCodes);
+            if(index > -1){ //存在
+                if(!isChecked) {
+                    relFuncCodes.splice(index, 1);
+                }
+            }else{
+                if(isChecked) {
+                    relFuncCodes.push(value);
+                }
+            }
+        }else if(name == 'rel_perm_ids'){
+            var index = $.inArray(value, relGroupPermIds);
+            if(index > -1){ //存在
+                if(!isChecked) {
+                    relGroupPermIds.splice(index, 1);
+                }
+            }else{
+                if(isChecked) {
+                    relGroupPermIds.push(value);
+                }
+            }
+        }
+    }
+
+    function doChecked2(thiz) {
+        var $thiz = $(thiz);
+        var isChecked = $thiz.is(":checked");
+        var name = $thiz.attr('name');
+        var value = $thiz.val();
+        if(name == 'rel_perm_keys2'){
+            var index = $.inArray(value, relPermKeys2);
+            if(index > -1){ //存在
+                if(!isChecked) {
+                    relPermKeys2.splice(index, 1);
+                }
+            }else{
+                if(isChecked) {
+                    relPermKeys2.push(value);
+                }
+            }
+        }else if(name == 'rel_func_codes2'){
+            var index = $.inArray(value, relFuncCodes2);
+            if(index > -1){ //存在
+                if(!isChecked) {
+                    relFuncCodes2.splice(index, 1);
+                }
+            }else{
+                if(isChecked) {
+                    relFuncCodes2.push(value);
+                }
+            }
+        }else if(name == 'rel_perm_ids2'){
+            var index = $.inArray(value, relGroupPermIds2);
+            if(index > -1){ //存在
+                if(!isChecked) {
+                    relGroupPermIds2.splice(index, 1);
+                }
+            }else{
+                if(isChecked) {
+                    relGroupPermIds2.push(value);
+                }
+            }
+        }
+    }
+
+</script>
+</html>

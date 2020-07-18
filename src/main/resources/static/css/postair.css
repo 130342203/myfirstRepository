@@ -1,0 +1,51 @@
+.label_s,.inputs{
+    display: inline-block;
+    height:25px;
+    float: left;
+}
+.label_s, .label_l{
+    width: 60px;
+    text-align: right;
+    padding-right: 5px;
+}
+
+.searchRight{
+    clear: both;
+}
+.searchRight .stat-percent{
+    float: left;
+    margin-left:15px;
+}
+.hide{
+    display: none;
+}
+.inputs{
+    display: inline-block;
+    float: left;
+}
+.check_b{
+    line-height: 25px;
+}
+.label_l{
+    width: 100px;
+}
+.fieldset_eui{
+    width: 98%;
+}
+
+@media only screen and (min-width: 160px) and (max-width: 414px) {
+    .inputs{
+        height: 25px;
+        float: left;
+    }
+    .easyLow{
+        width: 70px;
+    }
+    .searchRight{
+        width: 90%;
+    }
+    .searchRight .stat-percent{
+        float: right;
+        margin-right:15px;
+    }
+}

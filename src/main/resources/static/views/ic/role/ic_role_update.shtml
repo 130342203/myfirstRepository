@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <style>
+        .td-class{
+           margin-top: 20px;margin-left:50px
+        }
+    </style>
+</head>
+<body>
+<div class="form_eui">
+    <form id="fform" class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="layui-form-item">
+            <div class="layui-inline" >
+                <div style="margin-top: 20px;margin-left:50px">
+                    角色编码：<input id="roleNo" name="roleNo" datatype="*"  errormsg="角色名称必填！" class="form-input-class">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="td-class" >
+                    角色名称：<input id="roleName" name="roleName"  datatype="*"  errormsg="角色名称必填！" class="form-input-class">
+            </div>
+        </div>
+        <div class="layui-form-item">
+                <div class="td-class">
+                    角色描述：<input type="text" name="roleDesc" autocomplete="off" class="form-input-class">
+                </div>
+        </div>
+        <div class="layui-form-item">
+            <div style=" margin-top: 20px;text-align: center">
+                <button class="easyui-linkbutton" type="submit" data-options="iconCls:'icon-page_save',toggle:true" style="width:60px" lay-submit >保 存</button>
+                <button id="btn_cancel" class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" style="width:60px" >取 消</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.PKID ? true : false;
+        if(PAGE_PARAM.IS_EDIT){
+            AjaxUtil.postReq({
+                url: Constant.API_V1_PLUGINS + "IC_ROLE_GET",
+                data: {roleId: PAGE_PARAM.PKID },
+                success: function (result) {
+                    var object = result.data.IC_ROLE_GET.role;
+                    FuncUtil.parseForm(object);
+                }
+            });
+        }
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '#fform',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                if(PAGE_PARAM.IS_EDIT){
+                    data.pkid = PAGE_PARAM.PKID;
+                }
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + (PAGE_PARAM.IS_EDIT ?  "IC_ROLE_UPDATE" : "IC_ROLE_ADD"),
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    $('#btn_cancel').on('click', function() {
+        WinUtil.closeCurrDialog();
+    });
+
+</script>
+</html>

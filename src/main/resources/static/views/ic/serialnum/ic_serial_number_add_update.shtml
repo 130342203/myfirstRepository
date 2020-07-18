@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+
+</head>
+<body>
+<div class="form_eui">
+    <form id="mform1" class="layui-form layui-form-pane" style="margin-top: 2px;">
+        <input type="hidden" name="snType" />
+        <table class="form_table">
+            <tr>
+                <td class="bilingual form_th">流水号标识</td>
+                <td>
+                    <input type="text" name="serialCode" id="serialCode" class="layui-input nap">
+                </td>
+                <td class="bilingual form_th">描述</td>
+                <td>
+                    <input type="text" name="description" id="description" class="layui-input nap">
+                </td>
+            </tr>
+            <tr>
+                <td class="bilingual form_th">流水号规则</td>
+                <td>
+                    <input type="text" name="expression" id="expression" class="layui-input">
+                    <br/>
+                    <span style="color: red;">
+                                #{dt:日期格式} 例如: PM#{dt:yyyyMM} = PM201609<br/>
+                                #{seq:补零数} 例如: CN#{seq:5} = CN00001<br/>
+                                #{a-zA-Z0-9_} 例如：自定义参数
+                    </span>
+                </td>
+                <td class="bilingual form_th">序号开始值</td>
+                <td>
+                    <input type="text" name="startNum" id="startNum" class="layui-input">
+                </td>
+            </tr>
+            <tr>
+                <td class="bilingual form_th">序号递增值</td>
+                <td>
+                    <input type="text" name="stepNum" id="stepNum" autocomplete="off" class="layui-input">
+                </td>
+                <td class="bilingual form_th">序号结束值</td>
+                <td>
+                    <input type="text" name="endNum" id="endNum" autocomplete="off" class="layui-input">
+                    <br/>
+                    <span style="color: red;">如填写此项，序号超过此值重置为开始值。</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="bilingual form_th">重置标识</td>
+                <td colspan="3">
+                    <input type="text" name="circleIdent" id="circleIdent" autocomplete="off"
+                           class="layui-input nap">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: center;">
+                    <button class="layui-btn layui-btn-sm bilingual nap"
+                            type="submit"
+                            data-i18n="page:PAGE.COMM.SAVE">保存</button>
+                    <button class="layui-btn layui-btn-sm bilingual nap"
+                            type="button"
+                            onclick="WinUtil.closeCurrDialog();"
+                            data-i18n="page:PAGE.COMM.CLOSE">关闭</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.PKID ? true : false;
+        if( PAGE_PARAM.IS_EDIT){
+            AjaxUtil.postReq({
+                url: Constant.API_V1_PLUGINS + "IC_SYS_SERIAL_NUMBER_GET",
+                data: {pkid: PAGE_PARAM.PKID },
+                success: function (result) {
+                    var object = result.data[result.reqCode];
+                    FuncUtil.parseForm(object);
+                }
+            });
+        }
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '#mform1',
+            beforeSubmit: function (curform) {
+                var data = curform.serializeObject();
+                data.pkid = PAGE_PARAM.PKID || '';
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_SYS_SERIAL_NUMBER_ADD_EDIT",
+                    data: $.extend(data, {__lemark: PAGE_PARAM.IS_EDIT ? "edit" : "add"}),
+                    success: function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({content: result.msg});
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+</script>
+</html>

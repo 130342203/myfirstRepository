@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="./personel.js"></script>
+    <link href="/js/plugins/codemirror/lib/codemirror.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/lib/codemirror.js"></script>
+    <link href="/js/plugins/codemirror/theme/erlang-dark.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/mode/sql/sql.js"></script>
+    <script src="/js/plugins/codemirror/mode/xml/xml.js"></script>
+    <link rel="stylesheet" href="/js/plugins/codemirror/addon/hint/show-hint.css"/>
+    <script src="/js/plugins/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/js/plugins/codemirror/addon/hint/sql-hint.js"></script>
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <script src="/js/plugins/my_upload_view.js"></script>
+    <script src="/js/plugins/my_easyui_multistage_combox.js"></script>
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .btn {
+        width: 90px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background: cornflowerblue;
+        color: #fff;
+        border-radius: 7px;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .title {
+        width: 100%;
+        height: 32px;
+        line-height: 32px;
+        background: #f2f2f2;
+        margin: 10px 0;
+    }
+
+    .title span {
+        padding-left: 10px;
+    }
+
+    .clear {
+        overflow: hidden;
+    }
+
+    .left {
+        width: 85%;
+        float: left;
+    }
+
+    .right {
+        width: 13%;
+        float: right;
+    }
+
+    .person {
+        width: 110px;
+        height: 140px;
+        border: 1px solid #ccc;
+        float: right;
+    }
+
+    .table .btn {
+        width: 110px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .right .btn {
+        float: right;
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+
+    .tbBox {
+        margin: 0 auto;
+    }
+    /*验证码*/
+    .code
+    {
+        background-color: silver;
+        font-family:Arial; /*设置字体*/
+        font-style:initial;
+        color:blue;
+        font-size:20px;
+        border:0;
+        padding:2px 3px;
+        letter-spacing:3px;
+        font-weight:bolder;
+        cursor: pointer;
+        width:81px;
+        height:23px;
+        margin-left: 130px;
+        margin-top: -24px;
+
+    }
+
+</style>
+<body>
+<div class="easyui-panel" style="padding:0px 30px;">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;">
+        <div class="title"><span>个人详细信息</span></div>
+        <div class="clear">
+            <div class="left">
+                <table class="mytable">
+                    <tr>
+                        <td> 姓名:</td>
+                        <td><input class="easyui-textbox" id="realName" name="realName"></td>
+                        <td> 性别:</td>
+                        <td><input class="easyui-textbox" name="sex" id="sex"></td>
+                        <td> 民族:</td>
+                        <td><input class="easyui-textbox" id="nation" name="nation"></td>
+                        <input type="hidden" id="pkid" name="pkid">
+                    </tr>
+                    <tr>
+                        <td> 国籍:</td>
+                        <td><input class="easyui-textbox" id="countryName" name="countryName">
+                            <input type="text" id="country" name="country" hidden="hidden">
+                        </td>
+                        <td> 证件类型:</td>
+                        <td><input class="easyui-textbox" id="idType" name="idType"></td>
+                        <td> 所属单位:</td>
+                        <td><input class="easyui-textbox" id="companyName" name="companyName">
+                            <input type="text" id="company" name="company" hidden="hidden"></td>
+                        <!--<td> 证件编码:</td>
+                        <td><input class="easyui-textbox" id="idNo" name="idNo"></td>-->
+                    </tr>
+
+                    <tr>
+                        <td> 职务:</td>
+                        <td><input class="easyui-textbox" id="duty" name="duty"></td>
+                        <td> 通讯地址:</td>
+                        <td colspan="3">
+                            <div id="detailAdder">
+                                <input id="addressProvince" name="addressProvince">
+                                <input id="addressCity" name="addressCity"  >
+                                <input id="addressArea" name="addressArea" >
+                            </div>
+                            详细地址: <input class="easyui-textbox" style="width: 310px;height: 25px" id="addressDetail"
+                                         name="addressDetail" datatype="*" errormsg="详细地址不可为空！">
+                        </td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> 手机号<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-numberbox" id="phone" name="phone"
+                                   data-options="validType: 'phoneAndtel'" autocomplete="new-password" datatype="*"
+                                   errormsg="手机号不可为空！" style="width:120px">
+                            <div class="code" id="checkCode" onclick="createCode()"></div>
+                        </td>
+                        <td><input class="easyui-textbox" data-options="prompt:'请输入验证码...'" style="width: 100px"  id="eCode" name="eCode"></td>
+                        <td>
+                            <a href="javascript:void(0)" class="searchBtn"
+                               onclick="updatephone()"><span>获取手机验证码</span></a>
+                        </td>
+                        <td colspan="2"><input class="easyui-textbox"  data-options="prompt:'请输入手机验证码...'" id="phoneCode" name="phoneCode"><p style="color: red;line-height: 26px;">*如在2分钟内未收到，请重新获取</p></td>
+
+                    </tr>
+                    <tr>
+                        <td> 电子邮箱:</td>
+                        <td><input class="easyui-textbox" id="email" name="email"></td>
+                        <td> 出生日期:</td>
+                        <td colspan="3"><input class="easyui-datebox" name="birthday" id="birthday"
+                                               onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" autocomplete="off"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="right">
+                <div class="person" id="headPhotoPicture" style="margin-right: 30px" >
+                </div>
+                <div>
+                    <p style="font-size:12px; line-height:15px;
+                     color: red;">两寸标准蓝底正面免冠彩色照片,大小要求：354*472 标准二寸照片大小为：
+                        3.5*4.5厘米，对应为413*513像素。</p>
+                </div>
+                <div class="btn" id="headPhoto" style="margin-right: 30px">
+                    上传头像
+                </div>
+            </div>
+        </div>
+        <div class="title"><span>学历及教育情况</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 毕业院校:</td>
+                    <td><input class="easyui-textbox" id="college" name="college"></td>
+                    <td> 是否属于理工类专业:</td>
+                    <td><input class="easyui-textbox" id="isSe" name="isSe"></td>
+                </tr>
+                <tr>
+                    <td> 学历:</td>
+                    <td><input class="easyui-textbox" id="education" name="education"></td>
+                    <td> 毕业证书取得日期:</td>
+                    <td>
+                        <input class="easyui-datebox" name="diplomaDate" id="diplomaDate"
+                               onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"
+                               autocomplete="off">
+                    </td>
+                </tr>
+                <tr>
+                    <td> 学历证书:</td>
+                    <td id="educationCredentialPicture">
+
+                    <td colspan="3">
+                        <input id="educationCredential" name="educationCredential"
+                               data-options="buttonText:'选择文件', prompt:'请选择文件...'" accept="image/jpeg,image/gif,image/png"  style="height: 26px; width:100%">
+                        <!--  <div class="btn" id="educationCredential"> 上传</div>-->
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="title"><span>个人证件照片</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 身份证正面:</td>
+                    <td id="idCardFrontPicture"></td>
+                    <td>
+                    <div class="btn" id="idCardFront"> 上传</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td> 身份证反面:</td>
+                    <td id="idCardReversePicture"></td>
+                    <td>
+                    <div class="btn" id="idCardReverse"> 上传</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td> 手持身份证:</td>
+                    <td id="idCardHoldPicture"></td>
+                    <td>
+                    <div class="btn" id="idCardHold"> 上传</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align:center;padding:10px 0">
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-page_save',toggle:true" lay-submit>保 存
+            </button>
+        </div>
+    </form>
+</div>
+<script>
+    var editor;
+    var code;//验证码使用
+    var PAGE_PARAM = {};
+    var account = {};
+    var  adder="N";
+    var UIV_uploadPhoto, UIV_educationCredential, UIV_idCardFront, UIV_idCardReverse, UIV_idCardHold;
+
+    $(function () {
+        createCode();
+        account = WinUtil.getLoginAccount();
+        EasyUI.initFilebox('#educationCredential', {width: 250});
+        InitValidform();
+        PAGE_PARAM = WinUtil.getDialogParam();
+        /*$('#phone').numberbox('textbox').attr('maxlength', 11);*/
+
+        console.log(account);
+       /* $("#companyName").MyComboGrid({
+            idField: 'ORG_NAME',    //实际存储值
+            textField: 'ORG_NAME',   //文本显示值
+            panelWidth: 250,
+            panelHeight: 240,
+            width: 140,
+            url: Constant.API_V1_PLUGINS + "BS_ORGANIZATION_SELECT",
+            loadFilter: function (data) {
+                return data.data.BS_ORGANIZATION_SELECT;
+            },
+            pagination: false,          //关闭分页栏
+            columns: [[
+                {field: 'ORG_NAME', title: $.tl('', '公司名称'), width: 70},
+            ]],
+            onClickRow: function (index, row) {
+                $("#company").val(row.ID);
+            },
+        });*/
+        AjaxUtil.postReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {
+                codes: "PER_SEX,EX_ORG_ID,IC_ISF,IC_SYS_COUNTRY,PER_NATION,PER_ID_TYPE,PER_EDUCATION"
+            },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                EasyUI.initCombobox('#sex', {
+                    data: data['PER_SEX']
+                });
+                EasyUI.initCombobox('#countryName', {
+                    data: data['IC_SYS_COUNTRY'],
+                    onChange:function (a,b) {
+                        $("#country").val(a);
+                        if(a=="11111111111111111111111111111111"){//中国
+                            $("#detailAdder").show();
+                            adder="Y";
+                        }else{
+                            $("#detailAdder").hide();
+                            adder="N";
+                            $("#addressProvince").combobox("setValue","");
+                            $("#addressCity").combobox("setValue","");
+                            $("#addressArea").combobox("setValue","");
+                        }
+                    }
+                });
+                EasyUI.initCombobox('#companyName', {
+                    data: data['EX_ORG_ID'],
+                    editable:true,
+                    onChange:function (a,b) {
+                        $("#company").val(a);
+                    }
+                });
+                EasyUI.initCombobox('#isSe', {
+                    data: data['IC_ISF']
+                });
+                EasyUI.initCombobox('#nation', {
+                    data: data['PER_NATION']
+                });
+                EasyUI.initCombobox('#idType', {
+                    data: data['PER_ID_TYPE']
+                });
+                EasyUI.initCombobox('#education', {
+                    data: data['PER_EDUCATION']
+                });
+
+            }
+        });
+        $("#pkid").val(account.accountId);
+        getBsuser(account.accountId);
+    });
+
+    function submitForm() {
+        // 测试图片信息
+        if (UIV_uploadPhoto) {
+            var file = UIV_uploadPhoto.getFile();
+            console.log(file);
+        }
+    }
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit: function (curform) {
+
+                var data = curform.serializeObject();
+                /*var boo_idNo = ifIdNo();
+                if (boo_idNo == false) {
+                    WinUtil.MsgError({content: "身份证位数不符请查看！"})
+                    return false
+                }*/
+                var educationCredential = $('input[name=educationCredential]').prop('files');
+                data.id = $("#pkid").val();
+                data.pkid = $("#pkid").val();
+                var formData = new FormData();
+                $.each(data, function (k, v) {
+                    formData.append(k, v);
+                });
+                if(adder=="Y"){
+                    if($("#addressProvince").combobox("getValue")==""||$("#addressCity").combobox("getValue")==""|| $("#addressArea").combobox("getValue")==""){
+                        WinUtil.MsgError({content: "对不起,您的通讯地址不完整,请检查！"});
+                        return false;
+                    }
+                }
+                if($("#eCode").val().toUpperCase()!=code.toUpperCase()){
+                    WinUtil.MsgError({content: "验证码不正确！"});
+                    createCode();
+                    return false;
+                }
+                var file1 = UIV_uploadPhoto.getFile();
+                if (file1 != undefined) {
+                    formData.append("headPhotoPicture", file1);
+                }
+                if (educationCredential.length == 1) {
+                    formData.append("educationCredentialPicture", educationCredential[0]);
+                }
+                var file3 = UIV_idCardFront.getFile();
+                if (file3 != undefined) {
+                    formData.append("idCardFrontPicture", file3);
+                }/*else{
+                    WinUtil.MsgError({content: "请上传身份证正面照！"});
+                    return false;
+                }*/
+                var file4 = UIV_idCardReverse.getFile();
+                if (file4 != undefined) {
+                    formData.append("idCardReversePicture", file4);
+                }/*else{
+                    WinUtil.MsgError({content: "请上传身份证反面照！"});
+                    return false;
+                }*/
+                var file5 = UIV_idCardHold.getFile();
+                if (file5 != undefined) {
+                    formData.append("idCardHoldPicture", file5);
+                }/*else{
+                    WinUtil.MsgError({content: "请上传手持身份证照！"});
+                    return false;
+                }*/
+                AjaxUtil.postFileReq({
+                    url: Constant.API_V1_PLUGINS + "BS_USER_UPDATE",
+                    //data: $.extend(data, {__lemark: PAGE_PARAM.IS_EDIT ? "edit" : "add"}),
+                    data: formData,
+                    success: function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        WinUtil.MsgInfo({content: result.msg});
+                      // parent.reloadDataGrid(WinUtil.getLoginAccount().accountId);
+                        PAGE_PARAM.OWindow.reloadDataGrid(WinUtil.getLoginAccount().accountId);
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function getBsuser(ID) {
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "BS_USER_SELECT_BY_ID",
+            data: {id: ID},
+            success: function (result) {
+                var data = result.data[result.reqCode][0];
+                if(data.COUNTRY=="11111111111111111111111111111111"){//中国
+                    adder="Y" ;
+                }else{
+                    adder="N";
+                }
+                FuncUtil.parseForm(ToolUtil.toCamelCase(data), null, 'addressProvince,addressCity,addressArea,birthday,diplomaDate');
+                $('#birthday').datebox('setValue', getLocalTimeYMD(data.BIRTHDAY));
+                if (data.DIPLOMA_DATE != null) {
+                    $('#diplomaDate').datebox('setValue', getLocalTimeYMD(data.DIPLOMA_DATE));
+                }
+
+                var a = data.ADDRESS_PROVINCE ? data.ADDRESS_PROVINCE : '';
+                var b = data.ADDRESS_CITY ? data.ADDRESS_CITY : '';
+                var c = data.ADDRESS_AREA ? data.ADDRESS_AREA : '';
+                $("body").MyEasyUIMultistageCombox({
+                    url: Constant.API_V1_PLUGINS + "IC_SYS_AREA_SELECT",
+                    level: [
+                        {__id: 'addressProvince', __def_value: a}, //国家
+                        {__id: 'addressCity', __def_value: b}, //城市
+                        {__id: 'addressArea', __def_value: c} //乡镇
+                    ]
+                });
+
+                var file_1 = data.headPhotoPicture;
+                var file_2 = data.ATTACH;
+                var file_3 = data.idCardFrontPicture;
+                var file_4 = data.idCardReversePicture;
+                var file_5 = data.idCardHoldPicture;
+                if (file_1 != undefined) {
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture',
+                        imgWidth: 110,
+                        imgHeight: 140,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_1
+                    });
+                } else {
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture', imgWidth: 110, imgHeight: 140
+                    });
+                }
+                if (file_2 != undefined) {
+                    FuncUtil.fileArea('#educationCredentialPicture',file_2, false);
+                }
+                if (file_3 != undefined) {
+                    UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+                        imgAreaId: '#idCardFrontPicture',
+                        imgWidth: 80,
+                        imgHeight: 80,
+                        isfBorder: true,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_3
+                    });
+                } else {
+                    UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+                        imgAreaId: '#idCardFrontPicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+                    });
+                }
+
+                if (file_4 != undefined) {
+                    UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+                        imgAreaId: '#idCardReversePicture',
+                        imgWidth: 80,
+                        imgHeight: 80,
+                        isfBorder: true,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_4
+                    });
+                } else {
+                    UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+                        imgAreaId: '#idCardReversePicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+                    });
+                }
+                if (file_5 != undefined) {
+                    UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+                        imgAreaId: '#idCardHoldPicture',
+                        imgWidth: 80,
+                        imgHeight: 80,
+                        isfBorder: true,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_5
+                    });
+                } else {
+                    UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+                        imgAreaId: '#idCardHoldPicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+                    });
+                }
+            }
+        });
+    }
+
+    function createCode() {  //函数体
+        code = "";
+        var codeLength = 5; //验证码的长度
+        var checkCode = document.getElementById("checkCode");
+        var codeChars = new Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'); //所有候选组成验证码的字符，当然也可以用中文的
+        for (var i = 0; i < codeLength; i++)
+        {
+            var charNum = Math.floor(Math.random() * 52);//设置随机产生
+            code += codeChars[charNum];
+        }
+        if (checkCode)
+        {
+            checkCode.className = "code";
+            checkCode.innerHTML = code;
+        }
+    }
+    function updatephone() {
+        WinUtil.MsgWarn({content:"暂未开启该功能"})
+
+    }
+</script>

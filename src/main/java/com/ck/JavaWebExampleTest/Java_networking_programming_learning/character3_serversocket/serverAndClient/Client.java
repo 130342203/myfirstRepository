@@ -1,6 +1,7 @@
 package com.ck.JavaWebExampleTest.Java_networking_programming_learning.character3_serversocket.serverAndClient;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class Client {
@@ -12,6 +13,7 @@ public class Client {
         for (int i=0;i<length;i++){
             sockets[i] = new Socket(host,port);
             System.out.println("第"+(i+1)+"次连接");
+            OutputStream out = sockets[i].getOutputStream();
         }
         try {
             Thread.sleep(3000);

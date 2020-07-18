@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title data-i18n="page:PAGE.COMM.TEMPLATE_UPLOAD">导入数据</title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+
+    <link rel="stylesheet" href="/res/plugins/uploadFile/css/uploadFile.css"/>
+    <script src="/res/plugins/uploadFile/js/uploadfile.js"></script>
+</head>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <table class="form_table">
+            <tr>
+                <td class="bilingual form_th" data-i18n="page:PAGE.VIEW_IC_FILE_UPLOAD.UPLOAD_TYPE">允许上传类型</td>
+                <td>
+                    <div id="uploadType" class="layui-input input-lg20"></div>
+                </td>
+                <td class="bilingual form_th" data-i18n="page:PAGE.VIEW_IC_FILE_UPLOAD.UPLOAD_SIZE">上传大小限制</td>
+                <td>
+                    <div id="uploadSize" class="layui-input input-lg20"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <div id="up1" class="up_load_file"></div>
+                </td>
+            </tr>
+        </table>
+        <div class="layui-inline" style="float: right">
+            <button class="layui-btn layui-btn-sm bilingual" type="submit" data-i18n="page:PAGE.COMM.UPLOAD">上传</button>
+            <button class="layui-btn layui-btn-sm bilingual" style="margin:5px;margin-right: 28px" type="button"
+                    onclick="WinUtil.closeCurrDialog();" data-i18n="page:PAGE.COMM.CLOSE">关闭</button>
+        </div>
+        <!--
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">允许上传类型</label>
+                <div class="layui-input-inline">
+                    <div id="uploadType" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label">上传大小限制</label>
+                <div class="layui-input-inline">
+                    <div id="uploadSize" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="up1" class="up_load_file"></div>
+
+        <div class="layui-form-item single">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <input id="btnSubmit" class="layui-btn layui-btn-sm" type="submit" value="提 交"></input>
+            </div>
+        </div>-->
+    </form>
+</div>
+
+</body>
+<script>
+    var PAGE_PARAM = {};
+
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        // 文件上传格式
+        PAGE_PARAM.ALLOW_TYPE = "xls,xlsx";
+        // 文件选择窗口打开时限制文件格式
+        PAGE_PARAM.ALLOW_ACCEPT = "application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        // 文件限制上传1个
+        PAGE_PARAM.MAX_UPLOAD_COUNT = 1;
+        // 文件上传大小限制
+        if(!PAGE_PARAM.MAX_UPLOAD_SIZE_KB){
+            PAGE_PARAM.MAX_UPLOAD_SIZE_KB = 50 * 1024; //50mb
+        }
+        // 是否允许拖拽上传
+        if(PAGE_PARAM.ALLOW_DRAG == undefined) {
+            PAGE_PARAM.ALLOW_DRAG = true;
+        }
+        $('#uploadType').html(PAGE_PARAM.ALLOW_TYPE);
+        $('#uploadSize').html($.tl('page:PAGE.VIEW_IC_FILE_UPLOAD.UPLOAD_SIZE_TEXT','文件大小限制：') + getSizeByUnit(PAGE_PARAM.MAX_UPLOAD_SIZE_KB));
+
+        InitUploadFileArea();
+
+        InitValidform();
+    });
+
+    // 提交校验
+    function InitValidform() {
+        validForm = FuncUtil.initValidform({
+            target: '.layui-form',
+            datatype:{
+            },
+            beforeSubmit:function(curform){
+                // 校验文件是否选择
+                var fileUploader = $('#up1').uploadfile('getUploader');
+                if(fileUploader.files.length == 0){
+                    WinUtil.MsgError({ content: $.tl('page:PAGE.VIEW_IC_FILE_UPLOAD.NO_FILE_MSG','请选择上传文件!')});
+                    return false;
+                }
+                var data = new FormData();
+
+                $.each(fileUploader.files, function (i, file) {
+                    data.append("file", file);
+                });
+                // 拼接传入参数
+                if(PAGE_PARAM.PARAM){
+                    $.each(PAGE_PARAM.PARAM, function (key, value) {
+                        data.append(key, value);
+                    });
+                }
+
+                // 上传文件
+                AjaxUtil.postFileReq({
+
+                    url: Constant.API_V1_PLUGINS + PAGE_PARAM.FUNC,
+                    data: data,
+                    success: function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        WinUtil.MsgInfo({content:"操作成功！"});
+                        WinUtil.closeCurrDialog();
+                        if(typeof(PAGE_PARAM.SUCCESS_CALLBACK) == 'function'){
+                            PAGE_PARAM.SUCCESS_CALLBACK(result);
+                        }
+
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    // 初始化上传文件部分
+    function InitUploadFileArea() {
+        $('#up1').uploadfile({
+            //url : Constant.API_V1_PLUGINS + 'file.do',
+            width : 500,
+            height : 30,
+            // 是否允许拖拽上传
+            canDrag : PAGE_PARAM.ALLOW_DRAG,
+            // 是否允许上传多文件
+            canMultiple : false,
+            // 允许上传文件类型
+            allowExts: PAGE_PARAM.ALLOW_TYPE,
+            // 文件选择窗口打开时限制文件格式
+            accept: PAGE_PARAM.ALLOW_ACCEPT,
+            // 文件上传数量限制
+            maxUploadCount: PAGE_PARAM.MAX_UPLOAD_COUNT,
+            // 文件大小限制
+            maxUploadKbSize: PAGE_PARAM.MAX_UPLOAD_SIZE_KB
+        });
+    }
+
+    // 转换文件上传大小单位
+    function getSizeByUnit(fileSize) {
+        var unit = "KB";
+        if(fileSize > 1024){
+            unit = "MB";
+            fileSize = (fileSize / 1024).toFixed(2); // mb
+        }
+        if(fileSize > 1024){
+            unit = "GB";
+            fileSize = (fileSize / 1024).toFixed(2); // gb
+        }
+        return fileSize + unit;
+    }
+
+    /*
+*.3gpp	audio/3gpp, video/3gpp	3GPP Audio/Video
+*.ac3	audio/ac3	AC3 Audio
+*.asf	allpication/vnd.ms-asf	Advanced Streaming Format
+*.au	audio/basic	AU Audio
+*.css	text/css	Cascading Style Sheets
+*.csv	text/csv	Comma Separated Values
+*.doc	application/msword	MS Word Document
+*.dot	application/msword	MS Word Template
+*.dtd	application/xml-dtd	Document Type Definition
+*.dwg	image/vnd.dwg	AutoCAD Drawing Database
+*.dxf	image/vnd.dxf	AutoCAD Drawing Interchange Format
+*.gif	image/gif	Graphic Interchange Format
+*.htm	text/html	HyperText Markup Language
+*.html	text/html	HyperText Markup Language
+*.jp2	image/jp2	JPEG-2000
+*.jpe	image/jpeg	JPEG
+*.jpeg	image/jpeg	JPEG
+*.jpg	image/jpeg	JPEG
+*.js	text/javascript, application/javascript	JavaScript
+*.json	application/json	JavaScript Object Notation
+*.mp2	audio/mpeg, video/mpeg	MPEG Audio/Video Stream, Layer II
+*.mp3	audio/mpeg	MPEG Audio Stream, Layer III
+*.mp4	audio/mp4, video/mp4	MPEG-4 Audio/Video
+*.mpeg	video/mpeg	MPEG Video Stream, Layer II
+*.mpg	video/mpeg	MPEG Video Stream, Layer II
+*.mpp	application/vnd.ms-project	MS Project Project
+*.ogg	application/ogg, audio/ogg	Ogg Vorbis
+*.pdf	application/pdf	Portable Document Format
+*.png	image/png	Portable Network Graphics
+*.pot	application/vnd.ms-powerpoint	MS PowerPoint Template
+*.pps	application/vnd.ms-powerpoint	MS PowerPoint Slideshow
+*.ppt	application/vnd.ms-powerpoint	MS PowerPoint Presentation
+*.rtf	application/rtf, text/rtf	Rich Text Format
+*.svf	image/vnd.svf	Simple Vector Format
+*.tif	image/tiff	Tagged Image Format File
+*.tiff	image/tiff	Tagged Image Format File
+*.txt	text/plain	Plain Text
+*.wdb	application/vnd.ms-works	MS Works Database
+*.wps	application/vnd.ms-works	Works Text Document
+*.xhtml	application/xhtml+xml	Extensible HyperText Markup Language
+*.xlc	application/vnd.ms-excel	MS Excel Chart
+*.xlm	application/vnd.ms-excel	MS Excel Macro
+*.xls	application/vnd.ms-excel	MS Excel Spreadsheet
+*.xlt	application/vnd.ms-excel	MS Excel Template
+*.xlw	application/vnd.ms-excel	MS Excel Workspace
+*.xml	text/xml, application/xml	Extensible Markup Language
+*.zip	aplication/zip	Compressed Archive
+*.xlxs application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    */
+</script>
+</html>

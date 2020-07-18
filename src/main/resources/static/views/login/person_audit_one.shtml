@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/ionicons/2.0.1/css/ionicons.min.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <style>
+        .buttonStyle{
+          margin-left: 250px
+        }
+    </style>
+</head>
+
+<body style="overflow-y:auto; overflow-x:auto;">
+<div style="padding:2px;overflow: auto;">
+    <div class="form-div-class form_eui">
+        <form id="person" method="post" class="layui-form layui-form-pane">
+
+            <div class="layui-form-item">
+                <div class="layui-inline" style="margin-left: 100px">
+                    <input type="hidden" id="id" name="id">
+                    审核结果 :
+                    <input name="isPass" type="radio" value="Y" checked="checked" style="margin-left: 25px;font-size: 13px"/>通过
+                    <input name="isPass" type="radio" value="N" style="margin-left: 25px;font-size: 13px"/>不通过
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline" style="margin-left: 100px">审核意见 :
+                    <textarea id="auditOpinion" name="auditOpinion" autocomplete="off" class="layui-textarea"
+                              style="width: 400px;height: 100px"></textarea>
+                   </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline" style="margin-left: 100px">
+                    附件 : <input id="file" name="file"
+                           data-options="buttonText:'选择文件', prompt:'请选择文件...'" style="height: 26px; width:100%">
+                    <div id="fileArea"  ></div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="easyui-linkbutton" id="saveButtonCom" style="margin-left: 120px;"
+                            data-options="iconCls:'icon-page_save',toggle:true"
+                            lay-submit>提交
+                    </button>
+                    <button class="easyui-linkbutton" id="closeButton"  data-options="iconCls:'icon-page_cancel',toggle:true"
+                            onclick="WinUtil.closeCurrDialog();">关 闭
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+</body>
+<script>
+    var PAGE_PARAM={};
+
+    $(function () {
+        PAGE_PARAM=WinUtil.getDialogParam();
+        $("#id").val(PAGE_PARAM.row.ID);
+        InitValidform();
+        EasyUI.initFilebox('#file', {width: 250});
+    });
+
+
+
+
+
+
+
+
+    var VF;
+
+    function InitValidform() {
+
+        VF = FuncUtil.initValidform({
+            target: '#person',
+            beforeSubmit: function (curform) {
+                var data = curform.serializeObject();
+                console.log(data);
+                var formData = new FormData();
+                // 拼接请求参数和上传文件
+                var files = $('input[name=file]').prop('files');
+                var fileArea = $("#fileArea").html();
+                if(data.isPass=="Y"){
+                    formData.append("status","4")
+                }else{
+                    //检查意见是否填写，没写意见不能提交
+                    var auditOpinion=$("#auditOpinion").val();
+                    if(auditOpinion==""||auditOpinion==undefined){
+                        WinUtil.MsgError({content: "请先填写审核意见"});
+                        return false;
+                    }
+                    formData.append("status","3")//不通过
+                }
+                $.each(data,function (k,v) {
+                    formData.append(k,v);
+                });
+
+                if(PAGE_PARAM.IS_EDIT){
+                    formData.append("__lemark","edit");
+                    if (fileArea.length == ""&&files.length == 0) {
+                        //WinUtil.MsgError({content: "请上传健康证明后再提交"});
+                        //return false;
+                    }
+                    if (files.length == 1) {
+                        formData.append("file",files[0])
+                    }
+                }else{
+                    formData.append("__lemark","add");
+                    if (files.length == 0) {
+                       // WinUtil.MsgError({content: ""});
+                       // return false;
+                    }else{
+                        formData.append("file",files[0])
+                    }
+                }
+                AjaxUtil.postFileReq({
+                    url: Constant.API_V1_PLUGINS + "AUDIT_PASS_FUNC",
+                    data:formData,
+                    success: function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        WinUtil.MsgInfo({content: "操作成功！"});
+                        PAGE_PARAM.OWindow.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+</script>
+</html>
+
+

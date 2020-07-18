@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <legend>搜索</legend>
+    <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">模板名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="templetName" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn layui-btn-sm" type="button" onclick="GridUtil.onSearch({target: '#dg'})">查 询</button>
+            </div>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    var $dg = $("#dg");
+    function InitDataGrid() {
+        $dg.MyDataGrid({
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            queryParams:{ }, firstLoad: true,
+            custom: {
+                code : API_IC_CODE.IC_EMAIL_TEMPLET_LIST,
+                alter: { }
+            },
+            loadFilter : function(result){
+                var data = result.data[result.reqCode];
+                return { total: data.total, rows: data.rows };
+            },
+            contextMenus:[
+                {
+                    text: "编辑", auth: "FUNC:IC_EMAIL_TEMPLET_UPDATE",
+                    onclick: function () {
+                        var row = $dg.datagrid('getSelected');
+                        WinUtil.showTopDialog({
+                            title: "编辑",
+                            width: 1200, height: 580,
+                            param: {PKID: row.PKID},
+                            url: Constant.VIEWS_IC + "/emailtemplet/ic_email_templet_add_update.shtml"
+                        });
+                    }
+                },
+                {
+                    text: "删除", auth: "FUNC:IC_EMAIL_TEMPLET_DEL",
+                    onclick: function () {
+                        $.messager.confirm($.tl('page:PAGE.COMM.CONFIRM_TITLE', '确认窗口'),
+                            $.tl('page:PAGE.COM.CONFIRM_DEL_CONTENT', '你确定要删除此项吗?'), function (r) {
+                                if (r) {
+                                    var row = $('#dg').datagrid('getSelected');
+                                    AjaxUtil.postReq({
+                                        url: Constant.API_V1_PLUGINS + "IC_EMAIL_TEMPLET_DEL",
+                                        data: {pkid: row.PKID},
+                                        success: function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            reloadDataGrid();
+                                            WinUtil.MsgInfo({content: result.msg});
+                                        }
+                                    });
+                                }
+                            });
+
+                    }
+                },
+                {
+                    text: "发送测试", auth: "FUNC:IC_EMAIL_TEMPLET_TEST_SEND",
+                    onclick: function () {
+                        var row = $('#dg').datagrid('getSelected');
+                        AjaxUtil.postReq({
+                            url: Constant.API_V1_PLUGINS + "IC_EMAIL_TEMPLET_TEST_SEND",
+                            data: {pkid: row.PKID, to: '517024112@qq.com' },
+                            success: function (result) {
+                                if (!FuncUtil.checkResult(result)) {
+                                    return;
+                                }
+                                WinUtil.MsgInfo({content: result.msg});
+                            }
+                        });
+                    }
+                },
+
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {
+                    iconCls: 'icon-add', text: '新增', auth: "FUNC:IC_SYS_SERIAL_NUMBER_ADD_EDIT",
+                    handler: function () {
+                        WinUtil.showTopDialog({
+                            title: "编辑",
+                            width: 1200, height: 580,
+                            param: {},
+                            url: Constant.VIEWS_IC + "/emailtemplet/ic_email_templet_add_update.shtml"
+                        });
+                    }
+                }, '-',
+                {
+                    iconCls:'icon-reload', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+</script>
+</html>

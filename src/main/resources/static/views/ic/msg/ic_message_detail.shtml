@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<style type="text/css">
+    .textarea{
+        width: 610px; height: 280px;
+        overflow: auto;
+    }
+</style>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <table class="search-table" style="border-collapse:separate;border-spacing:0px 10px">
+            <tr>
+                <th class="search-th-class">消息时间:</th>
+                <td class="search-td-class">
+                    <input type="text" hidden name="id" id="id">
+                    <input type="text" id="createTime" name="createTime"  readonly="readonly"  class="form-input-class input-gray" datatype="*" errormsg="不可为空！">
+
+                </td>
+            </tr>
+            <tr>
+                <th class="search-th-class">消息类型:</th>
+                <td class="search-td-class">
+                    <input type="text" id="fromAccName" name="fromAccName"   readonly="readonly" class="form-input-class input-gray" datatype="*" errormsg="不可为空！">
+
+                </td>
+            </tr>
+            <tr>
+                <th class="search-th-class">内容:</th>
+                <td class="search-td-class">
+                  <textarea id="msgBody" name="msgBody" readonly="readonly" class="layui-textarea input-gray" style="width: 100%;height: 100px"
+                            placeholder="字数限制在200字以内" maxlength="200"></textarea>
+
+                </td>
+            </tr>
+            <tr>
+                <td class="search-td-but-class" colspan="10" style="text-align: center">
+                    <button id="btn_cancel1"  type="button" class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" style="width:60px;margin-left: 40px;display: none"  onclick="WinUtil.closeCurrDialog()">关 闭</button>
+
+                </td>
+            </tr>
+        </table>
+        <!--<div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">消息时间</label>
+                <div class="layui-input-inline">
+                    <div id="createTime" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">消息发送人</label>
+                <div class="layui-input-inline">
+                    <div id="fromAccName" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>-->
+        <!--<div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">消息类型</label>
+                <div class="layui-input-inline">
+                    <div id="msgType" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>-->
+       <!-- <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">消息内容</label>
+                <div class="layui-input-inline">
+                    <div id="msgBody" class="textarea layui-input"></div>
+                </div>
+            </div>
+        </div>-->
+      <!--  <div class="layui-form-item">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-sm" type="button" onclick="javascript: closeDialog();">关闭窗口</button>
+            </div>
+        </div>-->
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        // $('#msgTitle').html(PAGE_PARAM.MSG_TITLE);
+        $('#createTime').val(PAGE_PARAM.SEND_TIME);
+        $('#fromAccName').val(PAGE_PARAM.SEND_TYPE_NAME);
+//        $('#msgType').html(PAGE_PARAM.MSG_TYPE);
+        $('#msgBody').html((PAGE_PARAM.MSG || '').replace(/\[#BR\]/g,'<br/>'));
+
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "MAIN_MY_MESSAGE_READ",
+            data: {
+                pkid: PAGE_PARAM.ID
+            },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                try{
+                    PAGE_PARAM.OWindow.reloadDataGrid();
+                    // top.getMyMsgCount();
+                }catch (ex){}
+            }
+        });
+
+    });
+
+    function closeDialog() {
+        PAGE_PARAM.OWindow.reloadDataGrid();
+        WinUtil.closeCurrDialog();
+    }
+</script>
+</html>

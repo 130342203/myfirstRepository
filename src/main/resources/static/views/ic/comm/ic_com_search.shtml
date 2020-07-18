@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+    <div id="tabs">
+        <div title="查询" style="padding:2px;">
+            <fieldset class="fieldset_eui">
+            <table class="form_table">
+                <tr>
+                    <td class="bilingual form_th"
+                        data-i18n="page:PAGE.IC_COM_SEARCH.SEARCH_OPTIONS">查询选项</td>
+                    <td>
+                        <input type="text" id="searchOption" class="layui-input input-lg120">
+                    </td>
+                    <td class="bilingual form_th"
+                        data-i18n="page:PAGE.IC_COM_SEARCH.SEARCH_EXPRESS">表达式</td>
+                    <td>
+                        <select id="searchExpress">
+                            <option value="=">等于</option>
+                            <option value=">">大于</option>
+                            <option value=">=">大于等于</option>
+                            <option value="<=">小于等于</option>
+                            <option value="<">小于</option>
+                            <option value="like">包含</option>
+                        </select>
+                    </td>
+                    <td class="bilingual form_th"
+                        data-i18n="page:PAGE.IC_COM_SEARCH.SEARCH_VALUE">值</td>
+                    <td>
+                        <input type="text" id="searchValue" class="layui-input input-lg120">
+                    </td>
+                    <td>
+                        <button class="layui-btn layui-btn-sm bilingual" type="button"
+                                onclick="onInAdd()"
+                                data-i18n="page:PAGE.IC_COM_SEARCH.BTN_OK">增加</button>
+                    </td>
+                </tr>
+            </table>
+            </fieldset>
+            <table id="dg"></table>
+            <div style="margin-top: 4px; text-align: center;">
+                <button class="layui-btn layui-btn-sm bilingual" type="button"
+                        onclick="onSure();"
+                        data-i18n="page:PAGE.IC_COM_SEARCH.BTN_OK">确认</button>
+            </div>
+        </div>
+        <!--<div title="排序" style="padding:2px;">
+        </div>-->
+    </div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+
+        $('#tabs').tabs({
+            width: $(window).width() - 6,
+            height: $(window).height() - 6
+        });
+        EasyUI.initCombobox('#searchOption', {
+            width: 140,
+            valueField: 'field',
+            textField: 'title',
+            data: PAGE_PARAM['columnList']||[]
+        });
+
+        EasyUI.initCombobox('#searchExpress', { width: 140 });
+
+
+        InitDataGrid();
+
+        InitDGDefaultData();
+    });
+
+    function InitDGDefaultData() {
+        if(PAGE_PARAM.lastFlagQData){
+            eval("var flagQData = " + FuncUtil.decodeCustom(PAGE_PARAM.lastFlagQData) + ";");
+            if(flagQData.qy){
+                $.each(flagQData.qy, function (i, it) {
+                    $dg.datagrid('appendRow', it);
+                });
+            }
+        }
+    }
+
+    var $dg = $("#dg");
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            identity: 'dg',
+            width: $('#tabs').width() - 5,
+            height: $(window).height() - $('fieldset').outerHeight() - 120,
+            pagination: false,
+            columns:[[
+                {field: "SEARCH_NAME", title: "查询选项", width: 260},
+                {field: "SEARCH_EXP_NAME", title: "表达式", width: 180 },
+                {field: "SEARCH_VALUE", title: "值", width: 220 },
+                {field: "RM", title: "操作", width: 130, formatter: function (value, row, index) {
+                    return '<a href="javascript:void(0)" onclick="doRemoveRow(\''+index+'\');">移除</a>';
+                }}
+            ]],
+            data: [],
+            validAuthContextMenu: function (row, items) {
+                return items;
+            }
+        });
+    }
+
+    function onInAdd() {
+        var o1 = $('#searchOption').combobox('getText');
+        var o = $('#searchOption').combobox('getValue');
+        var e1 = $('#searchExpress').combobox('getText');
+        var e = $('#searchExpress').combobox('getValue');
+        var v = $('#searchValue').val();
+        if($.trim(o) == '' || $.trim(e) == '' || $.trim(v) == ''){
+            WinUtil.MsgError({ content: "信息不能为空" });
+            return;
+        }
+        $dg.datagrid('appendRow', {
+            SEARCH_NAME: o1,
+            SEARCH_OPTION: o,
+            SEARCH_EXP_NAME: e1,
+            SEARCH_EXPRESS: e,
+            SEARCH_VALUE: v
+        });
+    }
+
+    function onSure() {
+        if(PAGE_PARAM.callback){
+            var rows = $dg.datagrid('getRows');
+            var qy = [];
+            $.each(rows, function (k, it) {
+                qy.push({ f: it.SEARCH_OPTION, j: it.SEARCH_EXPRESS,  v: it.SEARCH_VALUE });
+            });
+            var orgData =  FuncUtil.encodeCustom(JSON.stringify({qy: rows, qs: []}));
+            PAGE_PARAM.callback(qy, [], orgData);
+            WinUtil.closeCurrDialog();
+        }
+    }
+
+    function doRemoveRow(index) {
+        $dg.datagrid('deleteRow', index);
+    }
+
+</script>
+</html>

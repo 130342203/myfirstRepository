@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2">
+                <tr>
+                    <th style="width: 80px;" align="right">字段：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="field" id="field" />
+                    </td>
+                    <th style="width: 80px;" align="right">表格码：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="dgCode" id="dgCode" />
+                    </td>
+                    <td colspan="2">
+                        &nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>查询</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="clearBtn" onclick="GridUtil.onReset({target: '#dg'})"><span>重置</span></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    var $dg = $("#dg");
+    function InitDataGrid() {
+        $dg.MyDataGrid({
+            title:'数据表格列表',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            queryParams : {},
+            enableLineEdit: true, firstLoad: true,
+            url: Constant.API_V1_PLUGINS + 'IC_DATA_GRID_LIST',
+            columns: [[
+                {field: "FIELD", title: "字段", width: 220, editor: {type: 'text'}},
+                {field: "TITLE", title: "标题", width: 160, editor: {type: 'text'}},
+                {field: "WIDTH", title: "宽度", width: 90, editor: {type:'numberbox',options:{precision:0}}},
+                {field: "SORT_NUM", title: "排序", width: 90, editor: {type:'numberbox',options:{precision:0}}},
+                {field: "DG_CODE", title: "表格码", width: 200, editor: {type: 'text'}},
+                {field: "EXTRA_ITEM", title: "其他参数", width: 200, editor: {type: 'text'}},
+                {field: "GP_INDEX", title: "分组号", width: 110, editor: {type:'numberbox',options:{precision:0}}}
+            ]],
+            contextMenus:[
+                {text : "删除", auth:"",
+                    onclick: function(){
+                        $.messager.confirm(('确认窗口'),
+                            ('你确定要删除此项吗?'), function(r){
+                                if (r){
+                                    var row = $dg.datagrid('getSelected');
+                                    AjaxUtil.post({
+                                        url: Constant.API_V1_PLUGINS + "IC_DATA_GRID_DEL",
+                                        data: {pkid: row.PKID},
+                                        success : function (result) {
+                                            if (!FuncUtil.checkResult(result)) {
+                                                return;
+                                            }
+                                            $dg.datagrid('reload');
+                                            WinUtil.MsgInfo({ content: result.msg });
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                }
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                },'-',
+                {
+                    iconCls: 'icon-table_add', auth: "", text: '新增行',
+                    handler: function () {
+                        GridEdit.DataGrid.insertDGEditRow($dg, {});
+                    }
+                },'-',
+                {
+                    iconCls: 'icon-table_save', auth: "", text: '保存行',
+                    handler: function () {
+                        var dt = GridEdit.DataGrid.getEditChangeData($dg);
+                        if (!dt || dt.length == 0) {
+                            return;
+                        }
+
+                        AjaxUtil.postReq({
+                            url: Constant.API_V1_PLUGINS + "IC_DATA_GRID_BATCH_EDIT",
+                            data: {
+                                editData: FuncUtil.encodelg_(JSON.stringify(dt))
+                            },
+                            success: function (result) {
+                                if (!FuncUtil.checkResult(result)) {
+                                    return;
+                                }
+                                GridEdit.DataGrid.endAndClearDGEdit($dg);
+                                WinUtil.MsgInfo({content: result.msg});
+                                $dg.datagrid('reload');
+                            }
+                        });
+                    }
+                },'-',
+                {
+                    iconCls: 'icon-line-edit-cancel', auth: "", text: $.tl('page:PAGE.COMM.LINE_CANCEL', '取消行'),
+                    handler: function () {
+                        GridEdit.DataGrid.cancelAndClearDGEdit($dg);
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+</script>
+</html>

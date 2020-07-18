@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="./personel.js"></script>
+
+    <link href="/js/plugins/codemirror/lib/codemirror.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/lib/codemirror.js"></script>
+    <link href="/js/plugins/codemirror/theme/erlang-dark.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/mode/sql/sql.js"></script>
+    <script src="/js/plugins/codemirror/mode/xml/xml.js"></script>
+    <link rel="stylesheet" href="/js/plugins/codemirror/addon/hint/show-hint.css"/>
+    <script src="/js/plugins/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/js/plugins/codemirror/addon/hint/sql-hint.js"></script>
+    <script src="/js/plugins/my_upload_view.js"></script>
+    <script src="/js/plugins/my_easyui_multistage_combox.js"></script>
+    <script src="/js/plugins/picture/jquery.touchSwipe.min.js"></script>
+    <script src="/js/plugins/picture/jkresponsivegallery.js"></script>
+    <link rel="stylesheet" href="/js/plugins/pic/jkresponsivegallery.css"/>
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .btn {
+        width: 90px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background: cornflowerblue;
+        color: #fff;
+        border-radius: 7px;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .title {
+        width: 100%;
+        height: 32px;
+        line-height: 32px;
+        background: #f2f2f2;
+        margin: 10px 0;
+    }
+
+    .title span {
+        padding-left: 10px;
+    }
+
+    .clear {
+        overflow: hidden;
+    }
+
+    .left {
+        width: 85%;
+        float: left;
+    }
+
+    .right {
+        width: 13%;
+        float: right;
+    }
+
+    .person {
+        width: 110px;
+        height: 140px;
+        border: 1px solid #ccc;
+        float: right;
+    }
+
+    .table .btn {
+        width: 110px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .right .btn {
+        float: right;
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+
+    .tbBox {
+        margin: 0 auto;
+    }
+
+
+</style>
+<body>
+<div class="easyui-panel" style="padding:30px 60px;">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;">
+        <div class="title"><span>个人详细信息</span></div>
+        <div class="clear">
+            <div class="left">
+                <table class="mytable">
+                    <tr>
+                        <td> 姓名<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" id="realName"
+                                   name="realName" datatype="*" errormsg="姓名不可为空！"></td>
+                        <td> 性别<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" name="sex" id="sex" datatype="easyui_combo"
+                                   errormsg="性别不可以为空！"></td>
+                        <td> 民族<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" id="nation" name="nation" datatype="easyui_combo"
+                                   errormsg="民族不可以为空！">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> 国籍<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" id="countryName" name="countryName" datatype="easyui_combo"
+                                   errormsg="国籍不可以为空！">
+                            <input type="text" id="country" name="country" hidden="hidden">
+                        </td>
+                        <td> 证件类型<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" id="idType" name="idType" datatype="easyui_combo"
+                                   errormsg="国籍不可以为空！"></td>
+                        <td> 证件编码<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" id="idNo" name="idNo" datatype="*" errormsg="证件编码不可为空！"></td>
+                    </tr>
+                    <tr>
+                        <td> 电子邮箱<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" id="email" name="email" datatype="*" errormsg="电子邮箱不可为空！">
+                        </td>
+                        <td> 出生日期<span style="color: red">*</span>:</td>
+                        <td><input name="birthday" id="birthday" class="easyui-datebox"
+                                   onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" maxlength=11 autocomplete="off"
+                                   datatype="easyui_combo" errormsg="出生日期不可为空！"></td>
+                        <td> 所属单位<span style="color: red">*</span>:</td>
+                        <td><input type="text" style="width: 140px;cursor: pointer;" id="companyName" name="companyName"
+                                   readonly="readonly" onclick="changePid()" class="form-input-class select_input">
+                            <!--  <td><input class="easyui-textbox" id="companyName" name="companyName" datatype="easyui_combo"
+                                         errormsg="所属单位不可以为空！">-->
+                            <input type="text" id="company" name="company" hidden="hidden"></td>
+                    </tr>
+                    <tr>
+                        <td> 职务:</td>
+                        <td><input class="easyui-textbox" id="duty" name="duty"></td>
+                        <td> 通讯地址:</td>
+                        <td colspan="3">
+                            <select id="addressProvince" name="addressProvince"></select>
+                            <select id="addressCity" name="addressCity"></select>
+                            <select id="addressArea" name="addressArea"></select>
+                            <input class="easyui-textbox" style="width: 150px;height: 25px" id="addressDetail"
+                                   name="addressDetail">
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <!-- <td> 手机号<span style="color: red">*</span>:</td>
+                         <td><input class="easyui-numberbox" id="phone" name="phone"
+                                    data-options="validType: 'phoneAndtel'" autocomplete="new-password" datatype="*" errormsg="手机号不可为空！"></td>-->
+
+                    </tr>
+                    <tr>
+                        <td> 手机号<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-numberbox" id="phone" name="phone"
+                                   data-options="validType: 'phoneAndtel'" autocomplete="new-password" datatype="*"
+                                   errormsg="手机号不可为空！"></td>
+                        <td><input class="easyui-textbox" data-options="prompt:'请输入验证码...'" style="width: 100px"
+                                   id="eCode" name="eCode"></td>
+                        <td>
+                            <a href="javascript:void(0)" class="searchBtn"
+                               onclick="updatephone()"><span>获取手机验证码</span></a>
+                        </td>
+                        <td colspan="2"><input class="easyui-textbox" data-options="prompt:'请输入手机验证码...'" id="phoneCode"
+                                               name="phoneCode">
+                            <p style="color: red;line-height: 26px;">*如在2分钟内未收到，请重新获取</p></td>
+
+                    </tr>
+                    <tr id="is_boby">
+                        <td>147培训机构:</td>
+                        <td><input type="text" style="width: 140px;cursor: pointer;" id="autitingBodyName"
+                                   name="autitingBodyName" readonly="readonly" onclick="trainCom()"
+                                   class="form-input-class select_input">
+                            <!-- <input class="easyui-textbox" id="autitingBodyName" name="autitingBodyName">-->
+                            <input type="hidden" id="autitingBody" name="autitingBody">
+                        </td>
+                        <td> 密码<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" type="password" id="password" name="password"
+                                   data-options="validType: 'password'" autocomplete="new-password" datatype="*"
+                                   errormsg="密码不可为空！"></td>
+                        <td> 确认密码<span style="color: red">*</span>:</td>
+                        <td><input class="easyui-textbox" type="password" id="password2" name="password2"
+                                   data-options="validType: 'password'" autocomplete="new-password" datatype="*"
+                                   errormsg=确认密码不可为空！"></td>
+                    </tr>
+                    <!--<tr>
+                        <td> 手机号: </td><td><input class="easyui-textbox" id="phone" name="phone"></td>
+                        <td> 验证码: </td><td><input class="easyui-textbox" id="verificationCode" name="verificationCode"></td>
+                    </tr>-->
+                </table>
+            </div>
+            <div class="right">
+                <div class="person" id="headPhotoPicture" style="margin-right: 20px">
+
+                </div>
+                <div>
+                    <p style="font-size:12px; line-height:15px;
+                     color: red;">两寸标准蓝底正面免冠彩色照片,大小要求：354*472 标准二寸照片大小为：
+                        3.5*4.5厘米，对应为413*513像素。</p>
+                </div>
+                <div class="btn" id="headPhoto" style="margin-right: 20px">
+                    上传头像
+                </div>
+            </div>
+        </div>
+        <div class="title"><span>学历及教育情况</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 毕业院校:</td>
+                    <td><input class="easyui-textbox" id="college" name="college"></td>
+                    <td> 是否属于理工类专业<span style="color: red">*</span>:</td>
+                    <td><input class="easyui-textbox" id="isSe" name="isSe" datatype="easyui_combo"
+                               errormsg=是否属于理工类专业不可为空！"></td>
+                </tr>
+                <tr>
+                    <td> 学历:</td>
+                    <td><input class="easyui-textbox" id="education" name="education"></td>
+                    <td> 毕业证书取得日期:</td>
+                    <td>
+                        <input name="diplomaDate" id="diplomaDate" class="easyui-datebox"
+                               onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"
+                               autocomplete="off">
+                    </td>
+                </tr>
+                <tr>
+                    <td> 学历证书:</td>
+                    <td id="educationCredentialPicture">
+
+                    <td colspan="3">
+                        <input id="educationCredential" name="educationCredential"
+                               data-options="buttonText:'选择文件', prompt:'请选择文件...'"
+                               accept="image/jpeg,image/gif,image/png" style="height: 26px; width:100%">
+                        <!--  <div class="btn" id="educationCredential"> 上传</div>-->
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+
+        <!--<div class="">
+            <div id="gallery" class="rthumbnail">
+                <a href="/img/zm.png">
+                    <img src="/img/zm.png" width="150" height="112"></a>
+                <div class="rcaption">一对鸟在看日出 <a href="###">一个链接</a></div>
+            </div>
+        </div>-->
+        <div class="title"><span>个人证件照片</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 身份证正面:</td>
+                    <td id="idCardFrontPicture"></td>
+                    <td>
+                        <div class="btn" id="idCardFront"> 上传</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td> 身份证反面:</td>
+                    <td id="idCardReversePicture"></td>
+                    <td>
+                        <div class="btn" id="idCardReverse"> 上传</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td> 手持身份证:</td>
+                    <td id="idCardHoldPicture"></td>
+                    <td>
+                        <div class="btn" id="idCardHold"> 上传</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align:center;padding:5px 0">
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-page_save',toggle:true" lay-submit>保 存
+            </button>
+            <!--<button class="easyui-linkbutton" type="button" data-options="iconCls:'icon-page_cancel',toggle:true"
+                    onclick="WinUtil.closeCurrDialog();">关 闭
+            </button>-->
+        </div>
+    </form>
+
+</div>
+</body>
+<script>
+
+
+    var editor;
+    var PAGE_PARAM = {};
+    var have_147 = "N";
+    var UIV_uploadPhoto, UIV_educationCredential, UIV_idCardFront, UIV_idCardReverse, UIV_idCardHold;
+
+    $(function () {
+        //enlargeImg();//初始化图片查看点击事件
+        EasyUI.initFilebox('#educationCredential', {width: 250});
+        PAGE_PARAM = WinUtil.getDialogParam();
+        InitValidform();
+        $('#phone').numberbox('textbox').attr('maxlength', 11);
+        UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+            imgAreaId: '#headPhotoPicture', imgWidth: 110, imgHeight: 140, size: 0.4
+        });
+        // UIV_educationCredential = $("#educationCredential").MyUploadImageView({
+        //     imgAreaId: '#educationCredentialPicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+        // });
+        UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+            imgAreaId: '#idCardFrontPicture',
+            imgWidth: 80,
+            imgHeight: 80,
+            size: 0.4,
+            isfBorder: true,
+            defImgSrc: "/img/zm.png"
+        });
+        UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+            imgAreaId: '#idCardReversePicture',
+            imgWidth: 80,
+            imgHeight: 80,
+            size: 0.4,
+            isfBorder: true,
+            defImgSrc: "/img/back.png"
+        });
+        UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+            imgAreaId: '#idCardHoldPicture',
+            imgWidth: 80,
+            imgHeight: 80,
+            size: 0.4,
+            isfBorder: true,
+            defImgSrc: "/img/handon.png"
+        });
+
+        AjaxUtil.postSyncReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {
+                codes: "PER_SEX,IC_ISF,IC_SYS_COUNTRY,BS_ORGANIZATION_TRAIN,EX_ORG_ID,PER_NATION,PER_ID_TYPE,PER_EDUCATION,BS_PARAMETER_AUTH"
+            },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                var is_147 = data['BS_PARAMETER_AUTH'];
+                console.log(is_147);
+                if (is_147[0].value == "false") {
+                    $("#is_boby").hide();
+                    have_147 = "N";
+                } else {
+                    have_147 = "Y";
+                }
+                EasyUI.initCombobox('#countryName', {
+                    data: data['IC_SYS_COUNTRY'],
+                    onChange: function (a, b) {
+                        $("#country").val(a);
+                    }
+                });
+                /* EasyUI.initCombobox('#companyName', {
+                     data: data['EX_ORG_ID'],
+                     editable:true,
+                     onChange:function (a,b) {
+                         $("#company").val(a);
+                     }
+                 });*/
+                EasyUI.initCombobox('#sex', {
+                    data: data['PER_SEX']
+                });
+                EasyUI.initCombobox('#isSe', {
+                    data: data['IC_ISF']
+                });
+                EasyUI.initCombobox('#nation', {
+                    data: data['PER_NATION']
+                });
+                EasyUI.initCombobox('#idType', {
+                    data: data['PER_ID_TYPE']
+                });
+                EasyUI.initCombobox('#education', {
+                    data: data['PER_EDUCATION']
+                });
+
+                /*EasyUI.initCombobox('#autitingBodyName', {
+                    data: data['BS_ORGANIZATION_TRAIN'],
+                    editable:true,
+                    onChange:function (a,b) {
+                        $("#autitingBody").val(a);
+                    }
+                });*/
+                // EasyUI.initCombobox('#isRep', {
+                //     width: 140,
+                // });
+            }
+        });
+
+
+        $("body").MyEasyUIMultistageCombox({
+            url: Constant.API_V1_PLUGINS + "IC_SYS_AREA_SELECT",
+            level: [
+                {__id: 'addressProvince'}, //国家
+                {__id: 'addressCity'}, //城市
+                {__id: 'addressArea'} //乡镇
+            ]
+            , textField: 'text'
+            , valueField: 'value'
+        });
+
+
+        //initComboGrid();
+        //initComboGrid2();
+    });
+
+    /*//图片放大悬浮
+     $(function(){
+         var x = 22;
+         var y = 20;
+         $("td.smallimage").hover(function(e){  //绑定一个鼠标悬停时事件
+             //新建一个p标签来存放大图片，this.rel就是获取到a标签的大图片的路径，然后追加到body中
+             $("body").append('<p id="bigimage"><img src="'+ this.rel + '" alt="" /></p>');
+             //改变小图片的透明度为0.5，结合上面的CSS，看起来就象是图片变暗了
+             $(this).find('img').stop().fadeTo('slow',0.5);
+             //将鼠标的坐标和声明的x，y做运算并赋值给大图片绝对定位的坐标，然后以fadeIn的效果显示
+             $("#bigimage").css({top:(e.pageY - y ) + 'px',left:(e.pageX + x ) + 'px'}).fadeIn('fast');
+         },function(){ //鼠标离开后
+             //将变暗的图片复原
+             $(this).find('img').stop().fadeTo('slow',1);
+             //移除新增的p标签
+             $("#bigimage").remove();
+         });
+         $("td.smallimage").mousemove(function(e){  //绑定一个鼠标移动的事件
+             //将鼠标的坐标和声明的x，y做运算并赋值给大图片绝对定位的坐标，这样大图片就能跟随图片而移动了
+             $("#bigimage").css({top:(e.pageY -y ) + 'px',left:(e.pageX + x ) + 'px'});
+         });
+     });
+ */
+    /* //查看大图
+     function enlargeImg() {
+         $(".enlargeImg").click(function() {
+             $(this).after("<div  onclick='closeImg()' class='enlargeImg_wrapper'></div>");
+             var imgSrc = this.querySelector("td img").src;
+             $(".enlargeImg_wrapper").css("background-image", "url(" + imgSrc + ")");
+             $('.enlargeImg_wrapper').fadeIn(200);
+         })
+     }
+     //关闭并移除图层
+     function closeImg() {
+         $('.enlargeImg_wrapper').fadeOut(200).remove();
+     }*/
+
+
+    function updatephone() {
+        WinUtil.MsgWarn({content: "暂未开启该功能"})
+
+    }
+
+    /* function getPic() {
+       $("#idCardFrontPicture").append("<a href=\"/img/zm.png\">\n" +
+           "             <img src=\"/img/zm.png\" width=\"150\" height=\"112\"></a>");
+         $(function() {
+             $('#idCardFrontPicture').responsivegallery();
+         });
+     }*/
+    function submitForm() {
+
+        if (UIV_uploadPhoto) {
+            var file = UIV_uploadPhoto.getFile();
+            console.log(file);
+        }
+    }
+
+    // 所属单位
+    function changePid() {
+        WinUtil.showTopDialog({
+            title: '单位选择',
+            width: '900', height: '500',
+            url: Constant.VIEWS_COM + "/com_organ_register_list.shtml",
+            param: {
+                queryParams: {
+                    dr: 'N',
+                    status: 'QY',
+                },
+                callBack: function (resultData) {
+                    $('#company').val(resultData.ID);
+                    $('#companyName').val(resultData.ORG_NAME);
+                }
+            }
+        });
+    }
+
+    // 147培训机构
+    function trainCom() {
+        WinUtil.showTopDialog({
+            title: '单位选择',
+            width: '900', height: '500',
+            url: Constant.VIEWS_COM + "/com_organ_register_list.shtml",
+            param: {
+                queryParams: {
+                    dr: 'N',
+                    status: 'QY',
+                    orgType: "PX",
+                },
+                callBack: function (resultData) {
+                    $('#autitingBody').val(resultData.ID);
+                    $('#autitingBodyName').val(resultData.ORG_NAME);
+                }
+            }
+        });
+    }
+
+    /* function initComboGrid() {
+
+         $("#countryName").MyComboGrid({
+             idField: 'ID',    //实际存储值
+             textField: 'NAME',   //文本显示值
+             panelWidth: 250,
+             panelHeight: 240,
+             width: 140,
+             url: Constant.API_V1_PLUGINS + "IC_SYS_COUNTRY_SELECT",
+             loadFilter: function (data) {
+                 return data.data.IC_SYS_COUNTRY_SELECT;
+             },
+             pagination: false,          //关闭分页栏
+             columns: [[
+                 {field: 'NAME', title: $.tl('', '中文'), width: 70},
+                 {field: 'ENAME', title: $.tl('', '英文'), width: 70},
+             ]],
+             onClickRow: function (index, row) {
+                 $("#country").val(row.ID);
+             },
+         });
+     }*/
+
+    /*function initComboGrid2() {
+
+        $("#companyName").MyComboGrid({
+            idField: 'ORG_NAME',    //实际存储值
+            textField: 'ORG_NAME',   //文本显示值
+            panelWidth: 250,
+            panelHeight: 240,
+            width: 140,
+            url: Constant.API_V1_PLUGINS + "BS_ORGANIZATION_SELECT",
+            loadFilter: function (data) {
+                return data.data.BS_ORGANIZATION_SELECT;
+            },
+            pagination: false,          //关闭分页栏
+            columns: [[
+                {field: 'ORG_NAME', title: $.tl('', '公司名称'), width: 70},
+            ]],
+            onClickRow: function (index, row) {
+                $("#company").val(row.ID);
+            },
+        });
+
+        $("#autitingBodyName").MyComboGrid({
+            idField: 'ORG_NAME',    //实际存储值
+            textField: 'ORG_NAME',   //文本显示值
+            panelWidth: 250,
+            panelHeight: 240,
+            width: 140,
+            url: Constant.API_V1_PLUGINS + "BS_ORGANIZATION_TRAIN",
+            loadFilter: function (data) {
+                return data.data.BS_ORGANIZATION_TRAIN;
+            },
+            pagination: false,          //关闭分页栏
+            columns: [[
+                {field: 'ORG_NAME', title: $.tl('', '公司名称'), width: 70},
+            ]],
+            onClickRow: function (index, row) {
+                $("#autitingBody").val(row.ID);
+            },
+        });
+    }*/
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit: function (curform) {
+                var boo_idNo = ifIdNo();
+                if (boo_idNo == false) {
+                    WinUtil.MsgError({content: "身份证位数不符请查看！"})
+                    return false
+                }
+                var educationCredential = $('input[name=educationCredential]').prop('files');
+                var data = curform.serializeObject();
+                var formData = new window.FormData();
+                if (data.password != data.password2) {
+                    WinUtil.MsgError({content: "密码与确认密码不同，请重新输入！"})
+                    return false
+                }
+                $.each(data, function (k, v) {
+                    formData.append(k, v);
+                });
+                if (have_147 == "Y") {
+                    if ($("#autitingBody").val() == '') {
+                        WinUtil.MsgError({content: "对不起147审核机构不可以为空！"});
+                        return false;
+                    }
+                }
+
+                var file1 = UIV_uploadPhoto.getFile();
+                if (file1 != undefined) {
+                    formData.append("headPhotoPicture", file1);
+                } else {
+                    WinUtil.MsgError({content: "请上传头像！"});
+                    return false;
+                }
+                /*var file2 = UIV_educationCredential.getFile();
+                if (file2 != undefined) {
+                    formData.append("educationCredentialPicture", file2);
+                }*/
+
+                if (educationCredential.length == 1) {
+                    formData.append("educationCredentialPicture", educationCredential[0]);
+                } else {
+                    WinUtil.MsgError({content: "请上传学历证书！"});
+                    return false;
+                }
+                var file3 = UIV_idCardFront.getFile();
+                if (file3 != undefined) {
+                    formData.append("idCardFrontPicture", file3);
+                } else {
+                    WinUtil.MsgError({content: "请上传身份证正面照！"});
+                    return false;
+                }
+                var file4 = UIV_idCardReverse.getFile();
+                if (file4 != undefined) {
+                    formData.append("idCardReversePicture", file4);
+                } else {
+                    WinUtil.MsgError({content: "请上传身份证反面照！"});
+                    return false;
+                }
+                var file5 = UIV_idCardHold.getFile();
+                if (file5 != undefined) {
+                    formData.append("idCardHoldPicture", file5);
+                } else {
+                    WinUtil.MsgError({content: "请上传手持身份证照！"});
+                    return false;
+                }
+                AjaxUtil.postFileReq({
+                    url: Constant.API_V1_PLUGINS + "BS_USER_ADD",
+                    data: formData,
+                    success: function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({content: result.msg});
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+
+</script>
+</html>

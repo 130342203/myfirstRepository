@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>通用-单位选择</title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+        <table class="search-table">
+            <tr>
+                <th class="search-th-class">机构名称</th>
+                <td class="search-td-class">
+                    <input type="text" id="orgName" name="orgName" autocomplete="off" class="easyui-textbox" style="width: 150px"/>
+                </td>
+                <th class="search-th-class">机构类型</th>
+                <td class="search-td-class">
+                    <input type="text" id="orgType" name="orgType" autocomplete="off" class="easyui-textbox" style="width: 150px"/>
+                </td>
+                <th class="search-th-class">公司类型</th>
+                <td class="search-td-class">
+                    <input type="text" id="companyType" name="companyType" autocomplete="off" class="easyui-textbox" style="width: 150px"/>
+                </td>
+                <td class="search-td-but-class" colspan="8">
+                    <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>查 询</span></a>
+                    <a href="javascript:void(0)" class="clearBtn" onclick="GridUtil.onReset({target: '#dg'})"><span>清 空</span></a>
+
+                </td>
+            </tr>
+           <!-- <tr>
+                <td class="search-td-but-class" colspan="8" >
+                <a href="javascript:void(0)" class="searchBtn" onclick="checkRows()"><span>选 中</span></a>
+                </td>
+            </tr>-->
+        </table>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    var PAGE_PARAM={};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        // 初始化下拉列表
+        AjaxUtil.postReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {codes: "BS_ORG_TYPE,BS_COMPANY_TYPE"},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                EasyUI.initCombobox('#orgType', {
+                    data: [{text: '请选择', value: ''}].concat(data['BS_ORG_TYPE'])
+                });
+                EasyUI.initCombobox('#companyType', {
+                    data: [{text: '请选择', value: ''}].concat(data['BS_COMPANY_TYPE'])
+                });
+            }
+        });
+        InitDataGrid();
+    });
+
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            title: '机构列表',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 10,
+            firstLoad: true, pagination: true, enableLineEdit: false,
+            queryParams: PAGE_PARAM.queryParams,
+            custom: {
+                code: 'IC_COM_ORGAN'
+            },
+            validAuthContextMenu: function (row, items) {
+                return items;
+            },
+            // onDblClickRow: function (i, row) {
+            //     if($.isFunction(PAGE_PARAM.callBack)){
+            //         PAGE_PARAM.callBack(row);
+            //     }
+            //     WinUtil.closeCurrDialog();
+            // }
+            toolbar: [
+                "_",
+                {
+                    iconCls:'icon-table_save', text: '提交勾选项', auth:"",
+                    handler: function () {
+                        checkRows();
+                    }
+                }
+            ],
+        });
+    }
+
+
+    function checkRows(){
+        var rows = $('#dg').datagrid('getChecked');
+        if(rows.length==0){
+            WinUtil.MsgError({content:"请至少勾选一行数据"});
+            return false;
+        }
+        // var dataLineKey="";
+        // var dataLineValue="";
+        // $.each(rows,function (index,value) {
+        //     dataLineKey+=value.ORG_NAME+',';
+        //     dataLineValue+=value.ID+',';
+        // });
+        PAGE_PARAM.callBack(rows);
+        WinUtil.closeCurrDialog();
+    }
+</script>
+</html>

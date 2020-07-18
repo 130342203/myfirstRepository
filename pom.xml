@@ -5,7 +5,7 @@
 
 	<groupId>com.ck</groupId>
 	<artifactId>demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>test606</name>
@@ -86,13 +86,6 @@
 			<version>1.2.7</version>
 
 		</dependency>
-		<!--<dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-log4j12</artifactId>
-		<version>1.7.10</version>
-			<scope>provided</scope>
-		</dependency>-->
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -159,7 +152,7 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>3.14</version>
+			<version>3.16</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
 		<dependency>
@@ -186,11 +179,18 @@
 			<groupId>net.sourceforge.tess4j</groupId>
 			<artifactId>tess4j</artifactId>
 			<version>3.3.1</version>
+<!--			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xmlgraphics</groupId>
+					<artifactId>xmlgraphics-commons</artifactId>
+				</exclusion>
+			</exclusions>-->
 		</dependency>
 		<dependency>
 			<groupId>com.github.junrar</groupId>
 			<artifactId>junrar</artifactId>
 			<version>0.7</version>
+
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
@@ -207,14 +207,110 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
         </dependency>
+		<!-- https://mvnrepository.com/artifact/it.sauronsoftware/javabase64 -->
+		<!--<dependency>
+			<groupId>it.sauronsoftware</groupId>
+			<artifactId>javabase64</artifactId>
+			<version>1.3.1</version>
+		</dependency>-->
+		<dependency>
+			<groupId>it.sauronsoftware</groupId>
+			<artifactId>javabase64</artifactId>
+			<version>1.3.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/libs/javabase64-1.3.1.jar</systemPath>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.13.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.sourceforge.htmlunit/htmlunit -->
+		<dependency>
+			<groupId>net.sourceforge.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<version>2.40.0</version>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>local</id>
+			<!--默认运行配置-->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<activeProfile>local</activeProfile>
+			</properties>
+		</profile>
+		<profile>
+		     <id>test</id>
+		     <properties>
+		         <activeProfile>test</activeProfile>
+		     </properties>
+		 </profile>
+		<profile>
+          <id>pro</id>
+          <properties>
+              <activeProfile>pro</activeProfile>
+           </properties>
+       </profile>
+	</profiles>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/webapp</directory>
+				<targetPath>META-INF/resources</targetPath>
+				<includes>
+					<include>**/**</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/**</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.ck.Test606Application</mainClass>
+				</configuration>
+
+				<!--<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4.1</version>-->
+
+				<!--<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptor>assembly/zip.xml</descriptor>
+					&lt;!&ndash;<finalName>${artifactId}</finalName>&ndash;&gt;
+					<finalName>demo</finalName>
+				</configuration>
+				<executions>
+					<execution>
+						<id>create-archive</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>-->
 			</plugin>
 		</plugins>
 	</build>

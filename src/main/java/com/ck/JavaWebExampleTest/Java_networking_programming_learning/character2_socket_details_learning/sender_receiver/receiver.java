@@ -24,7 +24,7 @@ public class receiver {
             new receiver().receive();
         }else {
             stopWay = 1;
-            savePath = "G:\\1.pdf";
+            savePath = "\"D:\\\\myProjects\\\\test\"+File.separator+begin+\".text\"";
             new receiver().receive();
         }
         long end = System.currentTimeMillis();

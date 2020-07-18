@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">服务代码</label>
+                <div class="layui-input-inline">
+                    <input type="hidden" id="ordServCode" name="ordServCode" value="" />
+                    <input type="text" id="servCode" name="servCode" autocomplete="off" datatype="s4-80" errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">顺序值</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="sort" datatype="n" errormsg="请输入整数！" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">事务开始/结束</label>
+            <div class="layui-input-pane">
+                <input type="checkbox" name="transBegin" lay-skin="primary" value="Y">
+                <input type="checkbox" name="transEnd" lay-skin="primary" value="Y">
+            </div>
+        </div>
+        <fieldset class="fieldset_eui">
+            <legend>SQL Service</legend>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">SQL CODE</label>
+                    <div class="layui-input-inline">
+                        <input id="sqlCode" type="text" name="sqlCode" autocomplete="off" class="layui-input">
+                    </div>
+                    <span style="color: gray;">* 如果Service仅执行SQL，请填写，否则不要填写。</span>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">SQL Mode</label>
+                    <div class="layui-input-inline">
+                        <select id="sqlMode" name="sqlMode">
+                            <option value="" selected>--请选择--</option>
+                            <option value="SELECT_ONE">SELECT_ONE</option>
+                            <option value="SELECT_LIST">SELECT_LIST</option>
+                            <option value="SELECT_LIST_PAGE">SELECT_LIST_PAGE</option>
+                            <option value="INSERT">INSERT</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-sm" lay-submit lay-filter="demo1">提 交</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.FUNC_CODE && PAGE_PARAM.SERV_CODE ? true : false;
+        $('#ordServCode').val(PAGE_PARAM.SERV_CODE);
+        EasyUI.initCombobox('#servType', {});
+        EasyUI.initCombobox('#sqlMode', { width: 180 });
+
+        EasyUI.initTextboxSelect('#sqlCode', {
+            handler: function ($target) {
+
+                WinUtil.showTopDialog({
+                    title : "选择执行SQL",
+                    width: 750, height : 370,
+                    param: {
+                        FUNC_CODE: "IC_SELECT_SQL_LIST",
+                        MULTI_SELECT: false, DEFAULT_VALUE: $target.textbox('getValue') || '',
+                        SELECTED_CALL : function (selectData) {
+                            $target.textbox({ value: selectData.CODE });
+                            FuncUtil.setReadOnly('#servCode').val("EXEC_SQL");
+                        }
+                    },
+                    url: ICViews.IC_SELECT_LIST
+                });
+
+            },
+            clearHandler: function ($target) {
+                $target.textbox({ value: "" });
+                FuncUtil.setReadOnly('#servCode', false).val('');
+            }
+        });
+
+        if(PAGE_PARAM.IS_EDIT){
+            AjaxUtil.postReq({
+                url: Constant.API_V1_PLUGINS + "IC_SERV_GET",
+                data: {funcCode: PAGE_PARAM.FUNC_CODE, servCode: PAGE_PARAM.SERV_CODE },
+                success: function (result) {
+                    if(!FuncUtil.checkResult(result)){
+                        return;
+                    }
+                    var serv = ToolUtil.toCamelCase(result.data.IC_SERV_GET ||{});
+                    FuncUtil.parseForm(serv);
+                    if(serv.sqlCode){
+                        FuncUtil.setReadOnly('#servCode').val("EXEC_SQL");
+                    }
+                }
+            });
+        }
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeCheck:function(curform){
+                var val = $.trim($('#sqlCode').val());
+                if(val != ''){
+                    $('#className').val("-");
+                }
+                return true;
+            },
+            datatype: {
+                "className" : function (gets,obj,curform,regxp) {
+                    var val = $.trim($('#sqlCode').val());
+                    if(val == ''){
+                        if($.trim(gets) == ''){
+                            return "请输入";
+                        }
+                    }
+                    return true;
+                }
+            },
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.funcCode = PAGE_PARAM.FUNC_CODE;
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + (PAGE_PARAM.IS_EDIT ?  "IC_SERV_UPDATE" : "IC_SERV_ADD"),
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadRightDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+
+</script>
+</html>

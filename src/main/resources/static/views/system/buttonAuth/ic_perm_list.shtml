@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<div style="padding: 2px">
+    <div id="mlayout">
+        <div data-options="region:'west',split:true" style="width:22%;">
+            <ul id="menuTree" class="mtree"></ul>
+        </div>
+        <div data-options="region:'center'" style="width:78%;">
+            <table id="page_dg"></table>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+
+    var $page_dg = $("#page_dg");
+
+    $(function () {
+        $('#mlayout').layout({
+            height: $(window).height() - 4
+        });
+        initMenuTree('');
+        InitPageDataGrid();
+    });
+
+    function initMenuTree(menuCodes) {
+        var menuCount = {};
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_PERM_MENU_COUNT",
+            data: {},
+            success: function (result) {
+                var data = result.data['IC_PERM_MENU_COUNT'];
+                for(var i=0; i<data.length; i++){
+                    menuCount[data[i]['MENU_CODE']] = data[i]['NUM'];
+                }
+            }
+        });
+
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_MENU_TREE",
+            data: {},
+            success: function (result) {
+                var tdata_ = EasyUITool.WarpTreeData(result.data.IC_MENU_TREE, ["pkid", "pid"], function (tdata) {
+                    return {
+                        id: tdata.pkid,
+                        text: tdata.menuName,
+                        checked: $.inArray(tdata.pkid, menuCodes) > -1,
+                        state: 'open'
+                    };
+                }, "0");
+                if(!tdata_){
+                    return;
+                }
+                $("#menuTree").tree({data: tdata_, lines:true,
+                    animate:true,
+                    formatter:function(node){
+                        return node.text + '('+(menuCount[node.id] || 0)+')';
+                    },
+                    onSelect: function (node) {
+                        $page_dg.treegrid('load', {pkid: node.id });
+                    }
+                }).css({padding: '5px'});
+            }
+        });
+
+    }
+
+    function InitPageDataGrid() {
+        $page_dg.MyTreeGrid({
+            identity: 'page_dg', enableLineEdit: function ($dg, nodeId, row) {
+                if(row.GROUP_NAME == '**'){
+                    return false;
+                }
+                return true;
+            },
+            height: '100%',
+            url: Constant.API_V1_PLUGINS + 'IC_PERM_LIST',
+            queryParams:{ pkid: '-'  },
+            columns:[[
+                {field: "KEY", title: "权限KEY", width: 200, editor: {type:'text'} },
+                {field: "GROUP_NAME", title: "组名称", width: 180, editor: {type:'text'} },
+                {field: "NAME", title: "权限名称", width: 150, editor: {type:'text'} },
+                {field: "TYPE", title: "权限类型", width: 90 },
+                {field: "ENABLE", title: "是否启用", width: 80, editor: {type:'checkbox', options:{
+                            on: 'Y',
+                            off: 'N'
+                        }}
+                }
+            ]],
+            idField: 'KEY',
+            treeField: 'KEY',
+            loadFilter : function(result){
+                var data = result.data['IC_PERM_LIST'].rows;
+                var total = result.data['IC_PERM_LIST'].total;
+                var map = {};
+                $.each(data, function (i, e) {
+                    if(!map[e.GROUP_NAME || '-']) {
+                        map[e.GROUP_NAME || '-'] = {
+                            KEY: e.GROUP_NAME,
+                            GROUP_NAME: "**"
+                        };
+                    }
+                });
+                $.each(map, function (k, v) {
+                    data.push(v);
+                });
+                var rows = EasyUITool.WarpTreeData(data, ['KEY', 'GROUP_NAME'], function (tdata) {
+                    return tdata;
+                }, "**");
+                return { total: total, rows: rows };
+            },
+            contextMenus:[
+                {text : "删除", auth:"",
+                    onclick: function(){
+                        $.messager.confirm('删除提示', '您确定要删除此项吗?', function () {
+                            var row = $page_dg.treegrid('getSelected');
+                            AjaxUtil.postReq({
+                                url: Constant.API_V1_PLUGINS + "IC_PERM_DEL",
+                                data: { KEY: row.KEY },
+                                success : function (result) {
+                                    if(!FuncUtil.checkResult(result)){
+                                        return;
+                                    }
+                                    WinUtil.MsgInfo({ content: result.msg });
+                                    $page_dg.treegrid('reload');
+                                }
+                            });
+                        });
+                    }
+                }
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {
+                    iconCls: 'icon-line-edit-add', auth: "", text: $.tl('page:PAGE.COMM.LINE_ADD','新增行'),
+                    handler: function () {
+                        var opt = $page_dg.treegrid('options');
+                        if(opt.queryParams.pkid == '-'){
+                            WinUtil.MsgError({ content: '请选择菜单!' });
+                            return;
+                        }
+                        GridEdit.TreeGrid.insertDGEditRow($page_dg, {TYPE: 'PAGE_PART'});
+                    }
+                },'-',
+                {   iconCls: 'icon-line-edit-ok', auth: "", text: $.tl('page:PAGE.COMM.LINE_SAVE','保存行'),
+                    handler: function () {
+                        var opt = $page_dg.treegrid('options');
+                        if(opt.queryParams.pkid == '-'){
+                            WinUtil.MsgError({ content: '请选择菜单!' });
+                            return;
+                        }
+                        var dt = GridEdit.TreeGrid.getEditChangeData($page_dg);
+                        if(!dt || dt.length == 0) {
+                            return;
+                        }
+                        AjaxUtil.postReq({
+                            url: Constant.API_V1_PLUGINS + "IC_PERM_BATCH_IEDIT",
+                            data: { menuCode: opt.queryParams.menuCode, editData: FuncUtil.encodelg_(JSON.stringify(dt)) },
+                            success : function (result) {
+                                if(!FuncUtil.checkResult(result)){
+                                    return;
+                                }
+                                GridEdit.TreeGrid.endAndClearDGEdit($page_dg);
+                                WinUtil.MsgInfo({ content: result.msg });
+                                $page_dg.treegrid('reload');
+                            }
+                        });
+                    }
+                },'-',
+                {
+                    iconCls: 'icon-line-edit-cancel', auth: "", text: $.tl('page:PAGE.COMM.LINE_CANCEL', '取消行'),
+                    handler: function () {
+                        var opt = $page_dg.treegrid('options');
+                        if(opt.queryParams.menuCode == '-'){
+                            WinUtil.MsgError({ content: '请选择菜单!' });
+                            return;
+                        }
+                        GridEdit.TreeGrid.cancelAndClearDGEdit($page_dg);
+                    }
+                }
+            ]
+        });
+    }
+
+
+</script>
+</html>

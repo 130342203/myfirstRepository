@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <legend>搜索</legend>
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2" class="table table-bordered table-info">
+                <tr>
+                    <th data-i18n="page:PAGE.SYSUSER.QY_USER_NAME">用户姓名：</th>
+                    <td style="width:110px">
+                        <input name="userName" id="userName"/>
+                    </td>
+                    <td colspan="2">
+                        &nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="searchBtn" auth="WS_USER_QUERY" onclick="onSearch_()"><span data-i18n="common:COMMON_OPERATION.QUERY">查询</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="clearBtn" auth="WS_USER_QUERY" onclick="onClear_()"><span data-i18n="common:COMMON_OPERATION.RESET">重置</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="addBtn" auth="WS_USER_QUERY" onclick="helpQuery('dg01', 'SYS_USER_LIST');"><span>高级查询</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="excelBtn" auth="WS_USER_EXPORT" onclick="excelExport('dg01','用户列表');"><span>导出Excel</span></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitTreeGrid();
+    });
+
+    function InitTreeGrid(){
+        $("#dg").MyTreeGrid({
+            identity: 'dg',
+            idField: 'orgId',
+            treeField: 'orgName',
+            pagination: false,
+            width: $(document).width(),
+            height: $(document).height() - $('fieldset').height() - 8,
+            url: Constant.API_V1 + 'org/list',
+            loadFilter: function(data,parentId){
+                return EasyUITool.WarpTreeData(data.rows, ['orgId', 'parentOid'], function (tdata) {
+                    return tdata;
+                },'-1');
+            },
+            columns:[[
+                {field: 'orgId', title:'orgId', width: 80},
+                {field: 'parentOid', title:'parentOid', width: 80},
+                {field: 'orgName', title:'orgName', width: 180}
+            ]],
+            contextMenus:[
+                {id: "m-edit", text : "common:COMMON_OPERATION.EDIT", auth:"WS_USER_EDIT",/*USER_EDIT*/
+                    onclick: function(){
+                        var ACC_PKID = $('#dg').datagrid('getSelected').ACC_PKID;
+                        common_add_edit_({
+                            identity: identity, isEdit: 1, width: 700, height : 380,param:{ACC_PKID:ACC_PKID},
+                            url: "/views/sysuser/sysuser_add_edit.shtml"
+                        });
+                    }
+                }
+                ,{id: "m-delete", text : "common:COMMON_OPERATION.DEL", auth:"WS_USER_DELTE",/*USER_DEL*/
+                    onclick: function(){
+                        common_delete_({
+                            identity: identity,
+                            cfmI18next : "msg_err:ERRMSG.COMMON.DEL_CONFIRM",
+                            param: {pkid:"PKID"},
+                            FunctionCode: "USER_DELETE"
+                        });
+                    }
+                }, {id: "m-resetPwd", text : "common:RES.SYS_USER_LIST.RESET_PWD", auth:"WS_USER_RESET_PWD",/*USER_RESET_PWD*/
+                    onclick: function(){
+                        resetPwd_();
+                    }
+                },
+                {id: "m-modifyPwd", text : "common:RES.SYS_USER_LIST.MODIFY_PWD", auth:"WS_USER_MODIFY_PWD",/*USER_MODIFY_PWD*/
+                    onclick: function(){
+                        modifyPwd_();
+                    }
+                }/*,
+                {i18nText : "测试发消息", auth:"",
+                    onclick: function(){
+                        var ACC_PKID = $('#dg').datagrid('getSelected').ACC_PKID;
+                        AjaxCall_(Constant.API_V1_URL + "sysuser/testmessage", {accId: ACC_PKID, type: 'warn'}, function (jdata) {
+                            if (jdata.code == RESULT_CODE.SUCCESS_CODE) {
+                                layer.msg(jdata.msg, {icon: 1});
+                            } else {
+                                layer.msg(jdata.msg, {icon: 5});
+                            }
+                        });
+                    }
+                }*/
+            ],
+            validAuthContextMenu: function(row, items){
+                if(row.ACC_PKID == "1"){
+                    items['common:COMMON_OPERATION.EDIT'].enable = false;
+                    items['common:COMMON_OPERATION.DEL'].enable = false;
+                }
+                var accountId = '1'; //getLoginInfo().accountId;
+                /*var accountType = getLoginInfo().accountType;
+                var userId = getLoginInfo().userId;*/
+                if (accountId != "1") {
+                    items['common:RES.SYS_USER_LIST.RESET_PWD'].display = false;
+                }
+                if(accountId != "1" && row.ACC_PKID != accountId){
+                    items['common:RES.SYS_USER_LIST.MODIFY_PWD'].display = false;
+                }
+                return items;
+            },
+            toolbar: [
+                {
+                    key:"COMMON_ADD", text: 'common:COMMON_OPERATION.ADD', auth:"WS_USER_ADD",
+                    handler: function () {
+                        common_add_edit_({
+                            identity: identity, isEdit: 0, width: 650, height : 380, /*param: {PKID : '1'},*/
+                            url: "/views/sysuser/sysuser_add_edit.shtml"
+                        });
+                    }
+                }, '-',
+                {
+                    key:"COMMON_RELOAD",text: 'common:COMMON_OPERATION.RELOAD',
+                    handler: function () {
+                        common_reload_({identity:identity });
+                    }
+                }
+            ]
+        });
+    }
+</script>
+</html>

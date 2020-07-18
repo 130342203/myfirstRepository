@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2">
+                <tr>
+                    <th style="width: 80px;" align="right">标题：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="msgTitle" id="msgTitle" />
+                    </td>
+                    <td colspan="2">
+                        &nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>查询</span></a>&nbsp;&nbsp;
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        InitDataGrid();
+    });
+
+    var $dg = $("#dg");
+
+    function InitDataGrid() {
+        var accountId = WinUtil.getLoginAccount().accountId;
+        $dg.MyDataGrid({
+            title: '我的消息',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            queryParams : { accountId : accountId },
+            custom: {
+                code : API_IC_CODE.IC_MY_MESSAGE_LIST,
+                alter: {
+                    'BODY_TYPE': {
+                        formatter:function(value,row,index){
+                            if(value == 'text'){
+                                return '文本消息';
+                            }
+                            return value;
+                        }
+                    },
+                    'MSG_TITLE': {
+                        formatter:function(value,row,index){
+                            return '<a href="javascript:void(0);" style="text-decoration: underline;" onclick="showMsgDetail(\''+index+'\')">'+value+'</a>';
+                        }
+                    }
+                }
+            },
+            loadFilter : function(result){
+                var data = result.data['IC_MY_MESSAGE_LIST'];
+                return { total: data.total, rows: data.rows };
+            },
+            pageButtons: [{
+                iconCls:'icon-excel',
+                handler:function(){
+                    GridUtil.dgExportExcel($('#dg'), "我的消息列表");
+                }
+            }],
+            contextMenus:[
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {
+                    iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+    function showMsgDetail(index) {
+        var row = $('#dg').datagrid('getRows')[index];
+        WinUtil.showDialog({
+            title : "消息-查看",
+            width: 750, height : 480,
+            param: row,
+            url: Constant.VIEWS_IC + "/msg/ic_message_detail.shtml"
+        });
+    }
+
+</script>
+</html>

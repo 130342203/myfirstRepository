@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<div style="float: left;">
+<table id="dg"></table>
+</div>
+<div style="float: left;">
+    <div id="title" class="div-title">
+        已选择的项:
+    </div>
+<table id="dg2"></table>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    var $dg = $('#dg'), $dg2 = $('#dg2');
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM = $.extend({SELECTED_CALL: function(data){} }, PAGE_PARAM);
+
+        InitDataGrid();
+    });
+
+    function InitDefaultValues() {
+        if(!PAGE_PARAM.DEFAULT_VALUE){
+            return;
+        }
+        var defaultValue = PAGE_PARAM.DEFAULT_VALUE;
+        if(typeof(defaultValue) == 'string'){
+            defaultValue = [defaultValue];
+        }
+        if(!ToolUtil.isArray(defaultValue)){
+            WinUtil.MsgError({content:'默认数据,格式有误!' });
+            return;
+        }
+        if(defaultValue.length <= 0){
+            return;
+        }
+        var start = 0, end = 500, wbool = true;
+        while (wbool){
+            var defValArry = defaultValue.slice(start, end);
+            var defVal = FuncUtil.encodelg_(JSON.stringify(defaultValue));
+
+            var url = Constant.API_V1_PLUGINS + PAGE_PARAM.FUNC_CODE;
+            var data = { $EXEC_TYPE: "SELECT_LIST", defVal_$A: defVal  };
+            AjaxUtil.postSyncReq({
+                url: url,
+                data: data,
+                success: function (result) {
+                    if (result.code != ResultCode.SUCCESS_CODE) {
+                        $.messager.alert('提示', result.msg, 'error');
+                        return;
+                    }
+                    var selectRows = [];
+                    $.each(result.data, function (k, e) {
+                        selectRows = e;
+                        return false;
+                    });
+                    if(PAGE_PARAM.MULTI_SELECT){
+                        $dg2.datagrid('loadData', selectRows);
+                        $dg2.datagrid('checkAll');
+                    }else{
+                        $.each(selectRows, function (i, e) {
+                            var index = EasyUI.getDGRowIndex($dg, e);
+                            if(index > -1){
+                                $dg.datagrid('selectRow', index);
+                            }
+                        });
+                    }
+                }
+            });
+
+            start += 500;
+            end += 500;
+            if(defValArry.length < 500){
+                wbool = false;
+            }
+        }
+    }
+
+    function InitDataGrid() {
+        var opts = {
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').height() - 8,
+            pageSize: 100,
+            custom: {
+                code : PAGE_PARAM.FUNC_CODE, dgCode: PAGE_PARAM.DG_CODE
+            },
+            queryParams: PAGE_PARAM.QUERY_PARAMS || {},
+            loadFilter : PAGE_PARAM.LOAD_FILTER || function(result){
+                var data = [];
+                $.each(result.data, function (k, e) {
+                    data = e;
+                    return false;
+                });
+                var rows = data.rows;
+                $.each(rows, function (i, e) {
+                    delete(e.ROW_ID)
+                });
+                return { total: data.total, rows: rows };
+            },
+            contextMenus:[],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: []
+        };
+        if(PAGE_PARAM.MULTI_SELECT){
+            opts = $.extend(opts, {
+                columns:[[
+                    {field: "-", title: "", width: 50, checkbox: true }
+                ]],
+                width: $(window).width() - 180,
+                toolbar: [
+                    {iconCls: 'icon-ok', text: '确定', auth:"",
+                        handler: function () {
+                            var rowsData = $dg2.datagrid('getChecked');
+                            PAGE_PARAM.SELECTED_CALL(rowsData);
+                            WinUtil.closeCurrDialog();
+                        }
+                    },
+                    {iconCls: 'icon-cancel', text: '清除', auth:"",
+                        handler: function () {
+                            $dg.datagrid('clearChecked');
+                        }
+                    },
+                    {iconCls: 'icon-select-invert', text: '反选', auth:"",
+                        handler: function () {
+                            $(".datagrid-view2 tr[datagrid-row-index]").each(function (i, e) {
+                                var index = $(e).attr("datagrid-row-index");
+                                var $chk = $(e).find("input:checkbox");
+                                if($chk.is(":checked")){
+                                    $dg.datagrid('uncheckRow', parseInt(index));
+                                }else{
+                                    $dg.datagrid('checkRow', parseInt(index));
+                                }
+                            });
+                        }
+                    },
+                    {iconCls: 'icon-search', text: '查询', auth:"",
+                        handler: function () {
+                            alert('还没弄');
+                        }
+                    }
+                ],
+                onCheck: function (rowIndex, rowData) {
+                    var index = EasyUI.getDGRowIndex($dg2, rowData);
+                    if(index == -1){
+                        $dg2.datagrid('appendRow', rowData);
+                        $dg2.datagrid('checkRow', $dg2.datagrid('getRows').length - 1);
+                    }
+                },
+                onUncheck: function (rowIndex, rowData) {
+                    var index = EasyUI.getDGRowIndex($dg2, rowData);
+                    if(index > -1){
+                        $dg2.datagrid('deleteRow', index);
+                    }
+                },
+                onLoadSuccess:function () {
+                    InitDefaultValues();
+                    InitDg2toDgCheckOnOff();
+                }
+            });
+            $dg.MyDataGrid(opts);
+            InitDataGrid2();
+        }else{
+            $('#title').hide();
+            opts = $.extend(opts, {
+                onDblClickRow: function (rowIndex, rowData) {
+                    PAGE_PARAM.SELECTED_CALL(rowData);
+                    WinUtil.closeCurrDialog();
+                },
+                toolbar: [
+                    {iconCls: 'icon-ok', text: '确定', auth:"",
+                        handler: function () {
+                            var rowData = $dg.datagrid('getSelected');
+                            if(!rowData){
+                                WinUtil.MsgError({content:'请选择!' });
+                                return;
+                            }
+                            PAGE_PARAM.SELECTED_CALL(rowData);
+                            WinUtil.closeCurrDialog();
+                        }
+                    },
+                    {iconCls: 'icon-search', text: '查询', auth:"",
+                        handler: function () {
+                            alert('还没弄');
+                        }
+                    }
+                ],
+                onLoadSuccess:function () {
+                    InitDefaultValues();
+                }
+            });
+            $dg.MyDataGrid(opts);
+        }
+    }
+
+    function InitDataGrid2() {
+        var options = $dg.datagrid('options');
+        $dg2.MyDataGrid({
+            identity: 'dg2', pagination: false, loader: function () {return false;},
+            width: 180, rownumbers: false,
+            height: $(window).height() - $('#title').height() - 8,
+            columns: options.columns,
+            onUncheck: function (rowIndex, rowData) {
+                var index = EasyUI.getDGRowIndex($dg, rowData);
+                if(index > -1){
+                    $dg.datagrid('uncheckRow', index);
+                }else{
+                    $dg2.datagrid('deleteRow', rowIndex);
+                }
+            },
+            onUncheckAll: function (rows) {
+                $dg2.datagrid('loadData', []);
+                $dg.datagrid('uncheckAll');
+            }
+        });
+    }
+
+    /**
+     * 根据已选择的项，勾选对应数据项
+     * @constructor
+     */
+    function InitDg2toDgCheckOnOff() {
+       var selectRows = $dg2.datagrid('getRows');
+       $.each(selectRows, function (i, e) {
+           var index = EasyUI.getDGRowIndex($dg, e);
+           if(index > -1){
+               $dg.datagrid('checkRow', index);
+           }
+       })
+    }
+</script>
+</html>

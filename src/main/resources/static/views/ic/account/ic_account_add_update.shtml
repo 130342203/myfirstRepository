@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="./personel.js"></script>
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <style>
+        .td-class {
+            margin-top: 20px;
+            margin-left: 50px
+        }
+
+        .easyui-textbox {
+            width: 220px;
+        }
+
+        .td-class span {
+            margin-right: 5px
+        }
+    </style>
+
+</head>
+<body>
+<div class="form_eui">
+    <!--<form id="mform1" class="layui-form layui-form-pane" style="margin-top: 2px;">-->
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;">
+        <div class="td-class">
+            <input type="hidden" id="pkid" name="pkid">
+            <input type="hidden" id="company" name="company">
+            <span>
+                用户姓名: <input type="text" name="userName" id="userName" autocomplete="off"
+                           datatype="*" errormsg="必输项！" class="easyui-textbox">
+            </span>
+            <span>
+                登录账号: <input type="text" name="accountNumber" autocomplete="off"
+                           class="easyui-textbox">
+            </span>
+        </div>
+        <div class="td-class">
+            <span>
+              证件类型: <input type="text" name="idType" id="idType" autocomplete="off"
+                           class="easyui-textbox">
+                </input>
+             </span>
+            <span>
+              证件号码: <input type="text" name="idNo" id="idNo" autocomplete="off"
+                          datatype="*" errormsg="必输项！"   class="easyui-textbox">
+             </span>
+        </div>
+        <div class="td-class">
+            <span>
+             所在单位: <input type="text" id="companyName" name="companyName" readonly="readonly" onclick="changeCity()" datatype="*" errormsg="必输项！" class="form-input-class select_input" style="width: 220px">
+             </span>
+            <span>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;职务: <input type="text" name="duty" id="duty" autocomplete="off"
+                         datatype="*" errormsg="必输项！"   class="easyui-textbox">
+             </span>
+        </div>
+        <div class="td-class">
+            <span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;性别: <input type="text" name="sex" id="sex" autocomplete="off"
+
+                           class="easyui-textbox">
+            </span>
+            <span>
+                电话号码: <input type="text" name="phone" id="phone" autocomplete="off"
+
+                           datatype="*" errormsg="必输项！"    class="easyui-textbox">
+            </span>
+        </div>
+        <div class="td-class">
+            <span>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;民族: <input type="text" name="nation" id="nation" autocomplete="off"
+                         datatype="easyui_combo" errormsg="必输项！"  class="easyui-textbox">
+             </span>
+            <span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;国籍: <input type="text" name="countryName" id="countryName" autocomplete="off"
+                           errormsg="必输项！"   class="easyui-textbox">
+                            <input type="text" id="country" name="country" hidden="hidden" >
+            </span>
+        </div>
+
+        <div class="td-class">
+            <span>
+              毕业院校: <input type="text" name="college" id="college" autocomplete="off"
+                           datatype="*" errormsg="必输项！"  class="easyui-textbox">
+             </span>
+            <span>
+              最高学历: <input type="text" name="education" id="education" autocomplete="off"
+                         datatype="easyui_combo" errormsg="必输项！"  class="easyui-textbox">
+             </span>
+        </div>
+        <div class="td-class">
+           <span>
+              通讯地址: <input type="text" name="addressDetail" id="addressDetail" autocomplete="off"
+                         datatype="*" errormsg="必输项！"   class="easyui-textbox">
+             </span>
+            <span style="width: 180px">
+              出生日期:  <input  type="text" name="birthday" id="birthday" class="easyui-datebox"
+                             onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" autocomplete="off" style="width: 220px;" >
+             </span>
+        </div>
+        <div class="td-class" id="addShow">
+            <span>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;密码: <input type="password"   data-options="validType: 'password'" name="accountPasswd" id="accountPasswd" style="display:none"
+                          class="easyui-textbox" datatype="*" autocomplete="new-password">
+             </span>
+            <span>
+              确认密码: <input type="password" name="accountPwd2" id="accountPwd2"  data-options="validType: 'password'" style="display:none"
+                            class="easyui-textbox" datatype="*" autocomplete="new-password">
+             </span>
+
+        </div>
+
+
+        <div class="form_dbtn" style="margin-left: 300px;margin-top: 20px">
+            <button class="easyui-linkbutton" type="submit" data-options="iconCls:'icon-page_save',toggle:true" style="width:60px" lay-submit >保 存</button>
+            <button type="button" onclick="closeDialog()" class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" style="width:60px" >取 消</button>
+
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM._isEdit ? true : false;
+        AjaxUtil.postSyncReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {codes: "PER_ID_TYPE,PER_SEX,IC_SYS_COUNTRY,PER_EDUCATION,PER_NATION"},
+            success: function (result) {
+
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                data['PER_ID_TYPE'].unshift({
+                    text: $.tl('page:PAGE.COMM.COMBOBOX_FIRST_ROW', '请选择'),
+                    value: ""
+                });
+                EasyUI.initCombobox('#countryName', {
+                    data: data['IC_SYS_COUNTRY'],
+                    onChange:function (a,b) {
+                        $("#country").val(a);
+                    }
+                });
+                EasyUI.initCombobox('#idType', {
+                    data: data['PER_ID_TYPE'],
+                    height:22
+                });
+                data['PER_SEX'].unshift({
+                    text: $.tl('page:PAGE.COMM.COMBOBOX_FIRST_ROW', '请选择'),
+                    value: ""
+                });
+                EasyUI.initCombobox('#sex', {
+                    data: data['PER_SEX'],
+                    height:22
+                });
+                EasyUI.initCombobox('#education', {
+                    data: data['PER_EDUCATION']
+                });
+                EasyUI.initCombobox('#nation', {
+                    data: data['PER_NATION']
+                });
+            }
+        });
+
+        if (PAGE_PARAM.IS_EDIT) {
+            $("#addShow").hide();
+            $('#accountPasswd').removeAttr('datatype');
+            $('#accountPwd2').removeAttr('datatype');
+            AjaxUtil.postSyncReq({
+                url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_USER",
+                data: {accountId:PAGE_PARAM.row.PKID},
+                success: function (result) {
+                    if (!FuncUtil.checkResult(result)) {
+                        return;
+                    }
+                    var object = result.data[result.reqCode];
+                    FuncUtil.parseForm(object);
+                    console.log(object);
+                    FuncUtil.parseForm(object, null, 'countryName,birthday');
+                    $('#countryName').combobox('setValue', object.country.trim());
+                    $('#birthday').datebox('setValue', getLocalTimeYMD(object.birthday));
+
+
+                }
+            });
+        }
+        //initComboGrid();
+        InitValidform();
+    });
+
+    function getLocalTimeYMD(nS) {
+        return new Date(parseInt(nS)).Format("yyyy-MM-dd");
+    }
+
+    function initCountry(){
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_SYS_COUNTRY_SELECT",
+            data: {},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var object = result.data.IC_SYS_COUNTRY_SELECT;
+                EasyUI.initCombobox('#country', {
+                    editable: true,
+                    valueField: 'VALUE',
+                    textField: 'TEXT',
+                    data: object || []
+                });
+            }
+        });
+    }
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit: function (curform) {
+                var data = curform.serializeObject();
+                // 验证手机号
+                var pattern = /^1[34578]\d{9}$/;
+                    if(!pattern.test($("#phone").val())){
+                        WinUtil.MsgWarn({content: "电话号码录入有误，请检查！"});
+                        return false;
+                    }
+
+                if (!PAGE_PARAM.IS_EDIT) {
+                    var pas1 = $("#accountPasswd").val();
+                    var pas2 = $("#accountPwd2").val();
+                    if (pas1 != pas2) {
+                        WinUtil.MsgWarn({content: "两个密码不一致,请重新设置"});
+                        return false;
+                    }
+                }
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_ADD_UPDATE",
+                    data: $.extend(data, {_isEdit:PAGE_PARAM.IS_EDIT ? "edit" : "add"}),
+                    success: function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        PAGE_PARAM.OWindow.WinUtil.MsgInfo({content: result.msg});
+                        PAGE_PARAM.OWindow.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+
+    // 单位选择通用弹窗，单选
+    function changeCity() {
+        WinUtil.showTopDialog({
+            title : '单位选择',
+            width: '70%', height : '60%',
+            url: Constant.VIEWS_IC_DATA + "/ic_organ_list.shtml",
+            param: {
+                callBack: function (result) {
+                    console.log(result);
+                    var name="";
+                    var id="";
+                    if(result.length==1){
+                        var name=result[0].ORG_NAME;
+                        var id=result[0].ID;
+                    }else{
+                        $.each(result,function (index,value) {
+                            name+=value.ORG_NAME+",";
+                            id+=result.ID+",";
+                        });
+                        name=name.substring(0,name.length-1);
+                        id=id.substring(0,name.length-1);
+                    }
+                    $("#companyName").val(name);
+                    $("#company").val(id);
+                }
+            }
+        });
+    }
+
+    /*function initComboGrid() {
+
+        $("#countryName").MyComboGrid({
+            idField: 'ID',    //实际存储值
+            textField: 'NAME',   //文本显示值
+            panelWidth: 250,
+            panelHeight: 240,
+            width: 220,
+            url: Constant.API_V1_PLUGINS + "IC_SYS_COUNTRY_SELECT",
+            loadFilter: function (data) {
+                return data.data.IC_SYS_COUNTRY_SELECT;
+            },
+            pagination: false,          //关闭分页栏
+            columns: [[
+                {field: 'NAME', title: $.tl('', '中文'), width: 70},
+                {field: 'ENAME', title: $.tl('', '英文'), width: 70},
+            ]],
+            onClickRow: function (index, row) {
+                $("#country").val(row.ID);
+            },
+        });
+    }*/
+
+    function closeDialog(){
+        WinUtil.closeCurrDialog();
+    }
+
+</script>
+</html>

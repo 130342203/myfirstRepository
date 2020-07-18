@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<style>
+			.icon {
+				font-size: 17px;
+			}
+			.addColor{
+				font-weight: bold;
+				color:#186ecc;
+			}
+		</style>
+		<!--#include virtual="/views/include/include_.shtml"-->
+		<title></title>
+		</head>
+
+	<body class="fixed-sidebar full-height-layout gray-bg" style="overflow:hidden; height: 100%;">
+	<div id="app">
+		<div class="row border-bottom">
+			<nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+				<div class="bireHead">
+					<img src="/img/caacLogo.png" alt="" width="60px">
+					<p class="p1">民航维修人员信息平台
+						<div class="p2">Maintenance Qualification Management System</div>
+					</p>
+
+				</div>
+				<div class="navUl">
+					<strong class="name">
+						<span>
+								<i class="fa fa-user" aria-hidden="true"></i>
+						</span>
+						<span style="font-weight:lighter;" >
+							<a id="userName" style="font-size: 13px;font-weight: 500;color:#337ab7">{{loginAccount.relUserName}}</a>
+						    </span> <span><a style="font-weight:500;;color:#337ab7">您好!</a></span>
+						<span style="margin-left: 6px">
+							<i class="fa fa-sign-out" aria-hidden="true"></i>
+						</span>
+						<span style="margin-right: 15px"><a style="font-weight: lighter;color:#337ab7" @click="logout">退出系统</a></span>
+					</strong>
+				</div>
+				<ul class="nav navbar-top-links navbar-right">
+
+					<li class="dropdown">
+						<ul class="dropdown-menu dropdown-alerts">
+							<li class="divider"></li>
+							<li>
+								<a href="javascript:void(0)">
+									<!--href="profile.html"-->
+									<div onclick="showmessage()">
+										<i class="fa fa-qq fa-fw"></i> <span id="qq"></span>
+										<span class="pull-right text-muted small" id="time"></span>
+									</div>
+								</a>
+							</li>
+							<li class="divider"></li>
+							<li>
+								<div class="text-center link-block">
+									<a class="J_menuItem" onclick="showAllmessage()">
+										<strong>查看所有 </strong>
+										<i class="fa fa-angle-right"></i>
+									</a>
+								</div>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+		</div>
+
+		<div id="wrapper">
+				<div id="tabs">
+				<div v-for="(topMenu,index) in topMenuData" :title="topMenu.menuName" style="padding: 2px;">
+					<!--左侧导航开始-->
+					<nav class="navbar-default navbar-static-side" role="navigation">
+						<div class="sideBar">
+							<ul class="menus" v-for="(subMenu,subIndex) in topMenu.subMenuData">
+								<li>{{subMenu.menuName}}</li>
+								<li v-for="(menu,mindex) in subMenu.children" @click="showMenuIframe(menu, topMenu.pkid)">{{menu.menuName}}</li>
+							</ul>
+						</div>
+					</nav>
+					<!--右侧部分开始-->
+					<div id="page-wrapper" class="gray-bg dashbard-1">
+						<div class="row J_mainContent" id="content-main"  style="overflow: hidden;">
+							<iframe :_id="'main_wrapper_' + topMenu.pkid" scrolling='auto' frameborder='0' style='width:100%;height:100%;'></iframe>
+						</div>
+					</div>
+					<!--右侧部分结束-->
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+	</body>
+
+</html>
+
+<script type="text/javascript">
+
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            loginAccount: {},
+            topMenuData: []
+        },
+        methods: {
+            initMenuData : function () {
+                var thiz = this;
+                var url = Constant.API_V1_PLUGINS + "IC_MENU_WX";
+                AjaxUtil.postSyncReq({
+                    url: url, data: { "pid": '0'}, mask: false,
+                    success: function (result) {
+                        thiz.$data.topMenuData = result.data.IC_MENU_WX;
+						$.each(thiz.$data.topMenuData, function (i, it) {
+                            thiz.__initMenuSubData(it, it.pkid);
+                        });
+                        Vue.nextTick(function () {
+                            $('#tabs').tabs({
+                                height: $(window).outerHeight(),
+                                onSelect:function(title,index){
+                                    AjaxUtil.postSyncReq({
+                                        url: Constant.API_V1_PLUGINS + "IC_MENU_WX", data: {"pid": '0',menuName:title}, mask: false,
+                                        success: function (result){
+                                            console.log(result);
+                                            $("iframe[_id='main_wrapper_" + result.data.IC_MENU_WX[0].pkid + "']").attr('src', ToolUtil.getUrl_t(result.data.IC_MENU_WX[0].url));
+                                        }
+                                    })
+                                }
+							});
+                            // var defTopMenuId = '', defMenuUrl = '';
+                            // try{
+                            //     defTopMenuId = thiz.$data.topMenuData[0].pkid;
+                            //     defMenuUrl = thiz.$data.topMenuData[0].subMenuData[0].children[0].url;
+                            //     $("iframe[_id='main_wrapper_" + defTopMenuId + "']").attr('src', ToolUtil.getUrl_t(defMenuUrl));
+                            // }catch(ex){console.log(ex)}
+                        });
+                    }
+                });
+
+            },
+			__initMenuSubData : function (topMenu, pkid) {
+                var url = Constant.API_V1_PLUGINS + "IC_MENU_WX";
+                AjaxUtil.postSyncReq({
+                    url: url, data: { "pid": pkid, type: 'multi'}, mask: false,
+                    success: function (result) {
+                        var rdata = result.data.IC_MENU_WX;
+                        var treeData = EasyUITool.WarpTreeData(rdata, ['pkid', 'pid'], function (tdata) {
+                            return {
+                                menuId: tdata.pkid,
+                                menuCode: tdata.menuCode,
+                                pcode: tdata.pcode,
+                                menuName: tdata.menuName,
+                                url: tdata.url || ''
+                            };
+                        }, pkid);
+
+                        topMenu.subMenuData = treeData;
+                    }
+                });
+            },
+			showMenuIframe : function (menu, topMenuId) {
+                $("iframe[_id='main_wrapper_" + topMenuId + "']").attr('src', ToolUtil.getUrl_t(menu.url));
+            },
+			//退出系统
+            logout : function () {
+                $.messager.confirm(('提示'),('确定要退出吗?'), function (r) {
+                    if (r) {
+                        $.messager.progress({
+                            text: ('正在退出中...')
+                        });
+                        AjaxUtil.post({
+                            url: Constant.API_V1_PLUGINS + "IC_LOGIN_OUT",
+                            data: {}, mask:false,
+                            success: function (result) {
+                                if (!FuncUtil.checkResult(result)) {
+                                    return;
+                                }
+                                top.FuncUtil.doPost(Constant.API_V1_PLUGINS + "IC_REDIRECT_TO_PAGE", { path: ToolUtil.getUrl_t("/views/login.shtml") });
+                            }
+                        });
+                    }
+                });
+            },
+			initLoginAccountData : function () {
+				var thiz = this;
+				AjaxUtil.postSyncReq({
+					url: Constant.API_V1_PLUGINS + "IC_SYSTEM_CONFIG",
+					data: { }, mask:false,
+					success: function (result) {
+						if (!FuncUtil.checkResult(result)) {
+							return;
+						}
+						//账户信息
+						var account = result.data.IC_SYSTEM_CONFIG.ACCOUNT;
+						account.notAllowFuncs = FuncUtil.decodeCustom(account.notAllowFuncs);
+						account.notAllowPerms = FuncUtil.decodeCustom(account.notAllowPerms);
+						account.allowFuncs = FuncUtil.decodeCustom(account.allowFuncs);
+						account.allowPerms = FuncUtil.decodeCustom(account.allowPerms);
+						WinUtil.setLoginAccount(account || {});
+						thiz.loginAccount = account;
+					}
+				});
+			}
+        },
+        watch: {},
+        mounted: function () { //初始化
+            var thiz = this;
+			this.initMenuData();
+            this.initLoginAccountData();
+        }
+    });
+
+    $('#userName').tooltip({
+
+        content: $('<div>'+'<ul>'+
+            '<li class = "dialog"><a href="#" onclick="modifyPwd()"><i class="fa fa-pencil"></i> &nbsp;修改密码</a></li>'+
+            '</ul></div>'),
+        showEvent: 'click',
+        onUpdate: function(content){
+            content.panel({
+                width: 100,
+                border: false
+            });
+        },
+        onShow: function(){
+            var t = $(this);
+            t.tooltip('tip').unbind().bind('mouseenter', function(){
+                t.tooltip('show');
+            }).bind('mouseleave', function(){
+                t.tooltip('hide');
+            });
+        }
+    });
+
+    $(document).ready(function(){
+        $("li").each(function(index){
+            $("li").eq(index).click(function(){
+                $("li").removeClass("addColor");
+                $(this).addClass("addColor");
+            });
+        });
+
+    });
+    function modifyPwd() {
+        var account = WinUtil.getLoginAccount();
+        WinUtil.showTopDialog({
+            title : ("密码修改"),
+            width: 600, height : 270,
+            param: {
+                ACCOUNT_ID: account.accountId,
+                ACCOUNT_NUMBER: account.accountNumber,
+                EMAIL: account.email
+            },
+            url: "/views/ic/account/ic_account_modify_pwd.shtml"
+        });
+    }
+</script>

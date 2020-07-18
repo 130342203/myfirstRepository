@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="./personel.js"></script>
+    <link href="/js/plugins/codemirror/lib/codemirror.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/lib/codemirror.js"></script>
+    <link href="/js/plugins/codemirror/theme/erlang-dark.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/mode/sql/sql.js"></script>
+    <script src="/js/plugins/codemirror/mode/xml/xml.js"></script>
+    <link rel="stylesheet" href="/js/plugins/codemirror/addon/hint/show-hint.css" />
+    <script src="/js/plugins/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/js/plugins/codemirror/addon/hint/sql-hint.js"></script>
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <script src="/js/plugins/my_upload_view.js"></script>
+    <script src="/js/plugins/my_easyui_multistage_combox.js"></script>
+
+
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+
+    .title {
+        width: 100%;
+        height: 32px;
+        line-height: 32px;
+        background: #f2f2f2;
+        margin: 10px 0;
+    }
+
+    .title span {
+        padding-left: 10px;
+    }
+    .clear {
+        overflow: hidden;
+    }
+
+
+    .table .btn {
+        width: 110px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .right .btn {
+        float: right;
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+
+
+
+</style>
+<body>
+<div  style="">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="title"><span>基本信息</span></div>
+        <div class="clear">
+            <table class="mytable">
+                <input type="hidden" id="id" name="id">
+                <tr >
+                    <td> 执照编号: </td><td><div class="layui-inline" id="licenseCode"></div></td>
+                    <td> 姓名: </td><td><div class="layui-inline" id="realName"></div></td>
+
+                </tr>
+                <tr >
+                    <td> 证件类型: </td><td> <div class="layui-inline" id="type" ></div></td>
+                    <td> 证件号码: </td><td><div class="layui-inline" id="idNo"></div></td>
+                </tr>
+                <tr>
+                    <td> 性别: </td><td> <div class="layui-inline" id="sex"></div></td>
+                    <td> 出生日期: </td><td><div class="layui-inline" id="birthday"></div></td>
+                </tr>
+                <tr>
+                    <td> 国籍: </td><td><div class="layui-inline" id="country"></div></td>
+                    <td > 通讯地址: </td><td colspan="3"><div class="layui-inline" id="addressDetail"></div></td>
+                </tr>
+            </table>
+        </div>
+        <div class="title"><span>标注</span></div>
+
+        <div class="clear">
+            <table class="mytable">
+                <tr>
+                    <td width="100px"> 执照状态: </td><td>
+                    <div id="licenseStatus" name="licenseStatus">
+                    <td width="100px"> 标注: </td><td>
+                    <div id="majorMark" name="majorMark">
+                    </div>
+                    <div id="profess">
+                        <button type="button" id="bt_submit" onclick="transformMajor()" class="easyui-linkbutton" data-options="iconCls:'icon-page_save',toggle:true" style="width:120px;margin-bottom: 5px">专业转换</button>
+                    </div>
+                </td>
+                </tr>
+            </table>
+        </div>
+        <div class="title"><span>执照类别</span></div>
+        <table id="dg"></table>
+        <div class="title"><span>机型签署</span></div>
+        <table id="dg2"></table>
+    </form>
+
+</div>
+</body>
+<script>
+    var PAGE_PARAM={};
+    var intId="";
+    var resultData = {};
+    //判断有没有没有转换的数据
+    $(function () {
+        PAGE_PARAM=WinUtil.getDialogParam();
+        intId=WinUtil.getLoginAccount().accountId;
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "HAVE_NOT_TRANSFORM",
+            data: {id:intId},
+            success: function (result) {
+                console.log(result.data.HAVE_NOT_TRANSFORM.profess);
+                if(result.data.HAVE_NOT_TRANSFORM.is_flag=="Y"){
+                    $("#majorMark").hide();
+                }else{
+                    $("#profess").hide();
+                    $("#majorMark").html(result.data.HAVE_NOT_TRANSFORM.mark);
+                }
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+            }
+        });
+        //获取用户信息
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "BS_USER_SELECT_BY_ID",
+            data: {id:intId},
+            success: function (result) {
+                var data = result.data[result.reqCode][0];
+                resultData = data;
+                console.log(data)
+                $("#realName").html(data.REAL_NAME);
+                var sex="";
+                if(data.SEX=="1"){
+                    sex="男";
+                }else{
+                    sex="女";
+                }
+                $("#sex").html(sex);
+                $("#idNo").html(data.ID_NO);
+                $("#country").html(data.COUNTRY_NAME);
+                $("#birthday").html(getLocalTimeYMD(data.BIRTHDAY));
+                $("#addressDetail").html(data.detailAddre);
+                $("#licenseCode").html(data.licenseCode);
+                $("#licenseStatus").html(data.licenseStatus);
+                $("#type").html(data.TYPE);
+                /*var a = data.ADDRESS_PROVINCE? data.ADDRESS_PROVINCE:'';
+                var b = data.ADDRESS_CITY?data.ADDRESS_CITY:'';
+                var c = data.ADDRESS_AREA?data.ADDRESS_AREA:'';*/
+                /*$("body").MyEasyUIMultistageCombox({
+                    url: Constant.API_V1_PLUGINS + "IC_SYS_AREA_SELECT",
+                    level : [
+                        {__id: 'addressProvince', __def_value: a}, //国家
+                        {__id: 'addressCity', __def_value: b }, //城市
+                        {__id: 'addressArea', __def_value: c } //乡镇
+                    ]
+                });*/
+                InitDataGrid();
+                InitDataGrid2();
+            }
+
+        });
+
+    });
+    
+
+
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            //title:'我的执照申请',
+            identity: 'dg',
+            width: $(window).width() -65,
+            firstLoad: true,
+            height:120,
+            pagination: false,
+            queryParams: {id:intId},
+            custom: {
+                code: 'LICENSE_SEARCH_LIST_DATA',
+                alter: {
+                    "AUDIT_DATE":{
+                        formatter: function (value, row, index) {
+                            if(value != undefined){
+                                return getLocalTimeYMD(value);
+                            }else{
+                                return '';
+                            }
+
+                        }
+                    }
+                }
+            },
+        });
+    }
+
+    function InitDataGrid2() {
+        $("#dg2").MyDataGrid({
+            //title:'我的执照申请',
+            identity: 'dg',
+            width: $(window).width() - 65,
+            height:120,
+            firstLoad: true,
+            pagination: false,
+            queryParams: {id:intId},
+            custom: {
+                code: 'PLANETYPE_MANAGE_OF_LIST_DATA',
+                alter: {
+                    "AUDIT_DATE":{
+                        formatter: function (value, row, index) {
+                            if(value != undefined){
+                                return getLocalTimeYMD(value);
+                            }else{
+                                return '';
+                            }
+
+                        }
+                    }
+                }
+
+            },
+        });
+    }
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+
+    function transformMajor() {
+        WinUtil.showDialog({
+            title: '专业转换',
+            width: '50%', height: '60%',
+            url: "/views/login/license_transform.shtml",
+            param: {}
+        });
+    }
+</script>
+</html>

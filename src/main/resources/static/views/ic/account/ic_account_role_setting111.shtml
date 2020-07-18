@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<style type="text/css">
+    #roles li{
+        width: 156px; float: left; padding: 3px;
+    }
+</style>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.ACCOUNT_NUMBER">用户账号</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="account" name="accountNumber" autocomplete="off" datatype="s4-80" errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.ACCOUNT_EMAIL">用户Email</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="email" name="email" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.ACCOUNT_TYPE">来源类型</label>
+                <div class="layui-input-inline">
+                    <div id="accountType" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.USER_NAME">用户名称</label>
+                <div class="layui-input-inline">
+                    <div id="userName" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.REL_IDENT_ID">关联主键</label>
+                <div class="layui-input-inline">
+                    <div id="relIdentId" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.CREATE_TIME">创建时间</label>
+                <div class="layui-input-inline">
+                    <div id="createTime" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.UPDATE_TIME">更新时间</label>
+                <div class="layui-input-inline">
+                    <div id="updateTime" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.STATE">状态</label>
+            <div class="layui-input-pane">
+                <input type="radio" name="state" value="N" /> 正常
+                <input type="radio" name="state" value="L" /> 锁定
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.ROLES">账号角色</label>
+            <div class="layui-input-inline" style="width: 520px;">
+                <div class="layui-input" style="height: 100%; min-height: 26px;">
+                    <ul id="roleTree" class="mtree"></ul>
+                    <div style="clear: both;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <input class="layui-btn layui-btn-sm" type="submit" value="提 交" data-i18n="[value]page:PAGE.COMM.SUBMIT"></input>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        if(!PAGE_PARAM.ACCOUNT_ID){
+            parent.WinUtil.MsgError({ content: $.tl('page:PAGE.COMM.PARAM_ERROR', "请求参数有误!") });
+            return;
+        }
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_GET",
+            data: { accountId: PAGE_PARAM.ACCOUNT_ID },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var account = result.data.IC_ACCOUNT_GET.account;
+                var roles = result.data.IC_ACCOUNT_GET.roles;
+                var accountRoles = result.data.IC_ACCOUNT_GET.accountRoles;
+
+                $('#account').val(account.accountNumber);
+                $('#email').val(account.email);
+                $('#accountType').html(account.accountType);
+                $('#userName').html(account.userName);
+                $('#relIdentId').html(account.refIdentId);
+                $('#createTime').html(account.createTime);
+                $('#updateTime').html(account.updateTime);
+
+                FuncUtil.parseForm({ state: account.state });
+
+                var roleIds = [];
+                $.each(accountRoles, function (i, e) {
+                    roleIds.push(e.pkid);
+                });
+                /* var roleHtml = "";
+                $.each(roles, function (i, e) {
+                    var checked = $.inArray(e.pkid, roleIds) > -1 ? 'checked' : '';
+                    roleHtml += '<li><input type="checkbox" name="roleIds" value="'+e.pkid+'" '+checked+' /> '+e.roleName+'</li>';
+                });
+                $('#roles').html(roleHtml);*/
+                InitRoleTree(roleIds);
+            }
+        });
+
+
+
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.accountId = PAGE_PARAM.ACCOUNT_ID;
+                var nodes = $('#roleTree').tree('getChecked', ['checked','indeterminate']);
+               /* if(nodes.length <= 0){
+                    WinUtil.MsgError({ content: $.tl('page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.CHOOSE_LEAST_ONE_ROLE', "请至少选择一个角色!") });
+                    return false;
+                }*/
+                var accountRoles = []
+                $.each(nodes, function (i, node) {
+                    accountRoles.push(node.id);
+                });
+                data.accountRoles = FuncUtil.encodelg_(JSON.stringify(accountRoles));
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_UPDATE",
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function InitRoleTree(roleIds) {
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_ROLE_LIST",
+            data: {},
+            success: function (result) {
+                var tdata_ = EasyUITool.WarpTreeData(result.data.IC_ROLE_LIST, ["PKID", "PID"], function (tdata) {
+                    return {
+                        id: tdata.PKID,
+                        text: tdata.ROLE_NAME,
+                        checked: $.inArray(tdata.PKID, roleIds) > -1,
+                        state: 'open'
+                    };
+                }, "0");
+                if (!tdata_) {
+                    return;
+                }
+                EasyUI.initTree('#roleTree', {
+                    data: tdata_, lines: true,
+                    checkbox: true,
+                    animate: true,
+                    cascadeCheck: true,
+                    formatter: function (node) {
+                        return node.text;
+                    },
+                    onLoadSuccess: function () {
+                    },
+                    onContextMenu: function (e, node) {
+                        e.preventDefault();
+                        node1 = node;
+
+                        $('#mm').menu('show', {
+                            left: e.pageX,
+                            top: e.pageY
+                        });
+                    }
+                }).css({padding: '5px'});
+            }
+        });
+    }
+
+</script>
+</html>

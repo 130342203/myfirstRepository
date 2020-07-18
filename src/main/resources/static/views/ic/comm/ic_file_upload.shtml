@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+
+    <link rel="stylesheet" href="/res/plugins/uploadFile/css/uploadFile.css"/>
+    <script src="/res/plugins/uploadFile/js/uploadfile.js"></script>
+    <style type="text/css">
+        #uploadFileList a{
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">来源类型</label>
+                <div class="layui-input-inline">
+                    <div id="sourceType" class="layui-input textmiddle" style="overflow:hidden"></div>
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label">上传个数限制</label>
+                <div class="layui-input-inline">
+                    <div id="uploadCount" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">允许上传类型</label>
+                <div class="layui-input-inline">
+                    <div id="uploadType" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label">上传大小限制</label>
+                <div class="layui-input-inline">
+                    <div id="uploadSize" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">上传模式</label>
+                <div class="layui-input-inline">
+                    <div id="uploadModel" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div id="fileList" class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">附件列表：</label>
+                <div class="layui-input-inline">
+                    <ul id="uploadFileList" style="height: 100%; min-height: 26px; width: 420px;" class="layui-input textmiddle"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div id="up1" class="up_load_file"></div>
+        </div>
+
+
+        <div class="layui-form-item single">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <input id="btnSubmit" class="layui-btn layui-btn-sm" type="submit" value="提 交"></input>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+</body>
+<script>
+    var PAGE_PARAM = {};
+    var ALLOW_TYPE = {
+        'images': 'jpg,jpeg,gif,png,bmp',
+        'office': 'doc,xls,ppt,docx,xlsx,pptx',
+        'office2003': 'doc,xls,ppt',
+        'office2007': 'docx,xlsx,pptx',
+        'word':'doc,docx',
+        'pdf':'pdf',
+    };
+    var ALLOW_ACCEPT = {
+        'images': "image/jpeg,image/gif,image/png,image/bmp",
+        'office': "application/msword,application/vnd.ms-excel,application/vnd.ms-powerpoint"
+    };
+
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        if(typeof(PAGE_PARAM.CATEGORY) != 'string' || !PAGE_PARAM.CATEGORY || !PAGE_PARAM.SOURCE_ID){
+            $('#btnSubmit').addClass('layui-btn-disabled');
+            WinUtil.MsgError({ content: "来源类型及来源ID必须不能为空!" });
+            return;
+        }
+        $('#sourceType').html(PAGE_PARAM.CATEGORY);
+
+        PAGE_PARAM.ALLOW_ACCEPT = "";
+        if(PAGE_PARAM.HIDELIST){
+            $("#fileList").hide();
+        }
+        if(!PAGE_PARAM.ALLOW_TYPE){
+            PAGE_PARAM.ALLOW_TYPE = "*"; //任意
+        }else{
+            if(ALLOW_TYPE[PAGE_PARAM.ALLOW_TYPE]){
+                PAGE_PARAM.ALLOW_ACCEPT = ALLOW_ACCEPT[PAGE_PARAM.ALLOW_TYPE];
+                PAGE_PARAM.ALLOW_TYPE = ALLOW_TYPE[PAGE_PARAM.ALLOW_TYPE];
+            }
+        }
+
+        if(!PAGE_PARAM.MAX_UPLOAD_SIZE_KB){
+            PAGE_PARAM.MAX_UPLOAD_SIZE_KB = 50 * 1024; //50mb
+        }
+
+        $('#uploadType').html(PAGE_PARAM.ALLOW_TYPE == "*" ? "任意文件" : PAGE_PARAM.ALLOW_TYPE);
+        $('#uploadSize').html("单个文件大小限制：" + getSizeByUnit(PAGE_PARAM.MAX_UPLOAD_SIZE_KB));
+
+        if(PAGE_PARAM.IS_MULTIPLE){
+            PAGE_PARAM.MAX_UPLOAD_COUNT = 20;
+            //EasyUI.initFilebox('#file', {});
+        }else{
+            PAGE_PARAM.MAX_UPLOAD_COUNT = 1;
+        }
+        if(PAGE_PARAM.ALLOW_DRAG == undefined) {
+            PAGE_PARAM.ALLOW_DRAG = true;
+        }
+        $('#uploadCount').html("文件数量不超过" + PAGE_PARAM.MAX_UPLOAD_COUNT + "个");
+
+        if(!PAGE_PARAM.UPLOAD_MODEL){
+            PAGE_PARAM.UPLOAD_MODEL = "COVER";
+        }
+        if(PAGE_PARAM.UPLOAD_MODEL.toUpperCase() == 'COVER'){
+            $('#uploadModel').html("全部覆盖");
+        }else if(PAGE_PARAM.UPLOAD_MODEL.toUpperCase() == 'APPEND'){
+            $('#uploadModel').html("追加附件");
+        }else{
+            PAGE_PARAM.UPLOAD_MODEL = "COVER";
+            $('#uploadModel').html("全部覆盖");
+        }
+
+        if(!PAGE_PARAM.SHOW_OLD_ATTACH){
+            PAGE_PARAM.SHOW_OLD_ATTACH = 'Y';
+        }
+
+        /** 加载附件列表 */
+        if (PAGE_PARAM.SHOW_OLD_ATTACH == 'Y') {
+            AjaxUtil.postSyncReq({
+                url: Constant.API_V1_PLUGINS + "IC_ATTACH_GET",
+                data: {sourceId: PAGE_PARAM.SOURCE_ID, category: PAGE_PARAM.CATEGORY },
+                success: function (result) {
+                    if(!FuncUtil.checkResult(result)){
+                        return;
+                    }
+                    $.each(result.data.IC_ATTACH_GET, function (i, e) {
+                        var m;
+                        if(checkSuffix(ALLOW_TYPE.images, e.fileExt)){
+                            m = "<li> <a href='javascript:void(0);' onclick=\"showWinImgPreview('"+e.pkid+"')\">"+e.orgName+"</a>";
+                            if(PAGE_PARAM.ATTACH_ALLOW_DEL){
+                                m += "&nbsp;<a href='javascript:void(0);' onclick=\"_DeleteAttach('"+e.pkid+"', this)\">删除</a>";
+                            }
+                            m += "</li>";
+                        }else{
+                            m = "<li>"+e.orgName;
+                            if(PAGE_PARAM.ATTACH_ALLOW_DEL) {
+                                m += "&nbsp;<a href='javascript:void(0);' onclick=\"_DeleteAttach('"+e.pkid+"', this)\">删除</a>";
+                            }
+                            m += "</li>";
+                        }
+                        $('#uploadFileList').append(m);
+                    });
+                }
+            });
+        }
+
+        InitUploadFileArea();
+
+        InitValidform();
+    });
+
+    function InitValidform() {
+        validForm = FuncUtil.initValidform({
+            target: '.layui-form',
+            datatype:{
+            },
+            beforeSubmit:function(curform){
+                var fileUploader = $('#up1').uploadfile('getUploader');
+                if(fileUploader.files.length == 0){
+                    WinUtil.MsgError({ content: "请选择上传文件!" });
+                    return false;
+                }
+                var data = new FormData();
+                $.each(fileUploader.files, function (i, file) {
+                    data.append("file", file);
+                });
+                data.append("sourceId", PAGE_PARAM.SOURCE_ID);
+                data.append("category", PAGE_PARAM.CATEGORY);
+                data.append("isfCover", PAGE_PARAM.UPLOAD_MODEL.toUpperCase() == 'COVER' ? 'Y' : 'N');
+                data.append("uploadModel", PAGE_PARAM.UPLOAD_MODEL);
+                if(typeof(PAGE_PARAM.BEFORE_SUBMIT) == 'function'){
+                    PAGE_PARAM.BEFORE_SUBMIT(data);
+                    WinUtil.closeCurrDialog();
+                    return false;
+                }
+                AjaxUtil.postFileReq({
+                    url: Constant.API_V1_PLUGINS + "IC_ATTACH_UPLOAD",
+                    data: data,
+                    success: function (result) {
+                        if (!FuncUtil.checkResult(result)) {
+                            return;
+                        }
+                        if(typeof(PAGE_PARAM.SUCCESS_CALLBACK) == 'function'){
+                            PAGE_PARAM.SUCCESS_CALLBACK(result);
+                        }
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function InitUploadFileArea() {
+        $('#up1').uploadfile({
+            //url : Constant.API_V1_PLUGINS + 'file.do',
+            width : 500,
+            height : 30,
+            canDrag : PAGE_PARAM.ALLOW_DRAG,
+            canMultiple : true,
+            allowExts: PAGE_PARAM.ALLOW_TYPE,
+            accept: PAGE_PARAM.ALLOW_ACCEPT,
+            maxUploadCount: PAGE_PARAM.MAX_UPLOAD_COUNT,
+            maxUploadKbSize: PAGE_PARAM.MAX_UPLOAD_SIZE_KB
+
+        });
+    }
+    
+    function checkSuffix(suffix, ext) {
+        if(suffix == undefined || suffix == '' || suffix == "*"){
+            return true;
+        }
+        var suffixList = suffix.split(",");
+        return $.inArray(ext, suffixList) > -1
+    }
+
+    function getSizeByUnit(fileSize) {
+        var unit = "KB";
+        if(fileSize > 1024){
+            unit = "MB";
+            fileSize = (fileSize / 1024).toFixed(2); // mb
+        }
+        if(fileSize > 1024){
+            unit = "GB";
+            fileSize = (fileSize / 1024).toFixed(2); // gb
+        }
+        return fileSize + unit;
+    }
+    
+    function showWinImgPreview(attachId) {
+        var imgSrc = Constant.API_V1_PLUGINS + 'IC_ATTACH_DOWN' + '?attachId='+attachId;
+        WinUtil.showTopDialog({
+            title : "预览图片附件",
+            width: 850, height : 480,
+            param: {},
+            content: "<img src='"+imgSrc+"' />"
+        });
+    }
+
+    function _DeleteAttach(pkid, thiz) {
+        $.messager.confirm('确认窗口','你确定要删除选中项吗?', function (r) {
+                if (r) {
+                    AjaxUtil.postReq({
+                        url: Constant.API_V1_PLUGINS + "/IC_ATTACH_DEL",
+                        data: {attachId: pkid},
+                        success: function (result) {
+                            if (!FuncUtil.checkResult(result)) {
+                                return;
+                            }
+                            $(thiz).parent().remove();
+                            WinUtil.MsgInfo({content: result.msg});
+                        }
+                    });
+                }
+            }
+        );
+    }
+    /*
+
+    *.3gpp	audio/3gpp, video/3gpp	3GPP Audio/Video
+*.ac3	audio/ac3	AC3 Audio
+*.asf	allpication/vnd.ms-asf	Advanced Streaming Format
+*.au	audio/basic	AU Audio
+*.css	text/css	Cascading Style Sheets
+*.csv	text/csv	Comma Separated Values
+*.doc	application/msword	MS Word Document
+*.dot	application/msword	MS Word Template
+*.dtd	application/xml-dtd	Document Type Definition
+*.dwg	image/vnd.dwg	AutoCAD Drawing Database
+*.dxf	image/vnd.dxf	AutoCAD Drawing Interchange Format
+*.gif	image/gif	Graphic Interchange Format
+*.htm	text/html	HyperText Markup Language
+*.html	text/html	HyperText Markup Language
+*.jp2	image/jp2	JPEG-2000
+*.jpe	image/jpeg	JPEG
+*.jpeg	image/jpeg	JPEG
+*.jpg	image/jpeg	JPEG
+*.js	text/javascript, application/javascript	JavaScript
+*.json	application/json	JavaScript Object Notation
+*.mp2	audio/mpeg, video/mpeg	MPEG Audio/Video Stream, Layer II
+*.mp3	audio/mpeg	MPEG Audio Stream, Layer III
+*.mp4	audio/mp4, video/mp4	MPEG-4 Audio/Video
+*.mpeg	video/mpeg	MPEG Video Stream, Layer II
+*.mpg	video/mpeg	MPEG Video Stream, Layer II
+*.mpp	application/vnd.ms-project	MS Project Project
+*.ogg	application/ogg, audio/ogg	Ogg Vorbis
+*.pdf	application/pdf	Portable Document Format
+*.png	image/png	Portable Network Graphics
+*.pot	application/vnd.ms-powerpoint	MS PowerPoint Template
+*.pps	application/vnd.ms-powerpoint	MS PowerPoint Slideshow
+*.ppt	application/vnd.ms-powerpoint	MS PowerPoint Presentation
+*.rtf	application/rtf, text/rtf	Rich Text Format
+*.svf	image/vnd.svf	Simple Vector Format
+*.tif	image/tiff	Tagged Image Format File
+*.tiff	image/tiff	Tagged Image Format File
+*.txt	text/plain	Plain Text
+*.wdb	application/vnd.ms-works	MS Works Database
+*.wps	application/vnd.ms-works	Works Text Document
+*.xhtml	application/xhtml+xml	Extensible HyperText Markup Language
+*.xlc	application/vnd.ms-excel	MS Excel Chart
+*.xlm	application/vnd.ms-excel	MS Excel Macro
+*.xls	application/vnd.ms-excel	MS Excel Spreadsheet
+*.xlt	application/vnd.ms-excel	MS Excel Template
+*.xlw	application/vnd.ms-excel	MS Excel Workspace
+*.xml	text/xml, application/xml	Extensible Markup Language
+*.zip	aplication/zip	Compressed Archive
+*.xlxs application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    */
+</script>
+</html>

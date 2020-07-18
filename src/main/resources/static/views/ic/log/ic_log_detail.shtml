@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<style type="text/css">
+    .textarea{
+        width: 600px; height: 280px;
+        overflow: scroll;
+    }
+</style>
+<body>
+<div class="form_eui">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_DETAIL.RECORD_SIGN">记录标记</label>
+                <div class="layui-input-inline" style="width: 320px">
+                    <div id="sign" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_DETAIL.RECORD_TIME">记录时间</label>
+                <div class="layui-input-inline" style="width: 145px">
+                    <div id="timestamp" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_DETAIL.REQUEST_FUNC">请求功能</label>
+                <div class="layui-input-inline" style="width: 320px">
+                    <div id="func" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_DETAIL.LOG_OPER_ACCOUNT_INFO">操作账号信息</label>
+                <div class="layui-input-inline" style="width: 320px">
+                    <div id="account" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_DETAIL.LOG_CLIENT_INFO">请求客户端信息</label>
+                <div class="layui-input-inline">
+                    <div id="clientInfo" class="layui-input textmiddle" style="width: 500px;height: 80px;overflow: scroll;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_DETAIL.LOG_SERVER_INFO">响应服务信息</label>
+                <div class="layui-input-inline">
+                    <div id="serverInfo" class="layui-input input-lg160 textmiddle"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_LOG_DETAIL.LOG_CONTENT">日志内容</label>
+                <div class="layui-input-inline">
+                    <div id="message" class="textarea layui-input"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-sm" type="button" onclick="javascript: WinUtil.closeCurrDialog();" data-i18n="page:PAGE.COM.CLOSE_DIALOG">关闭窗口</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        $('#sign').html(PAGE_PARAM.sign);
+        $('#timestamp').html(PAGE_PARAM.timestamp);
+        $('#func').html((PAGE_PARAM.funcName||'-') + "/" + (PAGE_PARAM.funcCode||'-'));
+        $('#account').html((PAGE_PARAM.accountNumber||'-') + "/" + (PAGE_PARAM.accountUserName||'-') + "/" + (PAGE_PARAM.accountId||'-'));
+        var clientInfo = "UserAgent: " + PAGE_PARAM.remoteUserAgent + "<br/>";
+        clientInfo += PAGE_PARAM.remoteHost + "|" + PAGE_PARAM.remoteIp + "|" + PAGE_PARAM.remotePort;
+        $('#clientInfo').html(clientInfo);
+        var serverInfo = PAGE_PARAM.serverIp + "|" + PAGE_PARAM.serverPort;
+        $('#serverInfo').html(serverInfo);
+        $('#message').html(PAGE_PARAM.message.replace(/\n/g,"<br/>"));
+    });
+
+
+</script>
+</html>

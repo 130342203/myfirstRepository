@@ -111,7 +111,7 @@ public class TUserController {
         return "redirect:/welcome.html";
     }*/
 
-   /* @RequestMapping(value = "excel/update")
+    @RequestMapping(value = "excel/update")
     @ResponseBody
     public void excelUpdate() throws FileNotFoundException {
         String filePath = "C:\\Users\\Administrator\\Desktop\\20180816.xlsx";
@@ -183,7 +183,7 @@ public class TUserController {
             cellValue = null;
         }
         return cellValue;
-    }*/
+    }
    @RequestMapping(value = "calcu")
    @ResponseBody
    public void calcu() throws FileNotFoundException {

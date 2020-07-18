@@ -1,10 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!--#include virtual="/include/include_.shtml"-->
+    <script type="text/javascript" src="../jquery/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="../js/plugins/easyui/jquery.easyui.min.js"></script>
+    <link href="../js/plugins/froalaEditor_test/2.8.1/css/froala_editor.min.css" rel="stylesheet">
+    <link href="../js/plugins/froalaEditor_test/2.8.1/css/froala_style.css" rel="stylesheet">
+    <link href="../js/plugins/froalaEditor_test/2.8.1/css/plugins/colors.min.css" rel="stylesheet">
+    <link href="../js/plugins/froalaEditor_test/2.8.1/css/plugins/char_counter.min.css" rel="stylesheet">
+    <script src="../js/plugins/froalaEditor_test/2.8.1/js/froala_editor.min.js"></script>
+    <script src="../js/plugins/froalaEditor_test/2.8.1/js/plugins/align.min.js"></script>
+    <script src="../js/plugins/froalaEditor_test/2.8.1/js/plugins/colors.min.js"></script>
+    <script src="../js/plugins/froalaEditor_test/2.8.1/js/plugins/font_size.min.js"></script>
+    <script src="../js/plugins/froalaEditor_test/2.8.1/js/plugins/char_counter.min.js"></script>
+    <script src="../js/plugins/froalaEditor_test/2.8.1/js/languages/zh_cn.js"></script>
     <meta charset="UTF-8">
     <title>这是一个测试</title>
 </head>
 <body>
 <h1>这是一个测试！</h1>
+<div id="edit">
+</div>
 </body>
+<script>
+    $(function () {
+       initEdit();
+    });
+    function initEdit() {
+
+        var editCont = '<p>请输入要提的问题</p>';
+        $.FroalaEditor.DefineIcon('color', {SRC: '22.png', ALT: 'Image button', template: 'image'}); //自定义图标
+        $('#edit').froalaEditor({
+            autofocus: true,
+            // toolbarButtonsXS: ['undo', 'redo', '|', 'bold', 'italic', 'underline', '|', 'fontSize', 'align', 'color'],
+            language: 'zh_cn',
+            colorsHEXInput: false,
+            colorsBackground: ['#2E2E2E', '#767676', '#DF281B', '#F4821C', '#46AC43', '#2E5BF7', '#A249B3', 'REMOVE'],
+            colorsText: ['#2E2E2E', '#767676', '#DF281B', '#F4821C', '#46AC43', '#2E5BF7', '#A249B3', 'REMOVE'],
+            fontSize: ['14', '16', '18', '20','22','24','26','28','30'],
+            fontSizeDefaultSelection: '16',
+            height: 220,
+            width: 800,
+            htmlAllowComments: false,
+            pasteAllowedStyleProps: ['font-size', 'color'],
+            placeholderText: '请输入内容',
+            charCounterMax: 500,
+            // imageUploadURL: Constant.API_V1_PLUGINS + "IC_FROALA_EDITOR_IMAGE_UPLOAD"
+        }).froalaEditor('html.set', editCont);
+    }
+    // 文本编辑器
+    function getFroala() {
+        var a = $('#edit').froalaEditor('html.get');
+        alert("原始内容：" + a);
+        var b = FuncUtil.encodeCustom(a);
+        alert("加密内容：" + b);
+    }
+    function setFroala() {
+        $('#edit').froalaEditor('html.set', '初始输入值');
+    }
+
+</script>
 </html>

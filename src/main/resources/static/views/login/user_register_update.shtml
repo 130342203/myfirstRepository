@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="./personel.js"></script>
+    <link href="/js/plugins/codemirror/lib/codemirror.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/lib/codemirror.js"></script>
+    <link href="/js/plugins/codemirror/theme/erlang-dark.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/mode/sql/sql.js"></script>
+    <script src="/js/plugins/codemirror/mode/xml/xml.js"></script>
+    <link rel="stylesheet" href="/js/plugins/codemirror/addon/hint/show-hint.css" />
+    <script src="/js/plugins/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/js/plugins/codemirror/addon/hint/sql-hint.js"></script>
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <script src="/js/plugins/my_upload_view.js"></script>
+    <script src="/js/plugins/my_easyui_multistage_combox.js"></script>
+
+
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .btn {
+        width: 90px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background: cornflowerblue;
+        color: #fff;
+        border-radius: 7px;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+
+    .title {
+        width: 100%;
+        height: 32px;
+        line-height: 32px;
+        background: #f2f2f2;
+        margin: 10px 0;
+    }
+
+    .title span {
+        padding-left: 10px;
+    }
+    .clear {
+        overflow: hidden;
+    }
+
+    .left {
+        width: 85%;
+        float: left;
+    }
+    .right {
+        width: 13%;
+        float: right;
+    }
+    .person {
+        width: 110px;
+        height: 140px;
+        border: 1px solid #ccc;
+        float: right;
+    }
+
+    .table .btn {
+        width: 110px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .right .btn {
+        float: right;
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+    .tbBox {
+        margin: 0 auto;
+    }
+
+
+</style>
+<body>
+<div  class="easyui-panel" style="padding:30px 60px;">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="title"><span>个人详细信息</span></div>
+        <div class="clear">
+            <div class="left">
+                <table class="mytable">
+                    <tr>
+                        <td> 姓名: </td><td><input class="easyui-textbox" id="realName" name="realName"></td>
+                        <td> 性别: </td><td><input class="easyui-textbox" name="sex" id="sex"></td>
+                        <td> 民族: </td><td><input class="easyui-textbox" id="nation" name="nation"></td>
+                    </tr>
+                    <tr>
+                        <td> 国籍: </td><td><input class="easyui-textbox" id="countryName" name="countryName">
+                        <input type="text" id="country" name="country" hidden="hidden">
+                    </td>
+                        <td> 证件类型: </td><td><input class="easyui-textbox" id="idType" name="idType"></td>
+                        <td> 证件编码: </td><td><input class="easyui-textbox" id="idNo" name="idNo" ></td>
+                    </tr>
+                    <tr>
+                        <td> 电子邮箱: </td><td><input class="easyui-textbox" id="email" name="email"></td>
+                        <td> 出生日期: </td><td> <input class="form-input-class search-input-date-class"  name="birthday" id="birthday" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"autocomplete="off" ></td>
+                        <td> 所属单位: </td><td><input class="easyui-textbox" id="companyName" name="companyName">
+                        <input type="text" id="company" name="company" hidden="hidden"></td>
+                    </tr>
+                    <tr>
+                        <td> 职务: </td><td><input class="easyui-textbox" id="duty" name="duty"></td>
+                        <td > 通讯地址: </td><td colspan="3">
+                        <select id="addressProvince" name="addressProvince"></select>
+                        <select id="addressCity" name="addressCity"></select>
+                        <select id="addressArea" name="addressArea"></select>
+                        <input class="easyui-textbox" id="addressDetail" name="addressDetail">
+                    </td></td>
+                    </tr>
+                    <tr>
+                        <td> 电话: </td>
+                        <td><input class="easyui-numberbox" id="phone" name="phone" maxlength="11" autocomplete="new-password"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="right">
+                <div class="person" id="headPhotoPicture" style="margin-right: 30px" >
+                </div>
+                <div>
+                    <p style="font-size:12px; line-height:15px;
+                     color: red;">两寸标准蓝底正面免冠彩色照片,大小要求：354*472 标准二寸照片大小为：
+                        3.5*4.5厘米，对应为413*513像素。</p>
+                </div>
+                <div class="btn" id="headPhoto" style="margin-right: 30px">
+                    上传头像
+                </div>
+            </div>
+        </div>
+        <div class="title"><span>学历及教育情况</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 毕业院校: </td><td><input class="easyui-textbox" id="college" name="college"></td>
+                    <td> 是否属于理工类专业: </td><td><input class="easyui-textbox" id="isSe" name="isSe" style="width: 90px"></td>
+                </tr>
+                <tr>
+                    <td> 学历: </td><td><input class="easyui-textbox" id="education" name="education"></td>
+                    <td> 毕业证书取得日期: </td>
+                    <td>
+                    <input class="form-input-class search-input-date-class" name="diplomaDate" id="diplomaDate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"
+                             autocomplete="off"   style="width: 180px" >
+                </td>
+                </tr>
+                <tr>
+                    <td> 学历证书: </td>
+                    <td id="educationCredentialPicture"> <td >
+                    <td colspan="3">
+                        <input id="educationCredential" name="educationCredential"
+                               data-options="buttonText:'选择文件', prompt:'请选择文件...'" accept="image/jpeg,image/gif,image/png"  style="height: 26px; width:100%">
+                        <!--  <div class="btn" id="educationCredential"> 上传</div>-->
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+        <div class="title"><span>个人证件照片</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 身份证正面: </td><td id="idCardFrontPicture"></td><td ><div class="btn" id="idCardFront"> 上传 </div></td>
+                </tr>
+                <tr>
+                    <td> 身份证反面: </td><td id="idCardReversePicture"></td><td ><div class="btn" id="idCardReverse"> 上传 </div></td>
+                </tr>
+                <tr>
+                    <td> 手持身份证: </td><td id="idCardHoldPicture"></td><td ><div class="btn" id="idCardHold"> 上传 </div></td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align:center;padding:5px 0">
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-page_save',toggle:true" lay-submit>保 存</button>
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" onclick="WinUtil.closeCurrDialog();">关 闭</button>
+        </div>
+    </form>
+
+</div>
+</body>
+<script>
+    var editor;
+    var PAGE_PARAM = {};
+
+    var UIV_uploadPhoto, UIV_educationCredential,UIV_idCardFront,UIV_idCardReverse,UIV_idCardHold;
+
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        EasyUI.initFilebox('#educationCredential', {width: 250});
+        InitValidform();
+        $('#phone').numberbox('textbox').attr('maxlength', 11);
+
+        AjaxUtil.postReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {
+                codes: "PER_SEX,IC_ISF,PER_NATION,PER_ID_TYPE,PER_EDUCATION"
+            },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                EasyUI.initCombobox('#sex', {
+                    data: data['PER_SEX']
+                });
+                EasyUI.initCombobox('#isSe', {
+                    data: data['IC_ISF']
+                });
+                EasyUI.initCombobox('#nation', {
+                    data: data['PER_NATION']
+                });
+                EasyUI.initCombobox('#idType', {
+                    data: data['PER_ID_TYPE']
+                });
+                EasyUI.initCombobox('#education', {
+                    data: data['PER_EDUCATION']
+                });
+
+            }
+        });
+
+
+
+
+       // initComboGrid();
+        initComboGrid2();
+        // getBsuser(PAGE_PARAM.row.ID);
+        // var bsUserData = {};
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "BS_USER_SELECT_BY_ID",
+            data: {id: PAGE_PARAM.row.ID},
+            success: function (result) {
+                var data = result.data[result.reqCode][0];
+                console.log(data)
+                FuncUtil.parseForm(ToolUtil.toCamelCase(data), null, 'addressProvince,addressCity,addressArea,birthday,diplomaDate');
+                $('input[name="birthday"]').val(getLocalTimeYMD(data.BIRTHDAY));
+                $('input[name="diplomaDate"]').val(getLocalTimeYMD(data.DIPLOMA_DATE));
+
+                var a = data.ADDRESS_PROVINCE? data.ADDRESS_PROVINCE:'';
+                var b = data.ADDRESS_CITY?data.ADDRESS_CITY:'';
+                var c = data.ADDRESS_AREA?data.ADDRESS_AREA:'';
+                $("body").MyEasyUIMultistageCombox({
+                    url: Constant.API_V1_PLUGINS + "IC_SYS_AREA_SELECT",
+                    level : [
+                        {__id: 'addressProvince', __def_value: a}, //国家
+                        {__id: 'addressCity', __def_value: b }, //城市
+                        {__id: 'addressArea', __def_value: c } //乡镇
+                    ]
+                });
+                var file_1 = data.headPhotoPicture ;
+                //var file_2 = data.educationCredentialPicture;
+                var file_2 = data.ATTACH;
+                var file_3 = data.idCardFrontPicture ;
+                var file_4 = data.idCardReversePicture ;
+                var file_5 = data.idCardHoldPicture ;
+                /*UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+                    imgAreaId: '#idCardFrontPicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:"/img/zm.png"
+                });
+                UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+                    imgAreaId: '#idCardReversePicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:"/img/back.png"
+                });
+                UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+                    imgAreaId: '#idCardHoldPicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:"/img/handon.png"
+                });*/
+                if(file_1!=undefined){
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture', imgWidth: 110, imgHeight: 140,defImgSrc:Constant.IC_ATTACH_DOWN_CODES+file_1
+                    });
+                }else{
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture', imgWidth: 110, imgHeight: 140
+                    });
+                }
+                if (file_2 != undefined) {
+                    FuncUtil.fileArea('#educationCredentialPicture',file_2, false);
+                }
+                /*if(file_2!=undefined){
+                    UIV_educationCredential = $("#educationCredential").MyUploadImageView({
+                        imgAreaId: '#educationCredentialPicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:Constant.IC_ATTACH_DOWN_CODES+file_2
+                    });
+                }else{
+                    UIV_educationCredential = $("#educationCredential").MyUploadImageView({
+                        imgAreaId: '#educationCredentialPicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+                    });
+                }*/
+                if(file_3!=undefined){
+                    UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+                        imgAreaId: '#idCardFrontPicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:Constant.IC_ATTACH_DOWN_CODES+file_3
+                    });
+                }else{
+                    UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+                        imgAreaId: '#idCardFrontPicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:"/img/zm.png"
+                    });
+                }
+
+                if(file_4!=undefined){
+                    UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+                        imgAreaId: '#idCardReversePicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:Constant.IC_ATTACH_DOWN_CODES+file_4
+                    });
+                }else{
+                    UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+                        imgAreaId: '#idCardReversePicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:"/img/back.png"
+                    });
+                }
+                if(file_5!=undefined){
+                    UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+                        imgAreaId: '#idCardHoldPicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:Constant.IC_ATTACH_DOWN_CODES+file_5
+                    });
+                }else{
+                    UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+                        imgAreaId: '#idCardHoldPicture', imgWidth: 80, imgHeight: 80, isfBorder: true,defImgSrc:"/img/handon.png"
+                    });
+                }
+
+
+            }
+        });
+
+    });
+
+    function submitForm(){
+        // 测试图片信息
+        if(UIV_uploadPhoto){
+            var file = UIV_uploadPhoto.getFile();
+            console.log(file);
+        }
+    }
+
+    function getBsuser(ID){
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "BS_USER_SELECT_BY_ID",
+            data: {id: ID},
+            success: function (result) {
+                var data = result.data[result.reqCode][0];
+                FuncUtil.parseForm(ToolUtil.toCamelCase(data));
+
+                // AjaxUtil.postReq({
+                //     url: Constant.API_V1_PLUGINS + "IC_SYS_COUNTRY_SELECT",
+                //     data: {id: data.COUNTRY},
+                //     success: function (result) {
+                //         var data = result.data[result.reqCode][0];
+                //         // $('#companyName').html(data.NAME);
+                //         // console.log(data);
+                //         // $("#companyName").removeClass("select_input");
+                //         $("#companyName").textbox('setValue' ,data.NAME);
+                //         // $("#companyName").val(data.NAME);
+                //     }
+                // });
+            }
+        });
+    }
+
+
+    /*function initComboGrid() {
+
+        $("#countryName").MyComboGrid({
+            idField: 'NAME',    //实际存储值
+            textField: 'NAME',   //文本显示值
+            panelWidth: 250,
+            panelHeight: 240,
+            url: Constant.API_V1_PLUGINS + "IC_SYS_COUNTRY_SELECT",
+            loadFilter: function (data) {
+                return data.data.IC_SYS_COUNTRY_SELECT;
+            },
+            pagination: false,          //关闭分页栏
+            columns: [[
+                {field: 'NAME', title: $.tl('', '中文'), width: 70},
+                {field: 'ENAME', title: $.tl('', '英文'), width: 70},
+            ]],
+            onClickRow: function (index, row) {
+                $("#country").val(row.ID);
+            },
+        });
+    }*/
+    function initComboGrid2() {
+
+        $("#companyName").MyComboGrid({
+            idField: 'ORG_NAME',    //实际存储值
+            textField: 'ORG_NAME',   //文本显示值
+            panelWidth: 250,
+            panelHeight: 240,
+            url: Constant.API_V1_PLUGINS + "BS_ORGANIZATION_SELECT",
+            loadFilter: function (data) {
+                return data.data.BS_ORGANIZATION_SELECT;
+            },
+            pagination: false,          //关闭分页栏
+            columns: [[
+                {field: 'ORG_NAME', title: $.tl('', '公司名称'), width: 70},
+            ]],
+            onClickRow: function (index, row) {
+                $("#company").val(row.ID);
+            },
+        });
+    }
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                var boo_idNo = ifIdNo();
+                if(boo_idNo==false){
+                    WinUtil.MsgError({content: "身份证位数不符请查看！"});
+                    return false
+                }
+                if(PAGE_PARAM.row.ID!=null) {
+                    data.id = PAGE_PARAM.row.ID;
+                    data.pkid = PAGE_PARAM.row.PKID;
+                }
+                var educationCredential = $('input[name=educationCredential]').prop('files');
+
+                var formData = new FormData();
+                $.each(data, function (k, v) {
+                    formData.append(k, v);
+                });
+                if (educationCredential.length == 1) {
+                    formData.append("educationCredentialPicture", educationCredential[0]);
+                }
+                var file1 = UIV_uploadPhoto.getFile();
+                if(file1!=undefined){
+                    formData.append("headPhotoPicture", file1);
+                }
+                var file3 = UIV_idCardFront.getFile();
+                if(file3!=undefined) {
+                    formData.append("idCardFrontPicture", file3);
+                }
+                var file4 = UIV_idCardReverse.getFile();
+                if(file4!=undefined) {
+                    formData.append("idCardReversePicture", file4);
+                }
+                var file5 = UIV_idCardHold.getFile();
+                if(file5!=undefined) {
+                    formData.append("idCardHoldPicture", file5);
+                }
+                AjaxUtil.postFileReq({
+                    url: Constant.API_V1_PLUGINS + "BS_USER_UPDATE",
+                    //data: $.extend(data, {__lemark: PAGE_PARAM.IS_EDIT ? "edit" : "add"}),
+                    data:formData,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+
+
+
+</script>
+</html>

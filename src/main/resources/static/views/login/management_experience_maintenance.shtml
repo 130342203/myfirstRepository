@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+</head>
+<body>
+<fieldset class="fieldset_eui">
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="2">
+                <tr>
+                    <th style="width: 80px;" align="right">姓名：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="name" id="name" />
+                    </td>
+                    <th style="width: 80px;" align="right">证件号：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="idNo" id="idNo" />
+                    </td>
+                    <th style="width: 100px;" align="right">执照类别：</th>
+                    <td style="width:110px">
+                        <input type="text" class="easyui-textbox" name="professional" id="professional1"/>
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <th style="width: 100px;" align="right">机型：</th>
+                    <td style="width:110px">
+                        <input class="easyui-textbox" name="planeTypeId" id="planeTypeId1" />
+                    </td>
+                    <td colspan="2">
+                        <a href="javascript:void(0)" class="searchBtn"
+                           onclick="searchForm()"><span>查询</span></a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="clearBtn" onclick="resetForm()"><span>重置</span></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+<table id="dg"></table>
+</body>
+<script>
+    $(function () {
+        AjaxUtil.postSyncReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {codes: "PROFESSIONAL_TYPE,PLANE_TYPE"},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+
+                EasyUI.initCombobox('#professional1',{data:data['PROFESSIONAL_TYPE']});
+                EasyUI.initCombobox('#planeTypeId1',{data:data['PLANE_TYPE']});
+            }
+
+        });
+        InitDataGrid();
+    });
+    function InitDataGrid() {
+        $("#dg").MyDataGrid({
+            title: '维修经历管理',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 30,
+            firstLoad: true,
+            queryParams : {status:'YX'},
+            firstLoad: true,
+            url: Constant.API_V1_PLUGINS + 'MAINTAIN_LIST_MANAGE',
+            columns: [[
+                {field: "CHECKBOX", title: "选择", width: 90, checkbox:true,},
+                {field: "REAL_NAME", title: "姓名", width: 90, editor: {type: 'text'}},
+                {field: "ID_NO", title: "证件号", width: 160, editor: {type: 'text'}},
+                {field: "PROFESSIONAL_NAME", title: "执照类别", width: 90, editor: {type:'text'}},
+                {field: "PLANE_NAMES", title: "机型", width: 160, editor: {type:'text'}},
+                {field: "BEGIN_DATE", title: "开始时间", width: 110, editor: {type: 'text'}},
+                {field: "END_DATE", title: "结束时间", width: 110, editor: {type: 'text'}},
+                {field: "ORG_NAME", title: "当前工作单位", width: 110},
+                {field: "WORK_DES", title: "工作内容", width: 110},
+                {field: "FILE", title: "证明方式", width: 110,formatter: function (value, row, index) {
+                        if(row.ORG_ID == undefined){
+                            return "飞标司证明";
+                        }else{
+                            return "质量经理证明";
+                        }
+                    }},
+                {field: "CREATE_DATE", title: "申请时间", width: 110},
+                {field: "STATUS_NAME", title: "状态", width: 110, editor: {type: 'text'}},
+            ]],
+            contextMenus:[
+                {text : '撤销', auth:"",
+                    onclick: function(){
+                        var row = $('#dg').datagrid('getSelected');
+                        WinUtil.showDialog(
+                            {
+                                title: "撤销",
+                                width: '50%', height: '50%',
+                                url: Constant.VIEWS_LOGIN + "/management_experience_maintenance_dialog.shtml",
+                                param: {row:row}
+                            }
+                        )
+                        /*$.messager.prompt(('提示'), ('您确定要撤销吗?'), function (r) {
+                            if (r) {
+                                alert(r);
+                                var row = $('#dg').datagrid('getSelected');
+
+                                    // AjaxUtil.post({
+                                    //     url: Constant.API_V1_PLUGINS + "BACKOUT_MAINTAIN_EXPERIENCE",
+                                    //     data: {id: row.ID, status: 'CX' },
+                                    //     success: function (result) {
+                                    //         if (!FuncUtil.checkResult(result)) {
+                                    //             return;
+                                    //         }
+                                    //         $("#dg").datagrid('reload');
+                                    //         WinUtil.MsgInfo({content: result.msg});
+                                    //     }
+                                    // });
+                                }else {
+                                    WinUtil.MsgError({content:"请输入撤销意见！",time:2000});
+                                }
+                            });*/
+                }
+                }
+            ],
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            toolbar: [
+                {
+                    iconCls:'icon-2012080412111', text: '刷新',
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                },'-',{
+                    iconCls:'icon-delete', text: '撤销',
+                    handler: function () {
+                        // $.messager.confirm(('提示'), ('您确定要撤销吗?'), function (r) {
+                        //     if (r) {
+                                    backout();
+                        //         }
+                        // });
+                    }
+                }
+            ]
+        });
+    }
+
+    function reloadDataGrid() {
+        $("#dg").datagrid('reload');
+    }
+    function backout() {
+        var rows = $('#dg').datagrid('getChecked');
+        if (rows.length==0){
+            WinUtil.MsgError({content:"请勾选后再点击撤销！",time:2000});
+            return false;
+        }
+            var ids =[];
+        for (var index in rows){
+            ids.push(rows[index].ID);
+        }
+        WinUtil.showDialog(
+            {
+                title: "撤销",
+                width: '50%', height: '50%',
+                url: Constant.VIEWS_LOGIN + "/management_experience_maintenance_dialog.shtml",
+                param: {ids:ids}
+            }
+        )
+       /* AjaxUtil.post({
+            url: Constant.API_V1_PLUGINS + "BACKOUT_MAINTAIN_EXPERIENCE_BATCH",
+            data: {ids: ids, status: 'CX' },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                $("#dg").datagrid('reload');
+                WinUtil.MsgInfo({content: result.msg});
+            }
+        });*/
+    }
+    function searchForm() {
+            GridUtil.onSearch({target: '#dg',formTarget:"#ffSearch"})
+    }
+
+    function resetForm() {
+            GridUtil.onReset({target: '#dg',formTarget:"#ffSearch"})
+    }
+
+</script>
+</html>

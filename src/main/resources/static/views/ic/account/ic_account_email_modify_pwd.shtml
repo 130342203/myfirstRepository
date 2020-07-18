@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <style type="text/css">
+        .main{
+            background-color: #fff;
+            border-radius: 20px;
+            width: 350px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+        }
+        .login-title {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 10px 5px;
+            background-color: #CCCCCC;
+        }
+
+        .login-title h1 {
+            margin-top: 10px !important;
+        }
+
+        .login-title small {
+            color: #fff;
+        }
+        .login-content {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            height: 220px;
+            width: 100%;
+            max-width: 500px;
+            background-color: rgba(255, 250, 2550, .6);
+            float: left;
+        }
+    </style>
+</head>
+<body>
+<div class="form_eui main">
+    <div class="login-title text-center">
+        <span class="flag"><i class="fa fa-user"></i> <span data-i18n="page:PAGE.VIEW_IC_ACCOUNT_EMAIL_MODIFY_PWD.EMAIL_RESET_PWD">用户重置密码</span></span>
+        <h1>
+            <small data-i18n="page:PAGE.COMM.APP_NAME"></small>
+        </h1>
+    </div>
+    <div class="login-content">
+    <form id="mform1" class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_EMAIL_MODIFY_PWD.ACCOUNT_NUMBER">用户账号</label>
+                <div class="layui-input-inline">
+                    <div id="account" class="layui-input textmiddle"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_EMAIL_MODIFY_PWD.NEW_PWD">新密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" id="newPwd" name="newPwd" autocomplete="off" datatype="s4-80" errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_EMAIL_MODIFY_PWD.CONFIRM_PWD">确认密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" id="newPwd2" name="newPwd2" autocomplete="off" datatype="s4-80,chkpwd2" errormsg="至少4个字符,最多80个字符！" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label-blank"></label>
+            <div class="layui-input-block">
+                <input class="layui-btn layui-btn-sm" type="submit" data-i18n="[value]page:PAGE.COMM.SUBMIT" value="提 交"></input>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+</body>
+<script>
+    var params = {};
+    var PAGE_PARAM = {}
+    $(function () {
+        params = WinUtil.getQueryParam();
+        eval('var queryParam = ' + FuncUtil.decodeCustom(params.m));
+        PAGE_PARAM = queryParam;
+        var accountId = queryParam.accountId;
+        if(!accountId){
+          ·
+            return;
+        }
+        if(queryParam.errMsg != ''){
+            $('#mform1').remove();
+            $('.login-content').html("<span style='color: red;'>"+queryParam.errMsg+"</span>");
+            return;
+        }
+        $('#account').html(queryParam.accountNumber);
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '#mform1',
+            datatype:{
+                chkpwd2:function (gets) {
+                    if($('#newPwd').val() != gets){
+                        return $.tl('page:PAGE.VIEW_IC_ACCOUNT_EMAIL_MODIFY_PWD.RESET_PWD_ATYPISM',"两次密码不一致!");
+                    }
+                    return true;
+                }
+            },
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.accountId = PAGE_PARAM.accountId;
+                data.emailAuthCode = params.m;
+                if(data.newPwd != data.newPwd2){
+                    WinUtil.MsgError({ content: $.tl('page:PAGE.VIEW_IC_ACCOUNT_EMAIL_MODIFY_PWD.RESET_PWD_ATYPISM',"两次密码不一致!") });
+                    return;
+                }
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_RESET_PWD_EMAIL_UPDATE",
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        WinUtil.MsgInfo({ content: result.msg });
+                        setTimeout(function () {
+                            top.FuncUtil.doPost(Constant.API_V1_PLUGINS + "IC_REDIRECT_TO_PAGE", { path: "/views/login.shtml" });
+                        }, 1000);
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+</script>
+</html>

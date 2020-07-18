@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>添加考场</title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <!--#include virtual="/views/include/include_froala_editor.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+</head>
+<body>
+<div class="form-div-class form_eui">
+    <form action="http://localhost:8099/app/upload" method="post" enctype="multipart/form-data" class="layui-form layui-form-pane" >
+
+        <div class="layui-form-item">
+            <label class="form-label-class">文件</label>
+            <div class="layui-inline">
+                <input type="file" name="file" />
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: center">
+                <input type="image" value="提交" />
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

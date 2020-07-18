@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+
+    <style type="text/css">
+        .textarea{
+            width: 610px; height: 80px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="form_eui">
+<form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+    <div class="layui-form-item">
+        <div class="layui-inline" >
+            <div style="margin-top: 20px;margin-left:50px">
+                角色名称：<input id="roleName" name="roleName" class="form-input-class" disabled>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="td-class">
+            角色描述：<input id="roleDesc" name="roleDesc" class="form-input-class" disabled>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="td-class">
+            菜单权限：
+            <div class="layui-inline" >
+                <div class="layui-input" style="height: 100%; min-height: 26px;width: 500px">
+                    <ul id="menuTree" class="mtree"></ul>
+                    <div style="clear: both;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div style=" margin-top: 20px;text-align: center">
+            <button class="easyui-linkbutton" type="submit" data-options="iconCls:'icon-page_save',toggle:true" style="width:60px" lay-submit >保 存</button>
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" style="width:60px" onclick="closeDialog()">取 消</button>
+        </div>
+    </div>
+</form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.PKID ? true : false;
+
+        var menuIds = [];
+        if(PAGE_PARAM.IS_EDIT){
+            AjaxUtil.postSyncReq({
+                url: Constant.API_V1_PLUGINS + "IC_ROLE_GET",
+                data: {roleId: PAGE_PARAM.PKID },
+                success: function (result) {
+                    var role = result.data.IC_ROLE_GET.role;
+                    $('#roleName').val(role.roleName);
+                    $('#roleDesc').val(role.roleDesc);
+                    var relRoleMenuList = result.data.IC_ROLE_GET.relRoleMenuList;
+                    $.each(relRoleMenuList, function (k, rel) {
+                        menuIds.push(rel.menuId);
+                    });
+                }
+            });
+        }
+        initMenuTree(menuIds);
+        InitValidform();
+    });
+
+    function initMenuTree(menuIds) {
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_MENU_TREE",
+            data: {},
+            success: function (result) {
+                var tdata_ = EasyUITool.WarpTreeData(result.data.IC_MENU_TREE, ["pkid", "pid"], function (tdata) {
+                    return {
+                        id: tdata.pkid,
+                        text:(+ 'O' + tdata.operId + "."+ tdata.pkid, tdata.menuName),
+                        checked: $.inArray(tdata.pkid, menuIds) > -1,
+                        state: 'closed'
+                    };
+                }, "0");
+                if(!tdata_){
+                    return;
+                }
+                $("#menuTree").tree({data: tdata_, lines:true,
+                    animate:true, checkbox: true,
+                    formatter:function(node){
+                        return node.text;
+                    }
+                }).css({padding: '5px'});
+            }
+        });
+
+    }
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.pkid = PAGE_PARAM.PKID;
+                data.marker_ = 'menu';
+                var nodes = $('#menuTree').tree('getChecked', ['checked','indeterminate']);
+                if(nodes.length == 0){
+                    WinUtil.MsgError({ content: $.tl('page:PAGE.VIEW_IC_ROLE_SETTING_MENU.TIP_CHECKED_ROLE_MENU',"请选择角色的菜单权限!") });
+                    return false;
+                }
+                var relMenuIds = [];
+                $.each(nodes, function (k, node) {
+                    relMenuIds.push(node.id);
+                });
+                data.relMenuIds = FuncUtil.encodelg_(JSON.stringify(relMenuIds));
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_ROLE_UPDATE",
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function closeDialog(){
+        WinUtil.closeCurrDialog();
+    }
+
+</script>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+
+
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+
+    .title {
+        width: 100%;
+        height: 32px;
+        line-height: 32px;
+        background: #f2f2f2;
+        margin: 10px 0;
+    }
+
+    .title span {
+        padding-left: 10px;
+    }
+    .clear {
+        overflow: hidden;
+    }
+
+
+    .table .btn {
+        width: 110px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .right .btn {
+        float: right;
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+
+
+
+</style>
+<body>
+<div  class="easyui-panel" style="padding:0px 30px;">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;" >
+        <div class="title"><span>个人信息</span></div>
+        <div class="clear">
+            <table class="mytable">
+                <input type="hidden" id="id" name="id">
+                <tr>
+                    <td> 用户账号: </td><td><div class="layui-inline" id="aaa"></div></td>
+                    <td> 用户Email: </td><td><div class="layui-inline" id="email"></div></td>
+                </tr>
+                <tr>
+                    <td> 来源类型: </td><td><div class="layui-inline" id="accountType"></div></td>
+                </tr>
+                <tr>
+                    <td> 用户名称: </td><td><div class="layui-inline" id="userName"></div></td>
+                    <td> 关联主键: </td><td><div class="layui-inline" id="relIdentId"></div></td>
+                </tr>
+                <tr>
+                    <td> 创建时间: </td><td><div class="layui-inline" id="createTime"></div></td>
+                    <td> 更新时间: </td><td><div class="layui-inline" id="updateTime"></div></td>
+                </tr>
+                <tr>
+                    <td> 状态: </td>
+                    <td>
+                        <div class="layui-input-pane">
+                            <input type="radio" name="state" value="N" /> 正常
+                            <input type="radio" name="state" value="L" /> 锁定
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="title"><span>设置角色</span></div>
+        <div class="layui-form-item">
+            <label class="layui-form-label" data-i18n="page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.ROLES">账号角色</label>
+            <div class="layui-input-inline" style="width: 520px;">
+                <div class="layui-input" style="height: 100%; min-height: 26px;">
+                    <ul id="roleTree" class="mtree"></ul>
+                    <div style="clear: both;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center;padding:5px 0">
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-page_save',toggle:true" lay-submit>保 存</button>
+        </div>
+    </form>
+
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        if(!PAGE_PARAM.ACCOUNT_ID){
+            parent.WinUtil.MsgError({ content: $.tl('page:PAGE.COMM.PARAM_ERROR', "请求参数有误!") });
+            return;
+        }
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_GET",
+            data: { accountId: PAGE_PARAM.ACCOUNT_ID },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var account = result.data.IC_ACCOUNT_GET.account;
+                var roles = result.data.IC_ACCOUNT_GET.roles;
+                var accountRoles = result.data.IC_ACCOUNT_GET.accountRoles;
+                var bsUser = result.data.IC_ACCOUNT_GET.bsUser;
+                console.log(bsUser.email+"---"+account.accountNumber)
+                $('#accountNumber').val(account.accountNumber);
+                $('#email').val(bsUser.email);
+                $('#accountType').html(account.accountType);
+                $('#userName').html(bsUser.realName);
+                $('#relIdentId').html(account.refIdentId);
+                $('#createTime').html(account.createTime);
+                $('#updateTime').html(account.updateTime);
+
+                FuncUtil.parseForm({ state: account.state }, null, 'accountNumber,email');
+
+
+                var roleIds = [];
+                $.each(accountRoles, function (i, e) {
+                    roleIds.push(e.pkid);
+                });
+                /* var roleHtml = "";
+                $.each(roles, function (i, e) {
+                    var checked = $.inArray(e.pkid, roleIds) > -1 ? 'checked' : '';
+                    roleHtml += '<li><input type="checkbox" name="roleIds" value="'+e.pkid+'" '+checked+' /> '+e.roleName+'</li>';
+                });
+                $('#roles').html(roleHtml);*/
+                InitRoleTree(roleIds);
+            }
+        });
+
+
+
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.accountId = PAGE_PARAM.ACCOUNT_ID;
+                var nodes = $('#roleTree').tree('getChecked', ['checked','indeterminate']);
+                /* if(nodes.length <= 0){
+                     WinUtil.MsgError({ content: $.tl('page:PAGE.VIEW_IC_ACCOUNT_ROLE_SETTING.CHOOSE_LEAST_ONE_ROLE', "请至少选择一个角色!") });
+                     return false;
+                 }*/
+                var accountRoles = []
+                $.each(nodes, function (i, node) {
+                    accountRoles.push(node.id);
+                });
+                data.accountRoles = FuncUtil.encodelg_(JSON.stringify(accountRoles));
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + "IC_ACCOUNT_UPDATE",
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function InitRoleTree(roleIds) {
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "IC_ROLE_LIST",
+            data: {},
+            success: function (result) {
+                var tdata_ = EasyUITool.WarpTreeData(result.data.IC_ROLE_LIST, ["PKID", "PID"], function (tdata) {
+                    return {
+                        id: tdata.PKID,
+                        text: tdata.ROLE_NAME,
+                        checked: $.inArray(tdata.PKID, roleIds) > -1,
+                        state: 'open'
+                    };
+                }, "0");
+                if (!tdata_) {
+                    return;
+                }
+                EasyUI.initTree('#roleTree', {
+                    data: tdata_, lines: true,
+                    checkbox: true,
+                    animate: true,
+                    cascadeCheck: true,
+                    formatter: function (node) {
+                        return node.text;
+                    },
+                    onLoadSuccess: function () {
+                    },
+                    onContextMenu: function (e, node) {
+                        e.preventDefault();
+                        node1 = node;
+
+                        $('#mm').menu('show', {
+                            left: e.pageX,
+                            top: e.pageY
+                        });
+                    }
+                }).css({padding: '5px'});
+            }
+        });
+    }
+
+</script>
+</html>

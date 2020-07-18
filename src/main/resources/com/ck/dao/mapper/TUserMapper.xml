@@ -2,12 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ck.dao.mapper.TUserMapper" >
-    <select id="selectXmlTest" parameterType="map" resultType="com.ck.dao.entity.TUser">
+   <!-- <select id="selectXmlTest" parameterType="map" resultType="com.ck.dao.entity.TUser">
         select * from t_user
         <where>
             <if test="userId !=null and userId !=''">
                 user_id=#{userId}
             </if>
         </where>
-    </select>
+    </select>-->
 </mapper>

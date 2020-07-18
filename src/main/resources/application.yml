@@ -3,10 +3,13 @@ server:
 
 spring:
   driverClassName:  "com.mysql.jdbc.Driver"
-  localdb: "jdbc:mysql://127.0.0.1:3307/test"
+#  localdb: "jdbc:mysql://127.0.0.1:3306/test"
 #  localdb: "jdbc:mysql://127.0.0.1:3306/world"
+#  userName: "root"
+#  password: "Chen_245193"
+  localdb: "jdbc:mysql://39.107.139.11:3306/weatherPro?characterEncoding=utf8&useSSl=false"
   userName: "root"
-  password: "chen_245193"
+  password: "Chen_12345"
   initialSize: 5
   maxIdle: 10
   maxActive: 50
@@ -22,5 +25,15 @@ spring:
 page-helper-config:
     pageHelperPlugin: true
 
-load-path:
+
+
+#logging:
+#  path: C:\Users\chenkun\projectLog
+#  file: test606.log
+#  level:
+#    root: debug
+#    tk.mybatis: debug
+#    com.ck: debug
+#  file: test606.log
+#  file: test606.log
 

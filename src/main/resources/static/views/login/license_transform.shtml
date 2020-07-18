@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>考试计划编辑</title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <!--#include virtual="/views/include/include_froala_editor.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <style>
+        #realName{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="form-div-class form_eui">
+    <form class="layui-form layui-form-pane">
+        <input type="hidden" id="id" name="id">
+        <input type="hidden" id="status" name="status">
+        <div class="layui-form-item">
+            <label class="form-label-class">可转换专业:</label>
+            <div class="layui-inline">
+                <input type="text" id="aricraftType" name="aricraftType" autocomplete="off"   class="form-input-class">
+            </div>
+        </div>
+
+        <div class="layui-form-item" >
+            <div class="layui-input-block" style="margin-left: 170px ;margin-top: 150px">
+                <button class="easyui-linkbutton"  id="save" data-options="iconCls:'icon-page_save',toggle:true" lay-submit>确认</button>
+                <button class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" onclick="WinUtil.closeCurrDialog();">取消</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+        var intId=WinUtil.getLoginAccount().accountId;
+        // 初始化下拉列表
+        AjaxUtil.postSyncReq({
+            url: Constant.API_V1_PLUGINS + "LC_MAJOR_TRANSFORM",
+            data: {id:intId},
+            success: function (result) {
+                console.log(result);
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data.LC_MAJOR_TRANSFORM;
+                if(data.flag=="Y"){
+                    EasyUI.initCombobox('#aricraftType', {
+                        multiple:true,
+                        data: data.profess,
+                    });
+                }else{
+                    EasyUI.initCombobox('#aricraftType', {
+                        multiple:false,
+                        data: data.profess,
+                    });
+                }
+
+
+
+            }
+        });
+
+        InitValidform();
+    });
+
+
+    // 提交保存方法
+    var vf;
+    function InitValidform() {
+        vf = FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                var aricraftType=$("aricraftType").val();
+                if(aricraftType==""||aricraftType==null){
+                    WinUtil.MsgError({content:"没有可以替换的专业，请检查！"})
+                    return false;
+                }
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + 'LC_MAJOR_TRANSFORM_SUBMIT',
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+
+
+
+</script>
+</html>

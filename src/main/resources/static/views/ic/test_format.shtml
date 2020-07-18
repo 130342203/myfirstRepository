@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <!-- 文本编辑器导入 -->
+    <!--#include virtual="/views/include/include_froala_editor.shtml"-->
+    <!-- 编辑页校验导入 -->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <link rel="stylesheet" href="https://cdn.staticfile.org/ionicons/2.0.1/css/ionicons.min.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"></head>
+<body>
+<div id="tabs">
+    <div title="列表" style="padding:2px;overflow: hidden;">
+        <fieldset class="fieldset_eui">
+            <form id="ffSearch" class="layui-form layui-form-pane" method="post">
+                <table class="search-table">
+                    <tr>
+                        <th class="search-th-class">输入文本框</th>
+                        <td class="search-td-class">
+                            <input type="text" id="searchText" name="searchText" autocomplete="off" class="easyui-textbox"/>
+                        </td>
+                        <th class="search-th-class">下拉文本框</th>
+                        <td class="search-td-class">
+                            <input type="text" id="searchCombo" name="searchCombo" autocomplete="off" class="easyui-textbox"/>
+                        </td>
+                        <th class="search-th-class">日期范围搜索框</th>
+                        <td class="search-td-class">
+                            <input type="text" id="searchBeginDate" name="searchBeginDate" autocomplete="off" onclick="WdatePicker({dateFmt:'yyyy-MM-dd', maxDate:'#F{$dp.$D(\'searchEndDate\')}'})" class="form-input-class search-input-date-class">
+                            <span class="float_left" style="height: 24px;line-height: 24px;">&nbsp;-&nbsp;</span>
+                            <input type="text" id="searchEndDate" name="searchEndDate" autocomplete="off" onclick="WdatePicker({dateFmt:'yyyy-MM-dd', minDate:'#F{$dp.$D(\'searchBeginDate\')}'})" class="form-input-class search-input-date-class">
+                        </td>
+                        <td class="search-td-but-class" colspan="10">
+                            <a href="javascript:void(0)" class="searchBtn" onclick="GridUtil.onSearch({target: '#dg'})"><span>查 询</span></a>
+                            <a href="javascript:void(0)" class="clearBtn" onclick="GridUtil.onReset({target: '#dg'})"><span>清 空</span></a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </fieldset>
+        <table id="dg"></table>
+    </div>
+    <div title="编辑页面" style="padding:2px;overflow: hidden;">
+        <div class="form-div-class form_eui">
+            <form class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <label class="form-label-class">输入文本框</label>
+                    <div class="layui-inline">
+                        <input type="text" id="editText" name="editText" autocomplete="off" datatype="*" errormsg="输入文本框不可为空！" class="form-input-class">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="form-label-class">整数数字文本框</label>
+                    <div class="layui-inline">
+                        <input type="text" id="editNumNText" name="editNumNText" autocomplete="off" datatype="n1-5" errormsg="请填写5位数以内的整数！" class="form-input-class">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="form-label-class">小数数字文本框</label>
+                    <div class="layui-inline">
+                        <input type="text" id="editNumZXText" name="editNumZXText" autocomplete="off" datatype="z1-5,x0-1" errormsg="请填写5位数以内的数字，带一位小数！" class="form-input-class">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="form-label-class">数字文本框</label>
+                    <div class="layui-inline">
+                        <input type="text" id="editNumText" name="editNumZXText" autocomplete="off" datatype="n1-5|z1-5,x0-1" errormsg="请填写5位数以内的数字，允许带一位小数！" class="form-input-class">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="form-label-class">下拉文本框</label>
+                    <div class="layui-inline">
+                        <input type="text" id="editCombo" name="editCombo" autocomplete="off" datatype="easyui_combo" errormsg="下拉文本框不可为空！" class="form-input-class">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="form-label-class">日期文本框</label>
+                    <div class="layui-inline">
+                        <!-- onpicked: function(dp) {vf.check(false, $('#editBeginDate')[0])}  为选择日期后重新校验填写，避免vaild提示错误 -->
+                        <input type="text" id="editBeginDate" name="editBeginDate" autocomplete="off" datatype="*" errormsg="开始日期不可为空！" onclick="WdatePicker({dateFmt:'yyyy-MM-dd', maxDate:'#F{$dp.$D(\'editEndDate\')}', onpicked: function(dp) {vf.check(false, $('#editBeginDate')[0])}})" class="form-input-class input-date">
+                        <span class="float_left" style="height: 24px;line-height: 24px;">&nbsp;-&nbsp;</span>
+                        <input type="text" id="editEndDate" name="editEndDate" autocomplete="off" datatype="*" errormsg="结束日期不可为空！" onclick="WdatePicker({dateFmt:'yyyy-MM-dd', minDate:'#F{$dp.$D(\'editBeginDate\')}', onpicked: function(dp) {vf.check(false, $('#editEndDate')[0])}})" class="form-input-class input-date">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="form-label-class">通用机构弹窗</label>
+                    <div class="layui-inline">
+                        <input type="hidden" id="editOrganId" name="editOrganId">
+                        <input type="text" id="editOrganName" name="editOrganName" readonly="readonly" onclick="changeOrgan()" class="form-input-class select_input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="easyui-linkbutton" data-options="iconCls:'icon-page_save',toggle:true" lay-submit>保 存</button>
+                        <button class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" onclick="WinUtil.closeCurrDialog();">关 闭</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div title="文本编辑器" style="padding:2px;overflow: hidden;">
+        <div class="layui-form-item">
+            <label class="form-label-class">文本编辑器</label>
+            <div class="layui-inline">
+                <div id='edit'></div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="easyui-linkbutton" data-options="iconCls:'icon-page_green',toggle:true" onclick="getFroala()">获取输入</button>
+                <button class="easyui-linkbutton" data-options="iconCls:'icon-page_green',toggle:true" onclick="setFroala()">初始赋值</button>
+            </div>
+        </div>
+    </div>
+    <div title="Icon图标" style="padding:2px;overflow: hidden;background:#E3F6CE;">
+        <div class="form-div-class form_eui">
+            <form class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+
+
+                    <div class="layui-inline">
+                        <i class="fa fa-user " style="font-size: 10px;color: #2aa1fb"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-play " style="font-size: 10px;color: #2aa1fb"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-lock " style="font-size: 10px;color: #2aa1fb"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-loc "></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-id-card-o" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-id-card-o" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-suitcase" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-suitcase" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+
+                    <div class="layui-inline">
+                        <i class="fa fa-file-text-o" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-file-text-o" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-envelope-o" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-envelope-o" aria-hidden="true" style="font-size: 10px;;color: #467cfd"></i>
+                    </div>
+
+
+                    <div class="layui-inline">
+                        <i class="fa fa-user-circle-o" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-user-circle-o" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+
+                    <div class="layui-inline">
+                        <i class="fa fa-chevron-right" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-chevron-right" aria-hidden="true" style="font-size: 10px;color: white"></i>
+                    </div>
+
+                    <div class="layui-inline">
+                        <i class="fa fa-chevron-left" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-chevron-left" aria-hidden="true" style="font-size: 10px;color: white"></i>
+                    </div>
+
+                    <div class="layui-inline">
+                        <i class="fa fa-shield" aria-hidden="true" style="font-size: 10px"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-shield" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+
+                    <div class="layui-inline">
+                        <i class="fa fa-power-off" aria-hidden="true" style="font-size: 10px;"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-power-off" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+
+                    <div class="layui-inline">
+                        <i class="fa fa-pencil-square-o" aria-hidden="true" style="font-size: 10px;"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-pencil-square-o" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+
+                    <div class="layui-inline">
+                        <i class="fa fa-pencil" aria-hidden="true" style="font-size: 10px;"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-pencil" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+
+                    <div class="layui-inline">
+                        <i class="fa fa-paint-brush" aria-hidden="true" style="font-size: 10px;"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="fa fa-paint-brush" aria-hidden="true" style="font-size: 10px;color: #467cfd"></i>
+                    </div>
+                    <div class="layui-inline">
+                        <i class="icon ion-thumbsdown" aria-hidden="true" style="font-size: 10px;;color: #467cfd"></i>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var PAGE_PARAM={};
+    $(function () {
+        // 获取登录人信息
+        PAGE_PARAM.LOGIN_ACCOUNT = WinUtil.getLoginAccount();
+        // 设置tabs标签页宽高
+        PAGE_PARAM.TABS_WIDTH = $(window).width();
+        PAGE_PARAM.TABS_HEIGHT = $(window).height() - 6;
+        // 初始化下拉列表
+        AjaxUtil.postReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {codes: "IC_ISF"},
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                EasyUI.initCombobox('#searchCombo', {
+                    data: [{text: '请选择', value: ''}].concat(data['IC_ISF'])
+                });
+                EasyUI.initCombobox('#editCombo', {
+                    data: data['IC_ISF']
+                });
+            }
+        });
+        // 初始化列表
+        InitDataGrid();
+        // 初始化提交
+        InitValidform();
+        $('#edit').froalaEditor({
+            height: '100px', width: '500px', videoUpload: false,
+            imageUploadURL: Constant.API_V1_PLUGINS + "IC_FROALA_EDITOR_IMAGE_UPLOAD"
+        });
+        // 标签页创建
+        $('#tabs').tabs({
+            width: PAGE_PARAM.TABS_WIDTH,
+            height: PAGE_PARAM.TABS_HEIGHT,
+        });
+    });
+
+    // 列表页面
+    // 初始化列表
+    var $dg = $("#dg");
+    function InitDataGrid() {
+        $dg.MyDataGrid({
+            title: '列表',
+            identity: 'dg',
+            width: $(window).width(),
+            height: $(window).height() - $('fieldset').outerHeight() - 6,
+            firstLoad: true, pagination: true, enableLineEdit: false,
+            queryParams : {dr: 'N'},
+            custom: {
+                code : API_IC_CODE.IC_DATA_DICT_LIST,
+                alter: {
+                }
+            },
+            validAuthContextMenu: function(row, items){
+                return items;
+            },
+            contextMenus:[
+                {
+                    text : '编辑', auth:"",
+                    onclick: function(){
+                        var row = $dg.datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : '编辑',
+                            width: '50%', height : '80%',
+                            url: Constant.VIEWS_ADMIN + "/update.shtml",
+                            param: {ID: row.ID}
+                        });
+                    }
+                }
+                , {
+                    text : '删除', auth:"",
+                    onclick: function(){
+                        var row = $dg.datagrid('getSelected');
+                        // 删除方法，这里只做提示
+                        // AjaxUtil.postReq({
+                        //     url: Constant.API_V1_PLUGINS + "BS_ORGANIZATION_DELETE",
+                        //     data: {id: row.ID},
+                        //     success: function (result) {
+                        //         if (!FuncUtil.checkResult(result)) {
+                        //             return;
+                        //         }
+                        //         WinUtil.MsgInfo({ content: result.msg });
+                        //         reloadDataGrid();
+                        //     }
+                        // });
+                        WinUtil.MsgInfo({ content: '删除成功'});
+                    }
+                }
+                , {
+                    text : '通用审核', auth:"",
+                    onclick: function(){
+                        var row = $dg.datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : '审核',
+                            width: '70%', height : '50%',
+                            url: Constant.VIEWS_COM + "/com_audit_opinion.shtml",
+                            param: {
+                                callBack: function (auditData) {
+                                    // 获取审批意见，拼接审批关联数据
+                                    auditData.append("sourceType", 'TS_PLAN');
+                                    auditData.append("sourceId", '9A5DF1ADDC6E8B29E05376D011AC333C');
+                                    // 提交审批方法，这里只做提示
+                                    // AjaxUtil.postFileReq({
+                                    //     url: Constant.API_V1_PLUGINS + "TS_PLAN_STATUS_CHANGE",
+                                    //     data: auditData,
+                                    //     success: function (result) {
+                                    //         if (!FuncUtil.checkResult(result)) {
+                                    //             return;
+                                    //         }
+                                    //         WinUtil.MsgInfo({ content: result.msg });
+                                    //         reloadDataGrid();
+                                    //     }
+                                    // });
+                                    WinUtil.MsgInfo({ content: '审批成功' });
+                                }
+                            }
+                        });
+                    }
+                }
+                , {
+                    text : '通用审核轨迹', auth:"",
+                    onclick: function(){
+                        var row = $dg.datagrid('getSelected');
+                        WinUtil.showDialog({
+                            title : '审核轨迹',
+                            width: '80%', height : '80%',
+                            url: Constant.VIEWS_COM + "/com_audit_log.shtml",
+                            param: {
+                                // 传递参数，sourceType：审批类型  sourceId：数据id
+                                queryParams: {sourceType: 'TS_PLAN', sourceId: '9A5DF1ADDC6E8B29E05376D011AC333C'}
+                            }
+                        });
+                    }
+                }
+            ],
+            toolbar: [
+                {
+                    iconCls:'icon-2012080412111', text: '刷新', auth:"",
+                    handler: function () {
+                        reloadDataGrid();
+                    }
+                }
+                , '-', {
+                    iconCls: 'icon-table_add', text: '新增', auth:"",
+                    handler: function () {
+                        WinUtil.showDialog({
+                            title : '新增',
+                            width: '50%', height : '80%',
+                            url: Constant.VIEWS_ADMIN + "/update.shtml",
+                            param: {}
+                        });
+                    }
+                }
+            ]
+        });
+    }
+    function reloadDataGrid() {
+        $dg.datagrid('reload');
+    }
+
+    // 编辑页面
+    // 提交保存方法
+    var vf;
+    function InitValidform() {
+        vf = FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                // 获取form表单内容
+                var data = curform.serializeObject();
+                // 拼接id
+                data.id = PAGE_PARAM.ID;
+                // 提交保存方法，这里只做提示
+                // AjaxUtil.postReq({
+                //     url: Constant.API_V1_PLUGINS + 'BS_PLANETYPE_EDIT',
+                //     data: data,
+                //     success : function (result) {
+                //         if(!FuncUtil.checkResult(result)){
+                //             return;
+                //         }
+                //         parent.WinUtil.MsgInfo({ content: result.msg });
+                //         parent.reloadDataGrid();
+                //         WinUtil.closeCurrDialog();
+                //     }
+                // });
+
+                // 包含文件的提交方法
+                // // 拼接请求参数和上传文件
+                // var files = $('input[name=file]').prop('files');
+                // var formData = new FormData();
+                // $.each(data, function (k, v) {
+                //     formData.append(k, v);
+                // });
+                // if(files.length == 1){
+                //     formData.append("file", files[0]);
+                // }
+                // // 提交数据
+                // AjaxUtil.postFileReq({
+                //     url: Constant.API_V1_PLUGINS + "EDIT",
+                //     data: formData,
+                //     success: function (result) {
+                //         if (!FuncUtil.checkResult(result)) {
+                //             return;
+                //         }
+                //         parent.WinUtil.MsgInfo({content: result.msg});
+                //         parent.reloadDataGrid();
+                //         WinUtil.closeCurrDialog();
+                //     }
+                // });
+                WinUtil.MsgInfo({ content: '保存成功' });
+                return false;
+            }
+        });
+    }
+    // 单位选择通用弹窗，单选
+    function changeOrgan() {
+        WinUtil.showTopDialog({
+            title : '单位选择',
+            width: '80%', height : '80%',
+            url: Constant.VIEWS_COM + "/com_organ_list.shtml",
+            param: {
+                queryParams: {
+                    dr: 'N',
+                    status: 'QY'
+                },
+                callBack: function (resultData) {
+                    $('#editOrganId').val(resultData.ID);
+                    $('#editOrganName').val(resultData.ORG_NAME);
+                }
+            }
+        });
+    }
+
+    // 文本编辑器
+    function getFroala() {
+        var a = $('#edit').froalaEditor('html.get');
+        alert("原始内容：" + a);
+        var b = FuncUtil.encodeCustom(a);
+        alert("加密内容：" + b);
+    }
+    function setFroala() {
+        $('#edit').froalaEditor('html.set', '初始输入值');
+    }
+</script>
+</html>

@@ -1,0 +1,208 @@
+
+{
+	"code": 200,
+	"page": 1,
+	"total": 0,
+	"msg": "请求成功",
+	"msgData": [],
+	"data": {
+		"menuData": {
+			"0": [
+				{
+					"name": "证书管理",
+					"pid": 0,
+					"i18nText": "证书管理",
+					"id": 1,
+					"url": null
+				}, {
+					"name": "报价管理",
+					"pid": 0,
+					"i18nText": "报价管理",
+					"id": 4,
+					"url": null
+				}, {
+					"name": "归还管理",
+					"pid": 0,
+					"i18nText": "归还管理",
+					"id": 7,
+					"url": null
+				}, {
+					"name": "租期管理",
+					"pid": 0,
+					"i18nText": "租期管理",
+					"id": 10,
+					"url": null
+				}, {
+					"name": "协同管理",
+					"pid": 0,
+					"i18nText": "协同管理",
+					"id": 13,
+					"url": null
+				}, {
+					"name": "帐单管理",
+					"pid": 0,
+					"i18nText": "帐单管理",
+					"id": 24,
+					"url": null
+				}, {
+					"name": "系统管理",
+					"pid": 0,
+					"i18nText": "系统管理",
+					"id": 16,
+					"url": null
+				}
+			],
+			"1": [
+				{
+					"name": "需求方证书管理",
+					"pid": 1,
+					"i18nText": "需求方证书管理",
+					"id": 2,
+					"url": "/views/pages/require/dorder/certifcate_list.shtml"
+				}, {
+					"name": "供应方证书管理",
+					"pid": 1,
+					"i18nText": "供应方证书管理",
+					"id": 3,
+					"url": "/views/pages/provide/dorder/certifcate_list.shtml"
+				}
+			],
+			"24": [
+				{
+					"name": "租赁帐单管理",
+					"pid": 24,
+					"i18nText": "租赁帐单管理",
+					"id": 26,
+					"url": "/views/pages/payMenu/payMenu_list_ZL.shtml"
+				}, {
+					"name": "价拨账单管理",
+					"pid": 24,
+					"i18nText": "价拨账单管理",
+					"id": 25,
+					"url": "/views/pages/payMenu/payMenu_list_JB.shtml"
+				}
+			],
+			"13": [
+				{
+					"name": "审核管理",
+					"pid": 13,
+					"i18nText": "审核管理",
+					"id": 15,
+					"url": "/views/pages/require/aogOrderAudit.shtml"
+				}
+			],
+			"4": [
+				{
+					"name": "需求方周转件报价管理",
+					"pid": 4,
+					"i18nText": "需求方周转件报价管理",
+					"id": 5,
+					"url": "/views/pages/require/dorder/order_quote_list.shtml"
+				}, {
+					"name": "需方价拨件报价管理",
+					"pid": 4,
+					"i18nText": "需方价拨件报价管理",
+					"id": 80,
+					"url": "/views/pages/require/dorder/order_quote_jb_list.shtml"
+				}, {
+					"name": "供应方报价管理",
+					"pid": 4,
+					"i18nText": "供应方报价管理",
+					"id": 6,
+					"url": "/views/pages/provide/dorder/order_quote_list.shtml"
+				}, {
+					"name": "批量上传报价单",
+					"pid": 4,
+					"i18nText": "批量上传报价单",
+					"id": 90,
+					"url": "/views/pages/require/dorder/order_quote_uploadList.shtml"
+				}
+			],
+			"16": [
+				{
+					"name": "公司管理",
+					"pid": 16,
+					"i18nText": "公司管理",
+					"id": 17,
+					"url": "/views/pages/company.shtml"
+				}, {
+					"name": "仓库管理",
+					"pid": 16,
+					"i18nText": "仓库管理",
+					"id": 18,
+					"url": "/views/pages/stock.shtml"
+				}, {
+					"name": "能力管理",
+					"pid": 16,
+					"i18nText": "能力管理",
+					"id": 19,
+					"url": "/views/pages/company_ability.shtml"
+				}, {
+					"name": "用户管理",
+					"pid": 16,
+					"i18nText": "用户管理",
+					"id": 20,
+					"url": "/views/pages/user.shtml"
+				}, {
+					"name": "机型管理",
+					"pid": 16,
+					"i18nText": "机型管理",
+					"id": 21,
+					"url": "/views/pages/planrelation.shtml"
+				}, {
+					"name": "主管分配角色",
+					"pid": 16,
+					"i18nText": "主管分配角色",
+					"id": 22,
+					"url": "/views/pages/zg_role_setting.shtml"
+				}, {
+					"name": "汇率管理",
+					"pid": 16,
+					"i18nText": "汇率管理",
+					"id": 23,
+					"url": "/views/pages/provide/companyRate.shtml"
+				}
+			],
+			"7": [
+				{
+					"name": "需求方归还管理",
+					"pid": 7,
+					"i18nText": "需求方归还管理",
+					"id": 8,
+					"url": "/views/pages/require/dorder/d_order_return_list.shtml"
+				}, {
+					"name": "供应方归还管理",
+					"pid": 7,
+					"i18nText": "供应方归还管理",
+					"id": 9,
+					"url": "/views/pages/provide/dorder/return_list.shtml"
+				}
+			],
+			"10": [
+				{
+					"name": "需求方租期管理",
+					"pid": 10,
+					"i18nText": "需求方租期管理",
+					"id": 11,
+					"url": "/views/pages/require/dorder/lease_list.shtml"
+				}, {
+					"name": "供应方租期管理",
+					"pid": 10,
+					"i18nText": "供应方租期管理",
+					"id": 12,
+					"url": "/views/pages/provide/dorder/lease_list.shtml"
+				}
+			]
+		},
+		"loginUser": {
+			"sessionKey": "69506909-3e16-46ef-8b56-9eae48279b47",
+			"userId": 1038,
+			"accountId": null,
+			"companyId": "185",
+			"companyName": "东航上海总部",
+			"publicMsg": true,
+			"roleIds": "3,7",
+			"loginTime": 1532486392353
+		}
+	}
+}

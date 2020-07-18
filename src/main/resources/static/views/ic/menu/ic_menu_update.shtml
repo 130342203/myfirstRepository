@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css" />
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        .box {
+            margin: 10px auto;
+        }
+
+        .btn {
+            width: 90px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            background: cornflowerblue;
+            color: #fff;
+            border-radius: 7px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .iform {
+            width: 700px;
+            padding: 10px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+        }
+
+        .odiv {
+            margin-bottom: 15px;
+        }
+
+        .spa {
+            display: inline-block;
+        }
+
+        .spa span {
+            margin-right: 20px;
+        }
+        .left{
+            float: left;
+        }
+        .spaLeft{
+            display: inline-block;
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+<div class="easyui-panel" style="padding:30px 60px;">
+    <form id="ff" method="post" class="layui-form layui-form-pane">
+        <div style="margin-bottom:20px">
+            <div class="layui-input-inline">
+                父级菜单：<select class="easyui-combobox" name="pid" id="pid" style="width:100%"></select>
+            </div>
+            </div>
+        <div style="margin-bottom:20px">
+            <div class="layui-input-inline">
+                菜单名称：<input class="easyui-textbox" id="menuName" name="menuName" style="width:100%;height:27px">
+            </div>
+        </div>
+        <div style="margin-bottom:20px">
+            <div class="layui-input-inline">
+                菜单链接：<input class="easyui-textbox" id="url" name="url" style="width:100%;height:27px">
+            </div>
+        </div>
+        <div style="margin-bottom:20px">
+            <div class="layui-input-inline">
+                菜单状态：
+                <input type="radio" name="state" value="0" > 启用
+                <input type="radio" name="state" value="1" > 禁用
+             </div>
+        </div>
+        <div style="margin-bottom:20px">
+            <div class="layui-input-inline">
+                菜单顺序：<input class="easyui-numberbox" id="sort" name="sort"
+                            style="width:100%;height:27px">
+            </div>
+        </div>
+        <input type="hidden" name="createTime" value="" />
+        <input type="hidden" name="operId" value="" />
+        <div class="layui-form-item" style="text-align:center;padding:5px 0">
+            <div class="layui-input-block">
+                <button class="easyui-linkbutton" type="submit" data-options="iconCls:'icon-page_save',toggle:true" style="width:60px" lay-submit >保 存</button>
+                <button type="button" onclick="closeDialog()" class="easyui-linkbutton" data-options="iconCls:'icon-page_cancel',toggle:true" style="width:60px" >取 消</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    var PAGE_PARAM = {};
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();console.log(PAGE_PARAM);
+        PAGE_PARAM.IS_EDIT = PAGE_PARAM.PKID ? true : false;
+        EasyUI.initCombotree('#pid',{
+            url: Constant.API_V1_PLUGINS + 'IC_MENU_LIST',width:340,
+            panelWidth:300,
+            panelHeight:300,
+            editable: true,
+            loadFilter: function(result,parentId){
+                var treeData = EasyUITool.WarpTreeData(result.data.IC_MENU_LIST, ['PKID', 'PID'], function (tdata) {
+                    return {id: tdata.PKID, text: tdata.MENU_NAME, children: tdata.children };
+                },'0');
+                treeData.unshift({id: '0', text: '--顶级菜单--' });
+                return treeData;
+            }
+        });
+
+        if(PAGE_PARAM.IS_EDIT){
+            AjaxUtil.postReq({
+                url: Constant.API_V1_PLUGINS + "IC_MENU_GET",
+                data: {pkid: PAGE_PARAM.PKID },
+                success: function (result) {
+                    var object = result.data.IC_MENU_GET;
+                    FuncUtil.parseForm(object);
+                    $('#pid').combotree('setValue',object.pid);
+                }
+            });
+        }
+        InitValidform();
+    });
+
+    function InitValidform() {
+        FuncUtil.initValidform({
+            target: '.layui-form',
+            beforeSubmit:function(curform){
+                var data = curform.serializeObject();
+                data.pkid = PAGE_PARAM.PKID;
+                data.menuType = '1';
+                AjaxUtil.postReq({
+                    url: Constant.API_V1_PLUGINS + (PAGE_PARAM.IS_EDIT ?  "IC_MENU_UPDATE" : "IC_MENU_ADD"),
+                    data: data,
+                    success : function (result) {
+                        if(!FuncUtil.checkResult(result)){
+                            return;
+                        }
+                        parent.WinUtil.MsgInfo({ content: result.msg });
+                        parent.reloadDataGrid();
+                        WinUtil.closeCurrDialog();
+                    }
+                });
+                return false;
+            }
+        });
+    }
+
+    function closeDialog(){
+        WinUtil.closeCurrDialog();
+    }
+</script>
+</html>

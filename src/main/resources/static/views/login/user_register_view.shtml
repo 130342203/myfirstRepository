@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--#include virtual="/views/include/include_.shtml"-->
+    <script src="./personel.js"></script>
+    <link href="/js/plugins/codemirror/lib/codemirror.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/lib/codemirror.js"></script>
+    <link href="/js/plugins/codemirror/theme/erlang-dark.css" rel="stylesheet">
+    <script src="/js/plugins/codemirror/mode/sql/sql.js"></script>
+    <script src="/js/plugins/codemirror/mode/xml/xml.js"></script>
+    <link rel="stylesheet" href="/js/plugins/codemirror/addon/hint/show-hint.css"/>
+    <script src="/js/plugins/codemirror/addon/hint/show-hint.js"></script>
+    <script src="/js/plugins/codemirror/addon/hint/sql-hint.js"></script>
+
+    <link rel="stylesheet" href="/js/plugins/Validform_v5.3.2/css/vf_style.css"/>
+    <script src="/js/plugins/Validform_v5.3.2/Validform_v5.3.2.js"></script>
+    <script src="/js/plugins/my_upload_view.js"></script>
+    <script src="/js/plugins/my_easyui_multistage_combox.js"></script>
+
+
+</head>
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .btn {
+        width: 90px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background: cornflowerblue;
+        color: #fff;
+        border-radius: 7px;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .title {
+        width: 100%;
+        height: 32px;
+        line-height: 32px;
+        background: #f2f2f2;
+        margin: 10px 0;
+    }
+
+    .title span {
+        padding-left: 10px;
+    }
+
+    .clear {
+        overflow: hidden;
+    }
+
+    .left {
+        width: 85%;
+        float: left;
+    }
+
+    .right {
+        width: 13%;
+        float: right;
+    }
+
+    .person {
+        width: 110px;
+        height: 140px;
+        border: 1px solid #ccc;
+        float: right;
+    }
+
+    .table .btn {
+        width: 110px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .right .btn {
+        float: right;
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+
+    .tbBox {
+        margin: 0 auto;
+    }
+
+
+</style>
+<body>
+<div class="easyui-panel" style="padding:30px 60px;">
+    <form class="layui-form layui-form-pane" style="margin-top: 2px;">
+        <div class="title"><span>个人详细信息</span></div>
+        <div class="clear">
+            <div class="left">
+                <table class="mytable">
+                    <tr>
+                        <td> 姓名:</td>
+                        <td><input class="easyui-textbox" id="realName" name="realName"></td>
+                        <td> 性别:</td>
+                        <td><input class="easyui-textbox" name="sex" id="sex"></td>
+                        <td> 民族:</td>
+                        <td><input class="easyui-textbox" id="nation" name="nation"></td>
+                    </tr>
+                    <tr>
+                        <td> 国籍:</td>
+                        <td><input class="easyui-textbox" id="countryName" name="countryName">
+                            <input type="text" id="country" name="country" hidden="hidden">
+                        </td>
+                        <td> 证件类型:</td>
+                        <td><input class="easyui-textbox" id="idType" name="idType"></td>
+                        <td> 证件编码:</td>
+                        <td><input class="easyui-textbox" id="idNo" name="idNo"></td>
+                    </tr>
+                    <tr>
+                        <td> 电子邮箱:</td>
+                        <td><input class="easyui-textbox" id="email" name="email"></td>
+                        <td> 出生日期:</td>
+                        <td><input name="birthday" id="birthday" class="easyui-datebox"
+                                   onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" autocomplete="off"></td>
+                        <td> 所属单位:</td>
+                        <td><input class="easyui-textbox" id="companyName" name="companyName">
+                            <input type="text" id="company" name="company" hidden="hidden"></td>
+                    </tr>
+                    <tr>
+                        <td> 职务:</td>
+                        <td><input class="easyui-textbox" id="duty" name="duty"></td>
+                        <td> 通讯地址:</td>
+                        <td colspan="3">
+                            <!--<select id="addressProvince"></select>
+                            <select id="addressCity"></select>
+                            <select id="addressArea"></select>-->
+                            <div id="addressDetail"></div>
+                           <!-- <input class="easyui-textbox" id="addressDetail" name="addressDetail" style="width:345px">-->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> 手机号:</td>
+                        <td><input class="easyui-textbox" id="phone" name="phone"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="right">
+                <div class="person" id="headPhotoPicture">
+
+                </div>
+            </div>
+        </div>
+        <div class="title"><span>学历及教育情况</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 毕业院校:</td>
+                    <td><input class="easyui-textbox" id="college" name="college"></td>
+                    <td> 是否属于理工类专业:</td>
+                    <td><input class="easyui-textbox" id="isSe" name="isSe"></td>
+                </tr>
+                <tr>
+                    <td> 学历:</td>
+                    <td><input class="easyui-textbox" id="education" name="education"></td>
+                    <td> 毕业证书取得日期:</td>
+                    <td>
+                        <input name="diplomaDate" id="diplomaDate" class="easyui-datebox"
+                               onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"
+                               autocomplete="off">
+                    </td>
+                </tr>
+                <tr>
+                    <td> 学历证书:</td>
+                    <td id="educationCredentialPicture" colspan="5"></td>
+                </tr>
+
+            </table>
+        </div>
+        <div class="title"><span>个人证件照片</span></div>
+        <div class="tbBox">
+            <table class="mytable">
+                <tr>
+                    <td> 身份证正面:</td>
+                    <td id="idCardFrontPicture"></td>
+                </tr>
+                <tr>
+                    <td> 身份证反面:</td>
+                    <td id="idCardReversePicture"></td>
+                </tr>
+                <tr>
+                    <td> 手持身份证:</td>
+                    <td id="idCardHoldPicture"></td>
+                </tr>
+            </table>
+        </div>
+    </form>
+
+</div>
+</body>
+<script>
+    var editor;
+    var PAGE_PARAM = {};
+
+    var UIV_uploadPhoto, UIV_educationCredential, UIV_idCardFront, UIV_idCardReverse, UIV_idCardHold;
+
+    $(function () {
+        PAGE_PARAM = WinUtil.getDialogParam();
+
+
+        AjaxUtil.postReq({
+            url: Constant.API_DATA_DICT_BY_CODES,
+            data: {
+                codes: "PER_SEX,IC_ISF,PER_NATION,PER_ID_TYPE,PER_EDUCATION"
+            },
+            success: function (result) {
+                if (!FuncUtil.checkResult(result)) {
+                    return;
+                }
+                var data = result.data[result.reqCode];
+                EasyUI.initCombobox('#sex', {
+                    data: data['PER_SEX']
+                });
+                EasyUI.initCombobox('#isSe', {
+                    data: data['IC_ISF']
+                });
+                EasyUI.initCombobox('#nation', {
+                    data: data['PER_NATION']
+                });
+                EasyUI.initCombobox('#idType', {
+                    data: data['PER_ID_TYPE']
+                });
+                EasyUI.initCombobox('#education', {
+                    data: data['PER_EDUCATION']
+                });
+
+            }
+        });
+
+        getBsuser(PAGE_PARAM.row.ID);
+    });
+
+    function submitForm() {
+        // 测试图片信息
+        if (UIV_uploadPhoto) {
+            var file = UIV_uploadPhoto.getFile();
+            console.log(file);
+        }
+    }
+
+    function getBsuser(ID) {
+        AjaxUtil.postReq({
+            url: Constant.API_V1_PLUGINS + "BS_USER_SELECT_BY_ID",
+            data: {id: ID},
+            success: function (result) {
+                var data = result.data[result.reqCode][0];
+                FuncUtil.parseForm(ToolUtil.toCamelCase(data), null, 'birthday,diplomaDate');
+                $('#addressDetail').html(data.detailAddre);
+                $('#birthday').datebox('setValue', getLocalTimeYMD(data.BIRTHDAY));
+                if (data.DIPLOMA_DATE != null) {
+                    $('#diplomaDate').datebox('setValue', getLocalTimeYMD(data.DIPLOMA_DATE));
+                }
+
+                /*var a = data.ADDRESS_PROVINCE? data.ADDRESS_PROVINCE:'';
+                var b = data.ADDRESS_CITY?data.ADDRESS_CITY:'';
+                var c = data.ADDRESS_AREA?data.ADDRESS_AREA:'';
+                $("body").MyEasyUIMultistageCombox({
+                    url: Constant.API_V1_PLUGINS + "IC_SYS_AREA_SELECT",
+                    level : [
+                        {__id: 'addressProvince', __def_value: a}, //国家
+                        {__id: 'addressCity', __def_value: b }, //城市
+                        {__id: 'addressArea', __def_value: c } //乡镇
+                    ]
+                });*/
+
+                var file_1 = data.headPhotoPicture;
+                var file_2 = data.ATTACH;
+                var file_3 = data.idCardFrontPicture;
+                var file_4 = data.idCardReversePicture;
+                var file_5 = data.idCardHoldPicture;
+                if (file_1 != undefined) {
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture',
+                        imgWidth: 110,
+                        imgHeight: 140,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_1
+                    });
+                } else {
+                    UIV_uploadPhoto = $("#headPhoto").MyUploadImageView({
+                        imgAreaId: '#headPhotoPicture', imgWidth: 110, imgHeight: 140
+                    });
+                }
+                if (file_2 != undefined) {
+                    FuncUtil.fileArea('#educationCredentialPicture', file_2, false);
+                }
+                if (file_3 != undefined) {
+                    UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+                        imgAreaId: '#idCardFrontPicture',
+                        imgWidth: 80,
+                        imgHeight: 80,
+                        isfBorder: true,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_3
+                    });
+                } else {
+                    UIV_idCardFront = $("#idCardFront").MyUploadImageView({
+                        imgAreaId: '#idCardFrontPicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+                    });
+                }
+
+                if (file_4 != undefined) {
+                    UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+                        imgAreaId: '#idCardReversePicture',
+                        imgWidth: 80,
+                        imgHeight: 80,
+                        isfBorder: true,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_4
+                    });
+                } else {
+                    UIV_idCardReverse = $("#idCardReverse").MyUploadImageView({
+                        imgAreaId: '#idCardReversePicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+                    });
+                }
+                if (file_5 != undefined) {
+                    UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+                        imgAreaId: '#idCardHoldPicture',
+                        imgWidth: 80,
+                        imgHeight: 80,
+                        isfBorder: true,
+                        defImgSrc: Constant.IC_ATTACH_DOWN_CODES + file_5
+                    });
+                } else {
+                    UIV_idCardHold = $("#idCardHold").MyUploadImageView({
+                        imgAreaId: '#idCardHoldPicture', imgWidth: 80, imgHeight: 80, isfBorder: true
+                    });
+                }
+            }
+        });
+    }
+</script>
+</html>

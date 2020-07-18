@@ -19,7 +19,11 @@ public class WebConfig extends WebMvcConfigurationSupport{
 
     @Override
     public void addViewControllers(ViewControllerRegistry controllerRegistry){
-        controllerRegistry.addViewController("/").setViewName("forward:/html/welcome.html");
+        controllerRegistry.addViewController("/").setViewName("forward:/html/love/1/index.html");
+//        controllerRegistry.addViewController("/").setViewName("forward:/views/test/photo.html");
+//        controllerRegistry.addViewController("/").setViewName("forward:/views/test/pubuliu/index.html");
+//        controllerRegistry.addViewController("/").setViewName("forward:/views/test/pubuliu/xuanzhuan1.html");
+//        controllerRegistry.addViewController("/").setViewName("forward:/html/welcome.html");
         controllerRegistry.setOrder(Ordered.HIGHEST_PRECEDENCE);
         super.addViewControllers(controllerRegistry);
     }
